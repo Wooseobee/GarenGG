@@ -1,0 +1,7 @@
+package org.example.getusermatches.repository;
+
+import org.example.getusermatches.domain.PlayerInfo;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface UserRepository extends JpaRepository<PlayerInfo, String> {
+}
