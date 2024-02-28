@@ -3,11 +3,9 @@ from typing import Union
 from fastapi import FastAPI, HTTPException
 
 from asyncio import current_task
-from fastapi import FastAPI
-from pymongo import MongoClient
+from pymongo import MongoClient, ReturnDocument
 
 import motor.motor_asyncio
-from pymongo import ReturnDocument
 
 app = FastAPI()
 
