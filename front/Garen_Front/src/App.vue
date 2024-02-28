@@ -1,85 +1,50 @@
-<script setup>
-import { RouterLink, RouterView } from 'vue-router'
-import HelloWorld from './components/HelloWorld.vue'
-</script>
-
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
-
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
-
-      <nav>
-        <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/about">About</RouterLink>
-      </nav>
+  <div class="background_gif">
+    <div class="background_overlay"></div>
+    <div class="main">
+      <Header/>
+      <RouterView/>
     </div>
-  </header>
-
-  <RouterView />
+  </div>
 </template>
 
+<script setup>
+import Header from "@/components/common/Header.vue";
+</script>
+
 <style scoped>
-header {
-  line-height: 1.5;
-  max-height: 100vh;
+.background_gif {
+  /* 전체 페이지를 커버하도록 설정 */
+  width: 100vw;
+  height: 100vh;
+  /* 배경 이미지를 담을 자식 요소에 대한 위치 설정 */
+  position: relative;
 }
 
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
-}
-
-nav {
+.background_overlay {
+  /* 배경 이미지로 PNG 파일 지정 */
+  background-image: url('@/assets/garen-background.gif');
+  /* 배경 이미지가 컨테이너에 맞게 조정되도록 설정 */
+  background-size: cover;
+  /* 배경 이미지가 페이지 스크롤에 따라 움직이지 않도록 설정 */
+  background-attachment: fixed;
+  /* 전체 요소를 커버하도록 설정 */
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
-  font-size: 12px;
-  text-align: center;
-  margin-top: 2rem;
+  height: 100%;
+  /* 배경 이미지에만 투명도 적용 */
+  opacity: 0.6;
+  /* z-index를 사용하여 배경을 내용 뒤로 보냄 */
+  z-index: -1;
 }
 
-nav a.router-link-exact-active {
-  color: var(--color-text);
-}
-
-nav a.router-link-exact-active:hover {
-  background-color: transparent;
-}
-
-nav a {
-  display: inline-block;
-  padding: 0 1rem;
-  border-left: 1px solid var(--color-border);
-}
-
-nav a:first-of-type {
-  border: 0;
-}
-
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
-
-  nav {
-    text-align: left;
-    margin-left: -1rem;
-    font-size: 1rem;
-
-    padding: 1rem 0;
-    margin-top: 1rem;
-  }
+.main {
+  /* 내용에는 투명도 적용하지 않음 */
+  opacity: 1;
+  /* 필요한 경우, z-index를 조정하여 내용을 더 부각시킴 */
+  position: relative;
+  z-index: 1;
 }
 </style>
