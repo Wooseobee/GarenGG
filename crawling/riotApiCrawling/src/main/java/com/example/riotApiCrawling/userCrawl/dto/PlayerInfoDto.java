@@ -1,4 +1,4 @@
-package com.example.riotApiCrawling.dto;
+package com.example.riotApiCrawling.userCrawl.dto;
 
 public class PlayerInfoDto {
     String puuid;

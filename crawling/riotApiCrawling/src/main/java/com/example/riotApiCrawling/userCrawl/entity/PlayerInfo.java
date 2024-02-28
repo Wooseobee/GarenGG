@@ -1,15 +1,17 @@
-package com.example.riotApiCrawling.entity;
+package com.example.riotApiCrawling.userCrawl.entity;
 
 import com.example.riotApiCrawling.audit.Auditable;
 import jakarta.persistence.*;
 
 @Entity
+@Table(name = "player_info", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"summoner_name", "tag_line"})
+})
 public class PlayerInfo extends Auditable {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer playerId;
-    @Column(name="puuid",unique = true)
+
     String puuid;
     String tagLine;
     String leagueId;
@@ -24,6 +26,16 @@ public class PlayerInfo extends Auditable {
     int leaguePoints;
     int wins;
     int losses;
+    int apiKeyId;
+
+    public int getApiKeyId() {
+        return apiKeyId;
+    }
+
+    public void setApiKeyId(int apiKeyId) {
+        this.apiKeyId = apiKeyId;
+    }
+
     boolean veteran;
     boolean inactive;
     boolean freshBlood;

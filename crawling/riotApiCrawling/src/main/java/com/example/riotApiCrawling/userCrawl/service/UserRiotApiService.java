@@ -1,4 +1,4 @@
-package com.example.riotApiCrawling.service;
+package com.example.riotApiCrawling.userCrawl.service;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -8,17 +8,14 @@ import java.net.URL;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import com.example.riotApiCrawling.dto.PlayerInfoDto;
-import com.example.riotApiCrawling.entity.PlayerInfo;
-import com.example.riotApiCrawling.repository.UserRiotApiRepository;
-import com.fasterxml.jackson.annotation.JsonTypeId;
+import com.example.riotApiCrawling.userCrawl.dto.PlayerInfoDto;
+import com.example.riotApiCrawling.userCrawl.dto.RequestDto;
+import com.example.riotApiCrawling.userCrawl.entity.PlayerInfo;
+
+import com.example.riotApiCrawling.userCrawl.repository.UserRiotApiRepository;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import jakarta.annotation.PostConstruct;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -26,40 +23,50 @@ import org.springframework.stereotype.Service;
 public class UserRiotApiService {
 
     private final UserRiotApiRepository userRiotApiRepository;
-    List<PlayerInfoDto> playerInfoList;
-    public int count;
+    @Value("${riot.apiKeys}")
+    List<String> apiKeys;
+
+    Map<String, Integer> apiKeysId;
+
+    @PostConstruct
+    public  void init() {
+        apiKeysId = new HashMap<String, Integer>();
+        System.out.println(apiKeys.size());
+        System.out.println(apiKeys);
+        for(int i= 0; i < 10; i++){
+            apiKeysId.put(apiKeys.get(i), i);
+        }
+    }
 //    public String[] tier = {"IRON", "BRONZE", "SILVER", "GOLD", "PLATINUM", "EMERALD", "DIAMOND"};
-//    public String[] rank = {"I", "II", "III", "IV"};
-        public String[] tier = {"DIAMOND"};
-        public String[] rank = {"IV"};
+    public String[] rank = {"", "I", "II", "III", "IV"};
+//        public String[] tier = {"DIAMOND"};
+//        public String[] rank = {"IV"};
 
     UserRiotApiService(UserRiotApiRepository userRiotApiRepository){
         this.userRiotApiRepository = userRiotApiRepository;
     }
 
-    @Value("${riot.api-key}")
-    private String apiKey;
-
-    @PostConstruct
-    public void crawlUser() throws IOException, InterruptedException {
+    public void crawlUser(RequestDto requestDto) throws IOException, InterruptedException {
 
         System.out.println("crawlUser 실행!!!");
-        for (int i = 0; i < tier.length; i++) {
-            //티어 하나 유저 목록 불러오기
-            for (int j = 0; j < rank.length; j++) {
+        String tier = requestDto.getTier();
+        int startRank = requestDto.getStartRank();
+        int endRank = requestDto.getEndRank();
+        int startPageNum = requestDto.getStartPageNum();
+        int endPageNum = requestDto.getEndPageNum();
+        String apiKey = requestDto.getApiKey();
 
-                //티어하나별 유저 목록 불러오기
-                crawlUsersByTier(tier[i], rank[j]);
-
-                System.out.println(tier[i] + rank[j] + "크롤링 완료!");
-            }
+        for(int  i = startRank;  i <= endRank; i++) {
+            //티어 하나의 유저 목록 불러오기
+            crawlUsersByTier(tier, rank[i], startPageNum, endPageNum, apiKey);
+            System.out.println(tier + rank[i] + "크롤링 완료!");
         }
     }
 
-    public void crawlUsersByTier(String tier, String rank) throws InterruptedException {
+    public void crawlUsersByTier(String tier, String rank, int startPageNum, int endPageNum, String apiKey) throws InterruptedException {
 //        long startTime = System.currentTimeMillis(); // 시작 시간 측정
-        int pageNum = 1;
-        while (true) {
+        int pageNum = startPageNum;
+        while (pageNum <= endPageNum) {
             try {
                     URL url = new URL("https://kr.api.riotgames.com/lol/league/v4/entries/RANKED_SOLO_5x5/" + tier + "/" + rank + "?page=" + pageNum + "&api_key=" + apiKey);
                     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -88,21 +95,21 @@ public class UserRiotApiService {
                     System.out.println(pageNum + ", response : " + response);
 
                     //플레이어 정보 담기
-                    playerInfoList = parseJsonResponseToPlayerInfoList(response.toString());
+                    List<PlayerInfoDto> playerInfoList = parseJsonResponseToPlayerInfoList(response.toString());
 
                 System.out.println("playerInfoList.size : "+playerInfoList.size());
 
                 //지금까지 불러온 유저 목록에 대한 puuid 저장
-                crawlPUUID();
+                crawlPUUID(playerInfoList, apiKey);
 
                 //지금까지 불러온 유저목록에대한 tagList 저장.
-                crawlTagLine();
+                crawlTagLine(playerInfoList, apiKey);
 
                 //db저장.
-                List<PlayerInfo> entityList = convertDtoListToEntityList(playerInfoList);
+                List<PlayerInfo> entityList = convertDtoListToEntityList(playerInfoList, apiKey);
 
                 for (PlayerInfo entity : entityList) {
-                    PlayerInfo existingEntity = (PlayerInfo) userRiotApiRepository.findByPuuid(entity.getPuuid()).orElse(null);
+                    PlayerInfo existingEntity = (PlayerInfo) userRiotApiRepository.findBySummonerNameAndTagLine(entity.getSummonerName(), entity.getTagLine()).orElse(null);
 
                     if (existingEntity != null) {
                         // 이미 존재하는 경우, ID를 설정하여 업데이트를 활성화
@@ -132,7 +139,7 @@ public class UserRiotApiService {
     }
 
     //현재 playerInfoList에있는 정보에 PUUID 삽입
-    private void crawlPUUID() throws InterruptedException{
+    private void crawlPUUID(List<PlayerInfoDto> playerInfoList, String apiKey) throws InterruptedException{
         for(int count = 0 ; count < playerInfoList.size(); count++) {
             try {
                 PlayerInfoDto playerInfoDto = playerInfoList.get(count);
@@ -176,7 +183,7 @@ public class UserRiotApiService {
         }
     }
 
-    private void crawlTagLine() throws InterruptedException{
+    private void crawlTagLine(List<PlayerInfoDto> playerInfoList, String apiKey) throws InterruptedException{
         for(int count = 0 ; count < playerInfoList.size(); count++) {
             try {
                 PlayerInfoDto playerInfoDto = playerInfoList.get(count);
@@ -206,8 +213,9 @@ public class UserRiotApiService {
 
                 AccountDto accountDto = parseJsonResponseToAccountDto(response.toString());
 
-                //puuid설정.
+                //summoner name, tagline설정.
                 playerInfoList.get(count).setTagLine(accountDto.getTagLine());
+                playerInfoList.get(count).setSummonerName(accountDto.getGameName());
 
                 System.out.println("tagline 설정완료. count : "+ count);
 
@@ -333,7 +341,7 @@ public class UserRiotApiService {
         }
     }
 
-    PlayerInfo convertDtoToEntity(PlayerInfoDto dto) {
+    PlayerInfo convertDtoToEntity(PlayerInfoDto dto, String apiKey) {
         PlayerInfo entity = new PlayerInfo();
         entity.setPuuid(dto.getPuuid());
         entity.setTagLine(dto.getTagLine());
@@ -350,10 +358,11 @@ public class UserRiotApiService {
         entity.setInactive(dto.isInactive());
         entity.setFreshBlood(dto.isFreshBlood());
         entity.setHotStreak(dto.isHotStreak());
+        entity.setApiKeyId(apiKeysId.get(apiKey));
         return entity;
     }
-    private List<PlayerInfo> convertDtoListToEntityList(List<PlayerInfoDto> dtoList) {
-        return dtoList.stream().map(dto -> convertDtoToEntity(dto)).collect(Collectors.toList());
+    private List<PlayerInfo> convertDtoListToEntityList(List<PlayerInfoDto> dtoList, String apiKey) {
+        return dtoList.stream().map(dto -> convertDtoToEntity(dto, apiKey)).collect(Collectors.toList());
     }
 }
 
