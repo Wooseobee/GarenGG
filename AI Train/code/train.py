@@ -1,5 +1,6 @@
 from sklearn.decomposition import TruncatedSVD
 from scipy.sparse.linalg import svds
+import pickle
 
 import pandas as pd
 import numpy as np
@@ -7,37 +8,41 @@ import warnings
 warnings.filterwarnings("ignore")
 
 # 데이터 불러오기
-score_data = pd.read_csv('data/score_data.csv')
-champ_data = pd.read_csv('data/champion_data.csv')
+def load_data():
+    score_data = pd.read_csv('data/score_data.csv')
+    champ_data = pd.read_csv('data/champion_data.csv')
+    return score_data, champ_data
 
-# 피벗테이블 형태로 만들기
-user_champ_score = score_data.pivot(
-    index='userId',
-    columns='champId',
-    values='Score'
-).fillna(0)
+# 데이터 전처리
+def preprocess_data(score_data, champ_data):
+    # 피벗테이블 형태로 만들기
+    user_champ_score = score_data.pivot(
+        index='userId',
+        columns='champId',
+        values='Score'
+    ).fillna(0)
 
-# 
-champ_user_score = user_champ_score.T.to_numpy()
+    # 
+    # champ_user_score = user_champ_score.T.to_numpy()
 
-matrix = user_champ_score.to_numpy()
+    matrix = user_champ_score.to_numpy()
 
-# 정규화
-# 유저의 평균 Score(영화의 별점)을 각 유저의 score에서 감산
-user_scores_mean = np.mean(matrix, axis = 1)
+    # 정규화
+    # 유저의 평균 Score(영화의 별점)을 각 유저의 score에서 감산
+    user_scores_mean = np.mean(matrix, axis = 1)
 
-matrix_user_mean = matrix - user_scores_mean.reshape(-1, 1)
+    matrix_user_mean = matrix - user_scores_mean.reshape(-1, 1)
 
-# svd(특이값 분해) 모델링 부분
-U, sigma, Vt = svds(matrix_user_mean, k = 12)
-# sigma는 0이 아닌 특이값의 나열(1차원 행렬)으로(sigma.shape (12,)), 0이 포함된 대칭행렬을 사용하기 위해 np.diag 적용(12,12)
-sigma = np.diag(sigma)
+    # svd(특이값 분해) 모델링 부분
+    U, sigma, Vt = svds(matrix_user_mean, k = 12)
+    # sigma는 0이 아닌 특이값의 나열(1차원 행렬)으로(sigma.shape (12,)), 0이 포함된 대칭행렬을 사용하기 위해 np.diag 적용(12,12)
+    sigma = np.diag(sigma)
 
-# U, Sigma, Vt의 내적을 수행하면, 다시 원본 행렬로 복원이 된다. 
-# 거기에 + 사용자 평균 rating을 적용한다. 
-svd_user_predicted_scores = np.dot(np.dot(U, sigma), Vt) + user_scores_mean.reshape(-1, 1)
-
-df_svd_preds = pd.DataFrame(svd_user_predicted_scores, columns = user_champ_score.columns)
+    # U, Sigma, Vt의 내적을 수행하면, 다시 원본 행렬로 복원이 된다. 
+    # 거기에 + 사용자 평균 rating을 적용한다. 
+    svd_user_predicted_scores = np.dot(np.dot(U, sigma), Vt) + user_scores_mean.reshape(-1, 1)
+    # df_svd_preds = pd.DataFrame(svd_user_predicted_scores, columns = user_champ_score.columns)
+    return pd.DataFrame(svd_user_predicted_scores, columns = user_champ_score.columns)
 
 # 추천 함수
 def recommend_champs(df_svd_preds, user_id, ori_champs_df, ori_scores_df, num_recommendations=5):
@@ -65,6 +70,26 @@ def recommend_champs(df_svd_preds, user_id, ori_champs_df, ori_scores_df, num_re
 
     return user_history, recommendations
 
-already_rated, predictions = recommend_champs(df_svd_preds, 330, champ_data, score_data, 3)
+# FastAPI 서버와 통신하기 위해 recommend_champs 함수를 호출하는 부분
+def get_recommendations(user_id):
+    already_rated, predictions = recommend_champs(df_svd_preds, user_id, champ_data, score_data, 3)
+    return predictions
 
-print(predictions)
+# FastAPI와 통신할 때 사용할 함수 정의
+def predict(user_id):
+    predictions = get_recommendations(user_id)
+    return predictions
+
+
+if __name__ == "__main__":
+    score_data, champ_data = load_data()
+    df_svd_preds = preprocess_data(score_data, champ_data)
+    # 데이터를 pickle 파일로 저장
+    file_path = 'models/df_svd_preds.pkl'
+    with open(file_path, 'wb') as f:
+        pickle.dump(df_svd_preds, f)
+    
+
+# already_rated, predictions = recommend_champs(df_svd_preds, 330, champ_data, score_data, 3)
+
+# print(predictions)
