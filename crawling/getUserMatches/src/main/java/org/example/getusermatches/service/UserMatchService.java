@@ -29,19 +29,19 @@ public class UserMatchService {
     private List<String> API_KEY;
 
     public void getUser(int offset) throws InterruptedException {
-        Pageable pageable = PageRequest.of(offset, 1);
+        Pageable pageable = PageRequest.of(offset, 100);
         Page<PlayerInfo> all = userRepository.findAll(pageable);
         List<PlayerInfo> content = all.getContent();
 
         for (int i = 0; i < content.size(); i++) {
             PlayerInfo playerInfo = content.get(i);
             String puuid = playerInfo.getPuuid();
+            if (puuid == null) continue;
             int apiKeyId = playerInfo.getApiKeyId();
             String apiKey = API_KEY.get(apiKeyId);
             HttpStatusCode matches = getMatches(puuid, apiKey);
             if (matches.is4xxClientError()) {
                 log.info("getUser= {}", matches);
-                Thread.sleep(120000); // 120초 대기
                 i--;
             } else {
                 Thread.sleep(1200); // 1.2초 대기
@@ -53,40 +53,45 @@ public class UserMatchService {
     public HttpStatusCode getMatches(String puuid, String apiKey) throws InterruptedException {
         String url = "https://asia.api.riotgames.com/lol/match/v5/matches/by-puuid/" + puuid + "/ids?start=0&count=100&api_key=" + apiKey;
         RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<List> response = restTemplate.getForEntity(url, List.class);
-        HttpStatusCode statusCode = response.getStatusCode();
+        try {
+            ResponseEntity<List> response = restTemplate.getForEntity(url, List.class);
+            HttpStatusCode statusCode = response.getStatusCode();
 
-        if (statusCode.is4xxClientError()) {
-            return statusCode;
-        }
+            List<String> result = response.getBody();
 
-        List<String> result = response.getBody();
-
-        for (int i = 0; i < result.size(); i++) {
-            String matchId = result.get(i);
-            HttpStatusCode httpStatusCode = saveMatch(matchId, apiKey);
-            if (httpStatusCode.is4xxClientError()) {
-                log.info("getMatches= {}", httpStatusCode);
-                Thread.sleep(120000); // 120초 대기
-                i--;
-            } else {
-                Thread.sleep(1200); // 1.2초 대기
+            for (int i = 0; i < result.size(); i++) {
+                String matchId = result.get(i);
+                HttpStatusCode httpStatusCode = saveMatch(matchId, apiKey);
+                if (httpStatusCode.is4xxClientError()) {
+                    log.info("getMatches= {}", httpStatusCode);
+                    i--;
+                } else {
+                    Thread.sleep(1200); // 1.2초 대기
+                }
             }
+            return statusCode;
+        } catch (Exception e) {
+            Thread.sleep(120000); // 120초 대기
+            return HttpStatusCode.valueOf(429);
         }
-        return statusCode;
     }
 
-    public HttpStatusCode saveMatch(String matchId, String apiKey) {
+    public HttpStatusCode saveMatch(String matchId, String apiKey) throws InterruptedException {
         String url = "https://asia.api.riotgames.com/lol/match/v5/matches/" + matchId + "?api_key=" + apiKey;
         RestTemplate restTemplate = new RestTemplate();
-
-        ResponseEntity<MatchInfo> result = restTemplate.getForEntity(url, MatchInfo.class);
-        MatchInfo matchInfo = result.getBody();
-
-        if (matchInfo != null) {
-            userMatchRepository.save(matchInfo);
+        ResponseEntity<MatchInfo> result;
+        try {
+            result = restTemplate.getForEntity(url, MatchInfo.class);
+            MatchInfo matchInfo = result.getBody();
+            if (matchInfo != null) {
+                matchInfo.setMatchId(matchId);
+                userMatchRepository.save(matchInfo);
+            }
+            return result.getStatusCode();
+        } catch (Exception e) {
+            Thread.sleep(120000); // 120초 대기
+            return HttpStatusCode.valueOf(429);
         }
-        return result.getStatusCode();
     }
 
 }
