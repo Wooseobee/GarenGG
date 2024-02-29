@@ -12,8 +12,8 @@
           </div>
           <div class="col-lg-5">
             <div class="sign-up-form d-flex" data-aos="fade-up" data-aos-delay="300">
-              <input type="text" class="form-control" placeholder="플레이어 이름#KR1">
-              <input type="submit" class="btn btn-primary" value="검색">
+              <input type="text" class="form-control" @keyup.enter="searchMyChamp" v-model="word" placeholder="플레이어 이름#KR1">
+              <button class="btn btn-primary" @click="searchMyChamp">가렌</button>
             </div>
           </div>
         </div>
@@ -24,6 +24,20 @@
 </template>
 
 <script setup>
+
+import { ref, computed, onMounted } from "vue";
+import { useRouter } from "vue-router";
+
+const router = useRouter();
+
+const word = ref("");
+const searchMyChamp = function () {
+  if (word.value.length < 1) {
+    alert("소환사명을 입력해 주세요");
+  } else {
+    router.push({ name: "detail", query: { word: word.value } });
+  }
+};
 
 </script>
 
@@ -81,9 +95,13 @@
   font-size: 25px;
 }
 
+.hero .btn {
+  width: 66px;
+}
+
 .hero .sign-up-form {
-  width: 120%;
-  height: 90%;
+  width: 110%;
+  height: 80px;
   margin-top: 20px;
   padding: 10px;
   border-radius: 7px;

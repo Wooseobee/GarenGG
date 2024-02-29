@@ -1,5 +1,7 @@
 <template>
-    <header id="header" class="header fixed-top d-flex align-items-center">
+    <header id="header" class="header fixed-top d-flex align-items-center"
+    :class="headerClass"
+    >
         <div class="container-fluid d-flex align-items-center">
 
                 
@@ -8,11 +10,11 @@
                     </RouterLink></div>    
 
             <!-- Nav Menu -->
-            <nav id="navmenu" class="navmenu" style="margin-left: 600px;">
+            <nav id="navmenu" class="navmenu" style="margin-left: 400px;">
                 <ul>
                     
-                    <li><RouterLink to="/">롤챔추</RouterLink></li>
-                    <li><RouterLink to="/">조합추</RouterLink></li>
+                    <li><RouterLink to="/detail">롤챔추</RouterLink></li>
+                    <li><RouterLink to="/detail">조합추</RouterLink></li>
                     <li><RouterLink to="/">오늘의 게임 운세</RouterLink></li>
                     <li><RouterLink to="/">나와 닮은 롤 이미지</RouterLink></li>
         
@@ -26,6 +28,23 @@
 </template>
 
 <script setup>
+import { ref, computed, onMounted } from "vue";
+import { useRouter, useRoute } from "vue-router";
+
+const router = useRouter();
+const route = useRoute();
+
+const headerClass = computed(() => {
+  if (route.path === '/detail') {
+    return 'scrolled';
+  } else if (route.path === '/home') {
+    return 'home-view';
+  } else {
+    return '';
+  }
+});
+
+console.log(headerClass)
 
 </script>
 
@@ -53,7 +72,7 @@
 
 .header .logo span {
     color: var(--accent-color);
-    font-size: 30px;
+    font-size: 50px;
     font-weight: 600;
     padding-left: 3px;
 }
@@ -95,6 +114,7 @@
 /* Global Header on page scroll
 ------------------------------*/
 .scrolled .header {
+    
     --background-color: #ffffff;
     --heading-color: #444444;
     --nav-color: #444444;
@@ -125,7 +145,8 @@ section {
 
 /* Home Page Custom Header on page scroll
 ------------------------------*/
-.index-page.scrolled .header {
+.scrolled {
+    background-color: #0D6EFD;
     --background-color: #ffffff;
     --heading-color: #444444;
     --nav-color: #444444;
@@ -157,7 +178,7 @@ section {
     .navmenu a:focus {
         color: var(--nav-color);
         padding: 18px 15px;
-        font-size: 20px;
+        font-size: 22px;
         font-family: var(--nav-font);
         font-weight: 400;
         display: flex;

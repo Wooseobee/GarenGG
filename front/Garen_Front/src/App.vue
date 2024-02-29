@@ -1,6 +1,5 @@
 <template>
   <div>
-
     <body class="index-page" data-bs-spy="scroll" data-bs-target="#navmenu">
       <Header />
       <RouterView />
