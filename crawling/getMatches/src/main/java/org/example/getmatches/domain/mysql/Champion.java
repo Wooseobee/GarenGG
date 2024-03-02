@@ -1,19 +1,20 @@
 package org.example.getmatches.domain.mysql;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Embedded;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.util.List;
 
 @Entity
 @Getter
 @Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Champion {
     @Id
     @Column(name = "champion_key")
-    private String key;
+    private Long key;
     private String version;
     private String id;
     private String name;
@@ -24,7 +25,9 @@ public class Champion {
     private Info info;
     @Embedded
     private Image image;
-    private String tags;
+
+    @ElementCollection
+    private List<String> tags;
     private String partype;
     @Embedded
     private Stats stats;

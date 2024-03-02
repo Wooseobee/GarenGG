@@ -1,15 +1,17 @@
 package org.example.getmatches.domain.mysql;
 
 import jakarta.persistence.Embeddable;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
 @Embeddable
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Info {
-    private int attack;
-    private int defense;
-    private int magic;
-    private int difficulty;
+    private Long attack;
+    private Long defense;
+    private Long magic;
+    private Long difficulty;
 }
