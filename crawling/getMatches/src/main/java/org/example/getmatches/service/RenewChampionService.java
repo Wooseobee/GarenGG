@@ -25,7 +25,6 @@ public class RenewChampionService {
     @Transactional
     public void renewChampion(String version) {
         String url = "https://ddragon.leagueoflegends.com/cdn/" + version + "/data/ko_KR/champion.json";
-        System.out.println(url);
         RestTemplate restTemplate = new RestTemplate();
 
         try {
