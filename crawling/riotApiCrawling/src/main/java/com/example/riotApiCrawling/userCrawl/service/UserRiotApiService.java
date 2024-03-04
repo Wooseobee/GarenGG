@@ -33,7 +33,7 @@ public class UserRiotApiService {
         apiKeysId = new HashMap<String, Integer>();
 //        System.out.println(apiKeys.size());
 //        System.out.println(apiKeys);
-        for(int i= 0; i < 10; i++){
+        for(int i= 0; i < 12; i++){
             apiKeysId.put(apiKeys.get(i), i);
         }
     }
