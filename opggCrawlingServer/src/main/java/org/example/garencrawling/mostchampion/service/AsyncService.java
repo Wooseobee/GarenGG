@@ -22,6 +22,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 @RequiredArgsConstructor
@@ -33,10 +34,7 @@ public class AsyncService {
     private final PlayerInfoRepository playerInfoRepository;
 
     @Async("threadPoolTaskExecutor")
-    public void processPlayersInRange(long startPlayerId, long endPlayerId) {
-        long startTime, endTime;
-        startTime = System.currentTimeMillis();
-        System.out.println("startPlayerId = " + startPlayerId + " endPlayerId = " + endPlayerId + " 시작 ");
+    public CompletableFuture<Void> processPlayersInRange(long startPlayerId, long endPlayerId) {
 
         List<PlayerInfo> playerInfos = playerInfoRepository.findByPlayerIdBetween(startPlayerId, endPlayerId);
         for (PlayerInfo playerInfo : playerInfos) {
@@ -48,8 +46,7 @@ public class AsyncService {
 
         playerPrevSoloRankRepository.saveAll(playerPrevSoloRanks);
 
-        endTime = System.currentTimeMillis();
-        System.out.println("startPlayerId = " + startPlayerId + " endPlayerId = " + endPlayerId + " 완료 " + " 소요 시간 : " + (endTime - startTime) / 1000);
+        return null;
     }
 
     public ArrayList<PlayerPrevSoloRank> crawling(List<PlayerInfo> playerInfos) {
@@ -152,6 +149,7 @@ public class AsyncService {
                 playerPrevSoloRank.setTier(null);
                 playerPrevSoloRank.setRankNum(null);
                 playerPrevSoloRank.setMostDatas(null);
+                MostChampionServiceImpl.failCount++;
             }
 
             playerPrevSoloRanks.add(playerPrevSoloRank);

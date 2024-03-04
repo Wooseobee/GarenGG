@@ -11,9 +11,9 @@ import java.util.concurrent.Executor;
 @EnableAsync // Application이 아닌, Async 설정 클래스에 붙여야 함.
 public class SpringAsyncConfig {
 
-    public static int corePoolSize = 100;
-    public static int maxPoolSize = 200;
-    public static int queueCapacity = 500;
+    public static int corePoolSize = 10;
+    public static int maxPoolSize = 100;
+    public static int queueCapacity = 200;
 
     @Bean(name = "threadPoolTaskExecutor")
     public Executor threadPoolTaskExecutor() {

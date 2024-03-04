@@ -7,18 +7,26 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+
 @Service
 @RequiredArgsConstructor
 public class MostChampionServiceImpl implements MostChampionService {
 
     private final AsyncService asyncService;
 
+    public static long startTime;
+    public static long endTime;
+    public static int failCount;
+
     @Override
     public ResponseEntity<?> mostChampionCrawling(Long startPlayerId, Long endPlayerId) {
+        startTime = System.currentTimeMillis();
+        failCount = 0;
 
-//        System.out.println("startPlayerId = " + startPlayerId + " endPlayerId = " + endPlayerId + " Request 시작");
         assignThreadTask(startPlayerId, endPlayerId, SpringAsyncConfig.corePoolSize);
-//        System.out.println("startPlayerId = " + startPlayerId + " endPlayerId = " + endPlayerId + " Request 종료");
 
         return ResponseEntity.status(HttpStatus.OK).body("success");
     }
@@ -41,8 +49,9 @@ public class MostChampionServiceImpl implements MostChampionService {
             remainder--;
         }
 
-        long currentStartPlayerId = startPlayerId;
+        List<CompletableFuture<Void>> futures = new ArrayList<>();
 
+        long currentStartPlayerId = startPlayerId;
         for (int i = 0; i < batchSizes.length; i++) {
 
             if (batchSizes[i] == 0)
@@ -50,11 +59,20 @@ public class MostChampionServiceImpl implements MostChampionService {
 
             long currentEndPlayerId = currentStartPlayerId + batchSizes[i] - 1;
 
-            asyncService.processPlayersInRange(currentStartPlayerId, currentEndPlayerId);
+            CompletableFuture<Void> future = asyncService.processPlayersInRange(currentStartPlayerId, currentEndPlayerId);
+            futures.add(future);
 
             currentStartPlayerId = currentEndPlayerId + 1;
         }
-    }
 
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).thenRun(() -> {
+            endTime = System.currentTimeMillis();
+            System.out.println("startPlayerId = " + startPlayerId + " endPlayerId = " + endPlayerId + " 종료");
+            System.out.println("성공 비율 = " + ((totalPlayers - failCount) * 100L / totalPlayers));
+            System.out.println("소요 시간 = " + (endTime - startTime) / 1000 + "s");
+
+        });
+
+    }
 
 }
