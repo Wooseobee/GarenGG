@@ -11,8 +11,7 @@ from pydantic import BaseModel
 from pymongo import MongoClient, ReturnDocument
 import motor.motor_asyncio
 
-from code.train import predict
-
+from code.recommend import get_recommendations
 
 app = FastAPI()
 
@@ -23,7 +22,8 @@ class PredictionInput(BaseModel):
 # MatrixFactorization or 학습된 모델 가져오기
 with open('models/df_svd_preds.pkl', 'rb') as f:
     df_svd_preds = pickle.load(f)
-
+# champio data
+    
 # MongoDB 연결 정보 설정
 MONGODB_URL = "mongodb://root:ssafy605@15.164.142.18:27017"
 
@@ -60,7 +60,7 @@ async def mongodb_test():
 @app.post("/predict/")
 async def prediction(input_data: PredictionInput):
     user_id = int(input_data.riotId)  # riotId를 int로 변환
-    predictions = predict(user_id)  # predict 함수 호출하여 결과 가져오기
+    predictions = get_recommendations(user_id)  # predict 함수 호출하여 결과 가져오기
     return predictions.to_dict(orient='records')  # DataFrame을 딕셔너리로 변환하여 반환
 
 if __name__ == "__main__":

@@ -70,16 +70,6 @@ def recommend_champs(df_svd_preds, user_id, ori_champs_df, ori_scores_df, num_re
 
     return user_history, recommendations
 
-# FastAPI 서버와 통신하기 위해 recommend_champs 함수를 호출하는 부분
-def get_recommendations(user_id):
-    already_rated, predictions = recommend_champs(df_svd_preds, user_id, champ_data, score_data, 3)
-    return predictions
-
-# FastAPI와 통신할 때 사용할 함수 정의
-def predict(user_id):
-    predictions = get_recommendations(user_id)
-    return predictions
-
 
 if __name__ == "__main__":
     score_data, champ_data = load_data()
@@ -89,7 +79,3 @@ if __name__ == "__main__":
     with open(file_path, 'wb') as f:
         pickle.dump(df_svd_preds, f)
     
-
-# already_rated, predictions = recommend_champs(df_svd_preds, 330, champ_data, score_data, 3)
-
-# print(predictions)
