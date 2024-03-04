@@ -87,13 +87,14 @@ public class GetMatchService {
         }
     }
 
-    private void setMatch(Match victory) {
-        Match findVictoryMatch = matchRepository.findByWithPessimisticLock(victory.getTop(), victory.getJungle(), victory.getMiddle(), victory.getBottom(), victory.getUtility());
+    private void setMatch(Match match) {
+        Match findVictoryMatch = matchRepository.findByWithPessimisticLock(match.getTop(), match.getJungle(), match.getMiddle(), match.getBottom(), match.getUtility());
         if (findVictoryMatch == null) {
-            victory.setVictory(1L);
+            match.setVictory(1L);
+            matchRepository.save(match);
         } else {
-            victory.setVictory(findVictoryMatch.getVictory() + 1);
+            findVictoryMatch.setVictory(findVictoryMatch.getVictory() + 1);
+            matchRepository.save(findVictoryMatch);
         }
-        matchRepository.save(victory);
     }
 }
