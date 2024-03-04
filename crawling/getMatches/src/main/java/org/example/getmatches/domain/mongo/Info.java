@@ -19,4 +19,6 @@ public class Info {
     private String gameVersion;
     private Integer mapId;
     private List<Participant> participants;
+    private String platformId;
+    private Integer queueId;
 }

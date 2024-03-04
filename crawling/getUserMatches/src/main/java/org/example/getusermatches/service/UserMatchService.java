@@ -83,7 +83,7 @@ public class UserMatchService {
         try {
             result = restTemplate.getForEntity(url, MatchInfo.class);
             MatchInfo matchInfo = result.getBody();
-            if (matchInfo != null) {
+            if (matchInfo != null && matchInfo.getInfo().getQueueId() == 420) {
                 matchInfo.setMatchId(matchId);
                 userMatchRepository.save(matchInfo);
             }
