@@ -46,7 +46,7 @@ public class UserMatchService {
             } else {
                 Thread.sleep(1200); // 1.2초 대기
             }
-            log.info("유저저장완료-{}", i);
+            log.info("유저저장완료 offset:{}, num:{}", offset, i);
         }
     }
 
@@ -85,7 +85,7 @@ public class UserMatchService {
             MatchInfo matchInfo = result.getBody();
             if (matchInfo != null && matchInfo.getInfo().getQueueId() == 420) {
                 matchInfo.setMatchId(matchId);
-                userMatchRepository.save(matchInfo);
+                userMatchRepository.upsertMatchInfo(matchInfo);
             }
             return result.getStatusCode();
         } catch (Exception e) {
