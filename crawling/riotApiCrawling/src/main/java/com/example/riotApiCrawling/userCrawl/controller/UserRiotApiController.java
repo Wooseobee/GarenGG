@@ -1,4 +1,4 @@
-package com.example.riotApiCrawling.userCrawl.Controller;
+package com.example.riotApiCrawling.userCrawl.controller;
 
 import com.example.riotApiCrawling.userCrawl.dto.RequestDto;
 import com.example.riotApiCrawling.userCrawl.service.UserRiotApiService;
