@@ -68,7 +68,7 @@ public class UserRiotApiService {
         int pageNum = startPageNum;
         while (pageNum <= endPageNum) {
             try {
-                URL url = new URL("https://kr.api.riotgames.com/lol/league/v4/entries/RANKED_SOLO_5x5/" + tier + "/" + rank + "?page=" + pageNum + "&api_key=" + apiKey);
+                URL url = new URL("https://kr.api.riotgames.com/lol/league-exp/v4/entries/RANKED_SOLO_5x5" + tier + "/" + rank + "?page=" + pageNum + "&api_key=" + apiKey);
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
                 // 요청 메서드 설정 (GET 방식)
