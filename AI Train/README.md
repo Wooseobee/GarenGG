@@ -14,5 +14,6 @@ pip install -r requirements.txt
 ### 라이브 서버 실행
 
 ```bash
+cd app
 uvicorn main:app --reload
 ```

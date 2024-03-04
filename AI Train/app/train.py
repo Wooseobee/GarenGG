@@ -7,6 +7,8 @@ import numpy as np
 import warnings
 warnings.filterwarnings("ignore")
 
+import motor.motor_asyncio
+
 # 데이터 불러오기
 def load_data():
     score_data = pd.read_csv('data/score_data.csv')
