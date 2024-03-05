@@ -30,67 +30,71 @@ public class GetMatchService {
 
     @Transactional
     public void saveMatchData(int offset) {
-        Pageable pageable = PageRequest.of(offset, 1000);
+        Pageable pageable = PageRequest.of(offset, 100);
         Page<MatchInfo> matchList = userMatchRepository.findAll(pageable);
-        List<MatchInfo> content = matchList.getContent();
-        for (MatchInfo matchInfo : content) {
-            Info info = matchInfo.getInfo();
+        while (matchList.isEmpty()) {
+            List<MatchInfo> content = matchList.getContent();
+            for (MatchInfo matchInfo : content) {
+                Info info = matchInfo.getInfo();
 
-            List<Participant> participants = info.getParticipants();
-            Combination victory = new Combination();
-            Combination defeat = new Combination();
+                List<Participant> participants = info.getParticipants();
+                Combination victory = new Combination();
+                Combination defeat = new Combination();
 
-            for (Participant participant : participants) {
-                int championId = participant.getChampionId();
-                String individualPosition = participant.getIndividualPosition();
-                boolean win = participant.isWin();
+                for (Participant participant : participants) {
+                    int championId = participant.getChampionId();
+                    String individualPosition = participant.getIndividualPosition();
+                    boolean win = participant.isWin();
 
-                switch (individualPosition) {
-                    case "TOP":
-                        if (win) {
-                            victory.setTop(championId);
-                        } else {
-                            defeat.setTop(championId);
-                        }
-                        break;
-                    case "JUNGLE":
-                        if (win) {
-                            victory.setJungle(championId);
-                        } else {
-                            defeat.setJungle(championId);
-                        }
-                        break;
-                    case "MIDDLE":
-                        if (win) {
-                            victory.setMiddle(championId);
-                        } else {
-                            defeat.setMiddle(championId);
-                        }
-                        break;
-                    case "BOTTOM":
-                        if (win) {
-                            victory.setBottom(championId);
-                        } else {
-                            defeat.setBottom(championId);
-                        }
-                        break;
-                    case "UTILITY":
-                        if (win) {
-                            victory.setUtility(championId);
-                        } else {
-                            defeat.setUtility(championId);
-                        }
-                        break;
-                    default:
-                        break;
+                    switch (individualPosition) {
+                        case "TOP":
+                            if (win) {
+                                victory.setTop(championId);
+                            } else {
+                                defeat.setTop(championId);
+                            }
+                            break;
+                        case "JUNGLE":
+                            if (win) {
+                                victory.setJungle(championId);
+                            } else {
+                                defeat.setJungle(championId);
+                            }
+                            break;
+                        case "MIDDLE":
+                            if (win) {
+                                victory.setMiddle(championId);
+                            } else {
+                                defeat.setMiddle(championId);
+                            }
+                            break;
+                        case "BOTTOM":
+                            if (win) {
+                                victory.setBottom(championId);
+                            } else {
+                                defeat.setBottom(championId);
+                            }
+                            break;
+                        case "UTILITY":
+                            if (win) {
+                                victory.setUtility(championId);
+                            } else {
+                                defeat.setUtility(championId);
+                            }
+                            break;
+                        default:
+                            break;
+                    }
                 }
-            }
 
-            if (!(isValidCombination(victory) && isValidCombination(defeat))) {
-                continue;
+                if (!(isValidCombination(victory) && isValidCombination(defeat))) {
+                    continue;
+                }
+                saveVictory(victory, matchInfo.getMetadata().getMatchId());
+                saveDefeat(defeat, matchInfo.getMetadata().getMatchId());
             }
-            saveVictory(victory, matchInfo.getMetadata().getMatchId());
-            saveDefeat(defeat, matchInfo.getMetadata().getMatchId());
+            pageable = PageRequest.of(++offset, 100);
+            matchList = userMatchRepository.findAll(pageable);
         }
     }
 
