@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -55,10 +56,10 @@ public class UserRiotApiService {
         int endPageNum = requestDto.getEndPageNum();
         String apiKey = requestDto.getApiKey();
         for(int  i = startRank;  i <= endRank; i++) {
-            System.out.println(tier + rank[i] + ", apikey :"+apiKeysId.get(apiKey)+ "  crawl start.");
+            System.out.println(LocalDateTime.now() +": "+tier + rank[i] + ", apikey :"+apiKeysId.get(apiKey)+ "  crawl start.");
             //티어 하나의 유저 목록 불러오기
             crawlUsersByTier(tier, rank[i], startPageNum, endPageNum, apiKey);
-            System.out.println(tier + rank[i] + "Crwaling Done!");
+            System.out.println(LocalDateTime.now() +": "+tier + rank[i] + "Crwaling Done!");
         }
     }
 
@@ -121,19 +122,19 @@ public class UserRiotApiService {
 
                 userRiotApiRepository.saveAll(entityList);
 
-                System.out.println("저장할 플레이어 목록");
-                for(PlayerInfoDto playerInfoDto : playerInfoList){
-                    System.out.println(playerInfoDto);
-                }
+//                System.out.println("저장할 플레이어 목록");
+//                for(PlayerInfoDto playerInfoDto : playerInfoList){
+//                    System.out.println(playerInfoDto);
+//                }
 
                 if (playerInfoList.size() < 205) break; //한번에 205개씩 가져온다.
 
-                System.out.println(tier + rank + ", page "+pageNum+", apikey :"+apiKeysId.get(apiKey)+ "  crawl done.");
+                System.out.println(LocalDateTime.now() +": "+tier + rank + ", page "+pageNum+", apikey :"+apiKeysId.get(apiKey)+ "  crawl done.");
 
                 pageNum++;
             } catch (IOException e) {
                 e.printStackTrace();
-                System.out.println(apiKeysId.get(apiKey)+" key, users per tier IOException. 10secs sleep. current Page : " + pageNum);
+//                System.out.println(apiKeysId.get(apiKey)+" key, users per tier IOException. 10secs sleep. current Page : " + pageNum);
                 Thread.sleep(10000);
             }
         }
@@ -178,7 +179,7 @@ public class UserRiotApiService {
                 //puuid설정.
                 playerInfoList.get(count).setPuuid(summonerDto.getPuuid());
 
-                System.out.println("puuid 설정완료. count : "+ count);
+//                System.out.println("puuid 설정완료. count : "+ count);
 
             } catch (IOException e) {
                 if(responseCode == 429) {
@@ -187,12 +188,12 @@ public class UserRiotApiService {
                     Thread.sleep(10000);
                 }
                 else{
-                    System.out.println("puuid not found. continue." + count);
+//                    System.out.println("puuid not found. continue." + count);
                 }
             } catch (NullPointerException e){
-                System.out.println("null pointer exception. no summonerId. continue. count  : "+ count);
+//                System.out.println("null pointer exception. no summonerId. continue. count  : "+ count);
             } catch(Exception e){
-                System.out.println("unexpected error. continue. :" );
+//                System.out.println("unexpected error. continue. :" );
             }
         }
     }
