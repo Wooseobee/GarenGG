@@ -12,9 +12,9 @@ public class UserMatchController {
 
     private final UserMatchService userMatchService;
 
-    @GetMapping("/test/{offset}")
-    public String test(@PathVariable int offset) throws InterruptedException {
-        userMatchService.getUser(offset);
+    @GetMapping("/test/{tier}/{rankNum}")
+    public String test(@PathVariable("tier") String tier, @PathVariable("tier") String rankNum) throws InterruptedException {
+        userMatchService.getUser(tier, rankNum);
         return "OK";
     }
 }

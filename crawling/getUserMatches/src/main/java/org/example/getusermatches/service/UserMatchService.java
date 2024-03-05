@@ -7,9 +7,6 @@ import org.example.getusermatches.domain.PlayerInfo;
 import org.example.getusermatches.repository.UserMatchRepository;
 import org.example.getusermatches.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -28,10 +25,8 @@ public class UserMatchService {
     @Value("${riot.apiKeys}")
     private List<String> API_KEY;
 
-    public void getUser(int offset) throws InterruptedException {
-        Pageable pageable = PageRequest.of(offset, 100);
-        Page<PlayerInfo> all = userRepository.findAll(pageable);
-        List<PlayerInfo> content = all.getContent();
+    public void getUser(String tier, String rankNum) throws InterruptedException {
+        List<PlayerInfo> content = userRepository.findAllByTierAndRank(tier, rankNum);
 
         for (int i = 0; i < content.size(); i++) {
             PlayerInfo playerInfo = content.get(i);
@@ -46,7 +41,7 @@ public class UserMatchService {
             } else {
                 Thread.sleep(1200); // 1.2초 대기
             }
-            log.info("유저저장완료 offset:{}, num:{}", offset, i);
+            log.info("유저저장완료 tier:{}", tier);
         }
     }
 
@@ -71,7 +66,7 @@ public class UserMatchService {
             }
             return statusCode;
         } catch (Exception e) {
-            Thread.sleep(120000); // 120초 대기
+            Thread.sleep(12000); // 12초 대기
             return HttpStatusCode.valueOf(429);
         }
     }
@@ -89,7 +84,7 @@ public class UserMatchService {
             }
             return result.getStatusCode();
         } catch (Exception e) {
-            Thread.sleep(120000); // 120초 대기
+            Thread.sleep(12000); // 12초 대기
             return HttpStatusCode.valueOf(429);
         }
     }
