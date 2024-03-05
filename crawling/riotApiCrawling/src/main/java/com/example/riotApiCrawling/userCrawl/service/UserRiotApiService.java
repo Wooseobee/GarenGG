@@ -68,7 +68,7 @@ public class UserRiotApiService {
         int pageNum = startPageNum;
         while (pageNum <= endPageNum) {
             try {
-                URL url = new URL("https://kr.api.riotgames.com/lol/league-exp/v4/entries/RANKED_SOLO_5x5" + tier + "/" + rank + "?page=" + pageNum + "&api_key=" + apiKey);
+                URL url = new URL("https://kr.api.riotgames.com/lol/league-exp/v4/entries/RANKED_SOLO_5x5/" + tier + "/" + rank + "?page=" + pageNum + "&api_key=" + apiKey);
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
                 // 요청 메서드 설정 (GET 방식)
@@ -121,10 +121,10 @@ public class UserRiotApiService {
 
                 userRiotApiRepository.saveAll(entityList);
 
-//                System.out.println("저장할 플레이어 목록");
-//                for(PlayerInfoDto playerInfoDto : playerInfoList){
-//                    System.out.println(playerInfoDto);
-//                }
+                System.out.println("저장할 플레이어 목록");
+                for(PlayerInfoDto playerInfoDto : playerInfoList){
+                    System.out.println(playerInfoDto);
+                }
 
                 if (playerInfoList.size() < 205) break; //한번에 205개씩 가져온다.
 
@@ -132,8 +132,8 @@ public class UserRiotApiService {
 
                 pageNum++;
             } catch (IOException e) {
-//                e.printStackTrace();
-//                System.out.println(apiKeysId.get(apiKey)+" key, users per tier IOException. 10secs sleep. current Page : " + pageNum);
+                e.printStackTrace();
+                System.out.println(apiKeysId.get(apiKey)+" key, users per tier IOException. 10secs sleep. current Page : " + pageNum);
                 Thread.sleep(10000);
             }
         }
@@ -178,7 +178,7 @@ public class UserRiotApiService {
                 //puuid설정.
                 playerInfoList.get(count).setPuuid(summonerDto.getPuuid());
 
-//                System.out.println("puuid 설정완료. count : "+ count);
+                System.out.println("puuid 설정완료. count : "+ count);
 
             } catch (IOException e) {
                 if(responseCode == 429) {
@@ -187,12 +187,12 @@ public class UserRiotApiService {
                     Thread.sleep(10000);
                 }
                 else{
-//                    System.out.println("puuid not found. continue." + count);
+                    System.out.println("puuid not found. continue." + count);
                 }
             } catch (NullPointerException e){
-//                System.out.println("null pointer exception. no summonerId. continue. count  : "+ count);
+                System.out.println("null pointer exception. no summonerId. continue. count  : "+ count);
             } catch(Exception e){
-//                System.out.println("unexpected error. continue. :" );
+                System.out.println("unexpected error. continue. :" );
             }
         }
     }
