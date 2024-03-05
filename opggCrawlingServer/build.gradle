@@ -18,8 +18,9 @@ configurations {
 }
 
 bootRun {
-    jvmArgs = ['-Xms512m', '-Xmx768m']
+    jvmArgs = ['-Xms512m', '-Xmx768m', '-Xss512k']
 }
+
 
 repositories {
     mavenCentral()
@@ -39,11 +40,6 @@ dependencies {
     implementation 'io.github.bonigarcia:webdrivermanager:5.7.0'
 
     implementation "org.springframework.boot:spring-boot-starter-data-mongodb"
-
-    // Gson 라이브러리 추가
-    implementation 'com.google.code.gson:gson:2.8.9'
-
-    implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
 }
 

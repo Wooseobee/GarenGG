@@ -12,8 +12,8 @@ import java.util.concurrent.Executor;
 public class SpringAsyncConfig {
 
     public static int corePoolSize = 10;
-    public static int maxPoolSize = 100;
-    public static int queueCapacity = 200;
+    public static int maxPoolSize = 20;
+    public static int queueCapacity = 100;
 
     @Bean(name = "threadPoolTaskExecutor")
     public Executor threadPoolTaskExecutor() {

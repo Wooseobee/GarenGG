@@ -26,7 +26,7 @@ public class MostChampionServiceImpl implements MostChampionService {
         startTime = System.currentTimeMillis();
         failCount = 0;
 
-        assignThreadTask(startPlayerId, endPlayerId, SpringAsyncConfig.corePoolSize);
+        assignThreadTask(startPlayerId, endPlayerId, 5);
 
         return ResponseEntity.status(HttpStatus.OK).body("success");
     }
@@ -68,7 +68,7 @@ public class MostChampionServiceImpl implements MostChampionService {
         CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).thenRun(() -> {
             endTime = System.currentTimeMillis();
             System.out.println("startPlayerId = " + startPlayerId + " endPlayerId = " + endPlayerId + " 종료");
-            System.out.println("성공 비율 = " + ((totalPlayers - failCount) * 100L / totalPlayers));
+            System.out.println("성공 비율 = " + ((totalPlayers - failCount) * 100L / totalPlayers) + "%");
             System.out.println("소요 시간 = " + (endTime - startTime) / 1000 + "s");
 
         });

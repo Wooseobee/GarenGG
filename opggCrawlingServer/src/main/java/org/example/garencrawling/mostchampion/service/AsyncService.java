@@ -43,6 +43,7 @@ public class AsyncService {
         }
 
         ArrayList<PlayerPrevSoloRank> playerPrevSoloRanks = crawling(playerInfos);
+//        ArrayList<PlayerPrevSoloRank> playerPrevSoloRanks = crawling2(playerInfos);
 
         playerPrevSoloRankRepository.saveAll(playerPrevSoloRanks);
 
@@ -68,7 +69,7 @@ public class AsyncService {
 
         driver = new ChromeDriver(options);
 
-        wait = new WebDriverWait(driver, Duration.ofSeconds(5)); // 명시적 대기 시간 설정
+        wait = new WebDriverWait(driver, Duration.ofSeconds(10)); // 명시적 대기 시간 설정
 
         ////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -85,10 +86,15 @@ public class AsyncService {
                 wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("/html/body/div[1]/div[4]/div[1]/div/div[1]/div[2]/div[1]/div/ul/li[1]/div/b")));
 
                 StringTokenizer st = new StringTokenizer(driver.findElement(By.xpath("/html/body/div[1]/div[4]/div[1]/div/div[1]/div[2]/div[1]/div/ul/li[1]/div")).getText());
-                st.nextToken();
-                st.nextToken();
-                playerPrevSoloRank.setTier(st.nextToken());
-                playerPrevSoloRank.setRankNum(st.nextToken());
+                st.nextToken(); // S2023
+                st.nextToken(); // S2
+
+                playerPrevSoloRank.setTier(st.nextToken()); // master
+                if (playerPrevSoloRank.getTier().equals("master") || playerPrevSoloRank.getTier().equals("grandmaster") || playerPrevSoloRank.getTier().equals("challenger")) {
+
+                } else {
+                    playerPrevSoloRank.setRankNum(st.nextToken());
+                }
 
                 // 챔피언 목록 읽기
                 wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("/html/body/div[1]/div[6]/div/div")));
@@ -146,6 +152,7 @@ public class AsyncService {
                     playerPrevSoloRank.getMostDatas().add(mostData);
                 }
             } catch (Exception e) {
+                System.out.println("playerInfo.getPlayerId() = " + playerInfo.getPlayerId() + " " + e.getMessage());
                 playerPrevSoloRank.setTier(null);
                 playerPrevSoloRank.setRankNum(null);
                 playerPrevSoloRank.setMostDatas(null);
