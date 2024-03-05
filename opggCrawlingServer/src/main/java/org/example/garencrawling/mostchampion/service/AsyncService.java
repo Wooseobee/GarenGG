@@ -42,10 +42,21 @@ public class AsyncService {
             playerInfo.setUserNickname(userNickname);
         }
 
-        ArrayList<PlayerPrevSoloRank> playerPrevSoloRanks = crawling(playerInfos);
-//        ArrayList<PlayerPrevSoloRank> playerPrevSoloRanks = crawling2(playerInfos);
+//        ArrayList<PlayerPrevSoloRank> playerPrevSoloRanks = crawling(playerInfos);
 
-        playerPrevSoloRankRepository.saveAll(playerPrevSoloRanks);
+        ArrayList<PlayerPrevSoloRank> allPlayerPrevSoloRanks = new ArrayList<>();
+
+        final int chunkSize = 20;
+        for (int i = 0; i < playerInfos.size(); i += chunkSize) {
+            // 하위 리스트 생성
+            List<PlayerInfo> batch = playerInfos.subList(i, Math.min(playerInfos.size(), i + chunkSize));
+            // 하위 리스트에 대해 crawling 호출
+            ArrayList<PlayerPrevSoloRank> playerPrevSoloRanks = crawling(batch);
+            // 결과를 allPlayerPrevSoloRanks에 추가
+            allPlayerPrevSoloRanks.addAll(playerPrevSoloRanks);
+        }
+
+        playerPrevSoloRankRepository.saveAll(allPlayerPrevSoloRanks);
 
         return null;
     }
@@ -89,8 +100,8 @@ public class AsyncService {
                 st.nextToken(); // S2023
                 st.nextToken(); // S2
 
-                playerPrevSoloRank.setTier(st.nextToken()); // master
-                if (playerPrevSoloRank.getTier().equals("master") || playerPrevSoloRank.getTier().equals("grandmaster") || playerPrevSoloRank.getTier().equals("challenger")) {
+                playerPrevSoloRank.setTier(st.nextToken());
+                if (playerPrevSoloRank.getTier().equals("Master") || playerPrevSoloRank.getTier().equals("Grandmaster") || playerPrevSoloRank.getTier().equals("Challenger")) {
 
                 } else {
                     playerPrevSoloRank.setRankNum(st.nextToken());
@@ -151,6 +162,8 @@ public class AsyncService {
                     }
                     playerPrevSoloRank.getMostDatas().add(mostData);
                 }
+
+                System.out.println("playerInfo.getPlayerId() = " + playerInfo.getPlayerId() + " 성공");
             } catch (Exception e) {
                 System.out.println("playerInfo.getPlayerId() = " + playerInfo.getPlayerId() + " " + e.getMessage());
                 playerPrevSoloRank.setTier(null);

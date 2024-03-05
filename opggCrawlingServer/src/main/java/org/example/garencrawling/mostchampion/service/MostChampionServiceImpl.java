@@ -2,7 +2,6 @@ package org.example.garencrawling.mostchampion.service;
 
 import lombok.RequiredArgsConstructor;
 
-import org.example.garencrawling.global.SpringAsyncConfig;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -26,7 +25,7 @@ public class MostChampionServiceImpl implements MostChampionService {
         startTime = System.currentTimeMillis();
         failCount = 0;
 
-        assignThreadTask(startPlayerId, endPlayerId, 5);
+        assignThreadTask(startPlayerId, endPlayerId, 1);
 
         return ResponseEntity.status(HttpStatus.OK).body("success");
     }
