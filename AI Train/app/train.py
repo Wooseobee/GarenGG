@@ -8,6 +8,7 @@ import warnings
 warnings.filterwarnings("ignore")
 
 import motor.motor_asyncio
+from db import get_player_prev_solo_rank
 
 # 데이터 불러오기
 def load_data():
@@ -19,12 +20,11 @@ def load_data():
 def preprocess_data(score_data, champ_data):
     # 피벗테이블 형태로 만들기
     user_champ_score = score_data.pivot(
-        index='userId',
-        columns='champId',
-        values='Score'
+        index='id',
+        columns='champName',
+        values='score'
     ).fillna(0)
 
-    # 
     # champ_user_score = user_champ_score.T.to_numpy()
 
     matrix = user_champ_score.to_numpy()
