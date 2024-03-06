@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -55,10 +57,10 @@ public class UserRiotApiService {
         int endPageNum = requestDto.getEndPageNum();
         String apiKey = requestDto.getApiKey();
         for(int  i = startRank;  i <= endRank; i++) {
-            System.out.println(tier + rank[i] + ", apikey :"+apiKeysId.get(apiKey)+ "  crawl start.");
+            System.out.println(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss:SSS")) +": "+tier + rank[i] + ", apikey :"+apiKeysId.get(apiKey)+ "  crawl start.");
             //티어 하나의 유저 목록 불러오기
             crawlUsersByTier(tier, rank[i], startPageNum, endPageNum, apiKey);
-            System.out.println(tier + rank[i] + "Crwaling Done!");
+            System.out.println(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss:SSS")) +": "+tier + rank[i] + " " + apiKeysId.get(apiKey) + "Crwaling Done!");
         }
     }
 
@@ -68,7 +70,7 @@ public class UserRiotApiService {
         int pageNum = startPageNum;
         while (pageNum <= endPageNum) {
             try {
-                URL url = new URL("https://kr.api.riotgames.com/lol/league-exp/v4/entries/RANKED_SOLO_5x5" + tier + "/" + rank + "?page=" + pageNum + "&api_key=" + apiKey);
+                URL url = new URL("https://kr.api.riotgames.com/lol/league-exp/v4/entries/RANKED_SOLO_5x5/" + tier + "/" + rank + "?page=" + pageNum + "&api_key=" + apiKey);
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
                 // 요청 메서드 설정 (GET 방식)
@@ -128,11 +130,11 @@ public class UserRiotApiService {
 
                 if (playerInfoList.size() < 205) break; //한번에 205개씩 가져온다.
 
-                System.out.println(tier + rank + ", page "+pageNum+", apikey :"+apiKeysId.get(apiKey)+ "  crawl done.");
+                System.out.println(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss:SSS")) +": "+tier + rank + ", page "+pageNum+", apikey :"+apiKeysId.get(apiKey)+ "  crawl done.");
 
                 pageNum++;
             } catch (IOException e) {
-//                e.printStackTrace();
+                e.printStackTrace();
 //                System.out.println(apiKeysId.get(apiKey)+" key, users per tier IOException. 10secs sleep. current Page : " + pageNum);
                 Thread.sleep(10000);
             }
