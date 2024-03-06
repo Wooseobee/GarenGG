@@ -18,11 +18,13 @@ public class MostChampionServiceImpl implements MostChampionService {
 
     public static long startTime;
     public static long endTime;
+    public static int failFindUser;
     public static int failCount;
 
     @Override
     public ResponseEntity<?> mostChampionCrawling(Long startPlayerId, Long endPlayerId) {
         startTime = System.currentTimeMillis();
+        failFindUser =0;
         failCount = 0;
 
         assignThreadTask(startPlayerId, endPlayerId, 3);
@@ -67,7 +69,8 @@ public class MostChampionServiceImpl implements MostChampionService {
         CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).thenRun(() -> {
             endTime = System.currentTimeMillis();
             System.out.println("startPlayerId = " + startPlayerId + " endPlayerId = " + endPlayerId + " 종료");
-            System.out.println("성공 비율 = " + ((totalPlayers - failCount) * 100L / totalPlayers) + "%");
+            System.out.println("전체 성공 비율 = " + ((totalPlayers - failCount) * 100L / totalPlayers) + "%");
+            System.out.println("없는 아이디 비율 = " + ((totalPlayers - failCount) * 100L / totalPlayers) + "%");
             System.out.println("소요 시간 = " + (endTime - startTime) / 1000 + "s");
 
         });

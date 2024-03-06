@@ -255,7 +255,7 @@ public class AsyncService {
                                 // 펜타킬
                                 // wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("/html/body/div[1]/div[6]/div/table/tbody/tr[1]/td[14]")));
 
-                                Thread.sleep(500);
+                                Thread.sleep(1000);
 
                                 rows = driver.findElements(By.xpath("/html/body/div[1]/div[6]/div/table/tbody/tr"));
                                 for (WebElement row : rows) {
