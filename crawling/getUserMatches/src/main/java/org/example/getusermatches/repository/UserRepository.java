@@ -7,5 +7,5 @@ import java.util.List;
 
 public interface UserRepository extends JpaRepository<PlayerInfo, String> {
 
-    List<PlayerInfo> findAllByTierAndRank(String tier, String rank);
+    List<PlayerInfo> findAllByTierAndRankAndApiKeyId(String tier, String rank, int apiKeyId);
 }

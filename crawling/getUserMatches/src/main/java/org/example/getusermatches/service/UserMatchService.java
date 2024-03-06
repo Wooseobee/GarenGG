@@ -25,29 +25,29 @@ public class UserMatchService {
     @Value("${riot.apiKeys}")
     private List<String> API_KEY;
 
-    public void getUser(String tier, String rankNum) throws InterruptedException {
-        List<PlayerInfo> content = userRepository.findAllByTierAndRank(tier, rankNum);
+    public void getUser(String tier, String rankNum, int apiKeyId, String startTime) throws InterruptedException {
+        List<PlayerInfo> content = userRepository.findAllByTierAndRankAndApiKeyId(tier, rankNum, apiKeyId);
 
+        int totalSize = content.size();
         for (int i = 0; i < content.size(); i++) {
             PlayerInfo playerInfo = content.get(i);
             String puuid = playerInfo.getPuuid();
             if (puuid == null) continue;
-            int apiKeyId = playerInfo.getApiKeyId();
             String apiKey = API_KEY.get(apiKeyId);
-            HttpStatusCode matches = getMatches(puuid, apiKey);
+            HttpStatusCode matches = getMatches(puuid, apiKey, startTime);
             if (matches.is4xxClientError()) {
                 log.info("getUser= {}", matches);
                 i--;
             } else {
                 Thread.sleep(1200); // 1.2초 대기
             }
-            log.info("유저저장완료 - count:{}, tier:{}", i, tier);
+            log.info("유저저장완료 - totalSize:{} & count:{} & tier:{}", totalSize, i, tier);
         }
-        log.info("유저저장완료 - tier:{}완료", tier);
+        log.info("유저저장완료 - tier:{} & apiKeyId:{} 완료", tier, apiKeyId);
     }
 
-    public HttpStatusCode getMatches(String puuid, String apiKey) throws InterruptedException {
-        String url = "https://asia.api.riotgames.com/lol/match/v5/matches/by-puuid/" + puuid + "/ids?start=0&count=100&api_key=" + apiKey;
+    public HttpStatusCode getMatches(String puuid, String apiKey, String startTime) throws InterruptedException {
+        String url = "https://asia.api.riotgames.com/lol/match/v5/matches/by-puuid/" + puuid + "/ids?startTime="+ startTime + "&queue=420&start=0&count=100&api_key=" + apiKey;
         RestTemplate restTemplate = new RestTemplate();
         try {
             ResponseEntity<List> response = restTemplate.getForEntity(url, List.class);
