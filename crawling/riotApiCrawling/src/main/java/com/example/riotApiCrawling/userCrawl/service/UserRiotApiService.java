@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -56,10 +57,10 @@ public class UserRiotApiService {
         int endPageNum = requestDto.getEndPageNum();
         String apiKey = requestDto.getApiKey();
         for(int  i = startRank;  i <= endRank; i++) {
-            System.out.println(LocalDateTime.now() +": "+tier + rank[i] + ", apikey :"+apiKeysId.get(apiKey)+ "  crawl start.");
+            System.out.println(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss:SSS")) +": "+tier + rank[i] + ", apikey :"+apiKeysId.get(apiKey)+ "  crawl start.");
             //티어 하나의 유저 목록 불러오기
             crawlUsersByTier(tier, rank[i], startPageNum, endPageNum, apiKey);
-            System.out.println(LocalDateTime.now() +": "+tier + rank[i] + "Crwaling Done!");
+            System.out.println(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss:SSS")) +": "+tier + rank[i] + " " + apiKeysId.get(apiKey) + "Crwaling Done!");
         }
     }
 
@@ -129,7 +130,7 @@ public class UserRiotApiService {
 
                 if (playerInfoList.size() < 205) break; //한번에 205개씩 가져온다.
 
-                System.out.println(LocalDateTime.now() +": "+tier + rank + ", page "+pageNum+", apikey :"+apiKeysId.get(apiKey)+ "  crawl done.");
+                System.out.println(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss:SSS")) +": "+tier + rank + ", page "+pageNum+", apikey :"+apiKeysId.get(apiKey)+ "  crawl done.");
 
                 pageNum++;
             } catch (IOException e) {
