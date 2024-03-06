@@ -12,8 +12,8 @@ public class UserMatchController {
 
     private final UserMatchService userMatchService;
 
-    @GetMapping("/test/{tier}/{rankNum}")
-    public String test(@PathVariable("tier") String tier, @PathVariable("tier") String rankNum) throws InterruptedException {
+    @GetMapping("/match/{tier}/{rankNum}")
+    public String match(@PathVariable("tier") String tier, @PathVariable("rankNum") String rankNum) throws InterruptedException {
         userMatchService.getUser(tier, rankNum);
         return "OK";
     }

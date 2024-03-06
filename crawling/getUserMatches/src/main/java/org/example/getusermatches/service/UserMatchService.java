@@ -41,8 +41,9 @@ public class UserMatchService {
             } else {
                 Thread.sleep(1200); // 1.2초 대기
             }
-            log.info("유저저장완료 tier:{}", tier);
+            log.info("유저저장완료 - count:{}, tier:{}", i, tier);
         }
+        log.info("유저저장완료 - tier:{}완료", tier);
     }
 
     public HttpStatusCode getMatches(String puuid, String apiKey) throws InterruptedException {
