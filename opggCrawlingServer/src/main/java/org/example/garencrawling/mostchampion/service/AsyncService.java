@@ -9,6 +9,7 @@ import org.example.garencrawling.mostchampion.repository.PlayerInfoRepository;
 import org.example.garencrawling.mostchampion.repository.PlayerPrevSoloRankRepository;
 import org.openqa.selenium.By;
 import org.openqa.selenium.PageLoadStrategy;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -43,20 +44,9 @@ public class AsyncService {
         }
 
 //        ArrayList<PlayerPrevSoloRank> playerPrevSoloRanks = crawling(playerInfos);
+        ArrayList<PlayerPrevSoloRank> playerPrevSoloRanks = crawling2(playerInfos);
 
-        ArrayList<PlayerPrevSoloRank> allPlayerPrevSoloRanks = new ArrayList<>();
-
-        final int chunkSize = 20;
-        for (int i = 0; i < playerInfos.size(); i += chunkSize) {
-            // 하위 리스트 생성
-            List<PlayerInfo> batch = playerInfos.subList(i, Math.min(playerInfos.size(), i + chunkSize));
-            // 하위 리스트에 대해 crawling 호출
-            ArrayList<PlayerPrevSoloRank> playerPrevSoloRanks = crawling(batch);
-            // 결과를 allPlayerPrevSoloRanks에 추가
-            allPlayerPrevSoloRanks.addAll(playerPrevSoloRanks);
-        }
-
-        playerPrevSoloRankRepository.saveAll(allPlayerPrevSoloRanks);
+        playerPrevSoloRankRepository.saveAll(playerPrevSoloRanks);
 
         return null;
     }
@@ -175,6 +165,213 @@ public class AsyncService {
             playerPrevSoloRanks.add(playerPrevSoloRank);
 
         }
+        driver.quit();
+
+        return playerPrevSoloRanks;
+    }
+
+    public ArrayList<PlayerPrevSoloRank> crawling2(List<PlayerInfo> playerInfos) {
+        WebElement element;
+        ChromeOptions options;
+        ChromeDriver driver;
+        WebDriverWait wait;
+        List<WebElement> rows;
+        ArrayList<PlayerPrevSoloRank> playerPrevSoloRanks = new ArrayList<>();
+
+        ////////////////////////////////////////////////////////////////////////////////////////////
+
+        WebDriverManager.chromedriver().setup();
+        options = new ChromeOptions();
+
+        options.addArguments("--headless"); // headless 모드 활성화
+        options.addArguments("--disable-gpu"); // 최신 버전에서는 필요하지 않지만 호환성을 위해 추천
+        options.setPageLoadStrategy(PageLoadStrategy.NONE);
+
+        driver = new ChromeDriver(options);
+
+        wait = new WebDriverWait(driver, Duration.ofSeconds(5)); // 명시적 대기 시간 설정
+
+        ////////////////////////////////////////////////////////////////////////////////////////////
+
+        for (int index = 0; index < playerInfos.size(); index++) {
+
+            PlayerInfo playerInfo = playerInfos.get(index);
+
+            PlayerPrevSoloRank playerPrevSoloRank = new PlayerPrevSoloRank();
+            playerPrevSoloRank.setPlayerId(playerInfo.getPlayerId());
+
+            driver.get("https://www.op.gg/summoners/kr/" + playerInfo.getUserNickname() + "/champions");
+
+            try {
+                wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("/html/body/div[1]/header")));
+
+                try {
+                    wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("/html/body/div[1]/div[4]/div[1]/div/div[1]/div[2]/div[2]/div/h1/strong")));
+
+                    try {
+                        wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("/html/body/div[1]/div[4]/div[1]/div/div[1]/div[2]/div[1]/div/ul")));
+
+                        StringTokenizer st = new StringTokenizer(driver.findElement(By.xpath("/html/body/div[1]/div[4]/div[1]/div/div[1]/div[2]/div[1]/div/ul/li[1]/div")).getText());
+
+                        String season1 = st.nextToken(); // S2023
+                        if (!season1.equals("S2023")) {
+                            throw new Exception();
+                        }
+
+                        String season2 = st.nextToken(); // S2
+                        if (!season2.equals("S2")) {
+                            throw new Exception();
+                        }
+
+                        String tier = st.nextToken();
+                        playerPrevSoloRank.setTier(tier);
+
+                        if (tier.equals("Master") || tier.equals("Grandmaster") || tier.equals("Challenger")) {
+
+                        } else {
+                            playerPrevSoloRank.setRankNum(st.nextToken());
+                        }
+
+                        try {
+                            wait.until(ExpectedConditions.elementToBeClickable(By.xpath("/html/body/div[1]/div[6]/div/div/div[1]/div[2]/div/button")));
+                            element = driver.findElement(By.xpath("/html/body/div[1]/div[6]/div/div/div[1]/div[2]/div/button"));
+                            driver.executeScript("arguments[0].click();", element);
+
+                            wait.until(ExpectedConditions.elementToBeClickable(By.xpath("/html/body/div[1]/div[6]/div/div/div[1]/div[2]/div/div/button[2]")));
+                            element = driver.findElement(By.xpath("/html/body/div[1]/div[6]/div/div/div[1]/div[2]/div/div/button[2]"));
+                            driver.executeScript("arguments[0].click();", element);
+
+                            wait.until(ExpectedConditions.elementToBeClickable(By.xpath("/html/body/div[1]/div[6]/div/div/div[2]/button[2]")));
+                            element = driver.findElement(By.xpath("/html/body/div[1]/div[6]/div/div/div[2]/button[2]"));
+                            driver.executeScript("arguments[0].click();", element);
+
+                            try {
+                                // 챔피언 1번 표시 xpath
+                                // wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("/html/body/div[1]/div[6]/div/table/tbody/tr[1]/td[1]")));
+
+                                // 챔피언 1개의 row
+                                // /html/body/div[1]/div[6]/div/table/tbody/tr[1]
+
+                                // 펜타킬
+                                // wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("/html/body/div[1]/div[6]/div/table/tbody/tr[1]/td[14]")));
+
+                                Thread.sleep(500);
+
+                                rows = driver.findElements(By.xpath("/html/body/div[1]/div[6]/div/table/tbody/tr"));
+                                for (WebElement row : rows) {
+                                    List<WebElement> cols = row.findElements(By.tagName("td"));
+
+                                    MostData mostData = new MostData();
+
+                                    for (int i = 0; i < cols.size(); i++) {
+                                        WebElement col = cols.get(i);
+                                        String tmp = col.getText().replace("\n", "").replace(" ", "");
+                                        if (i == 0)
+                                            mostData.setMostSeq(tmp);
+                                        else if (i == 1)
+                                            mostData.setChampion(tmp);
+                                        else if (i == 2)
+                                            mostData.setGame(tmp);
+                                        else if (i == 3)
+                                            mostData.setRating(tmp);
+                                        else if (i == 4)
+                                            mostData.setGold(tmp);
+                                        else if (i == 5)
+                                            mostData.setCreepScore(tmp);
+                                        else if (i == 6)
+                                            mostData.setMaxKills(tmp);
+                                        else if (i == 7)
+                                            mostData.setMaxDeaths(tmp);
+                                        else if (i == 8)
+                                            mostData.setAverageDamageDealt(tmp);
+                                        else if (i == 9)
+                                            mostData.setAverageDamageTaken(tmp);
+                                        else if (i == 10)
+                                            mostData.setDoubleKills(tmp);
+                                        else if (i == 11)
+                                            mostData.setTripleKills(tmp);
+                                        else if (i == 12)
+                                            mostData.setQuadraKills(tmp);
+                                        else if (i == 13)
+                                            mostData.setPentaKills(tmp);
+                                    }
+                                    playerPrevSoloRank.getMostDatas().add(mostData);
+                                }
+
+                                System.out.println("playerInfo.getPlayerId() = " + playerInfo.getPlayerId() + " 성공");
+                            } catch (TimeoutException e2) {
+                                System.out.println("playerInfo.getPlayerId() = " + playerInfo.getPlayerId() + " driver 모스트 목록 TimeoutException");
+                                playerPrevSoloRank.setTier(null);
+                                playerPrevSoloRank.setRankNum(null);
+                                playerPrevSoloRank.setMostDatas(null);
+                                index--;
+                                continue;
+                            } catch (Exception e2) {
+                                System.out.println("playerInfo.getPlayerId() = " + playerInfo.getPlayerId() + " driver 모스트 목록 Exception");
+                                playerPrevSoloRank.setTier(null);
+                                playerPrevSoloRank.setRankNum(null);
+                                playerPrevSoloRank.setMostDatas(null);
+                                MostChampionServiceImpl.failCount++;
+                            }
+
+                        } catch (TimeoutException e2) {
+                            System.out.println("playerInfo.getPlayerId() = " + playerInfo.getPlayerId() + " driver 시즌 버튼 TimeoutException");
+                            playerPrevSoloRank.setTier(null);
+                            playerPrevSoloRank.setRankNum(null);
+                            playerPrevSoloRank.setMostDatas(null);
+                            index--;
+                            continue;
+                        } catch (Exception e2) {
+                            System.out.println("playerInfo.getPlayerId() = " + playerInfo.getPlayerId() + " driver 시즌 버튼 Exception");
+                            playerPrevSoloRank.setTier(null);
+                            playerPrevSoloRank.setRankNum(null);
+                            playerPrevSoloRank.setMostDatas(null);
+                            MostChampionServiceImpl.failCount++;
+                        }
+                    } catch (TimeoutException e2) {
+                        System.out.println("playerInfo.getPlayerId() = " + playerInfo.getPlayerId() + " driver 시즌 목록 TimeoutException");
+                        playerPrevSoloRank.setTier(null);
+                        playerPrevSoloRank.setRankNum(null);
+                        playerPrevSoloRank.setMostDatas(null);
+                        MostChampionServiceImpl.failCount++;
+                    } catch (Exception e2) {
+                        System.out.println("playerInfo.getPlayerId() = " + playerInfo.getPlayerId() + " driver 시즌 목록 Exception");
+                        playerPrevSoloRank.setTier(null);
+                        playerPrevSoloRank.setRankNum(null);
+                        playerPrevSoloRank.setMostDatas(null);
+                        MostChampionServiceImpl.failCount++;
+                    }
+                } catch (TimeoutException e) {
+                    System.out.println("playerInfo.getPlayerId() = " + playerInfo.getPlayerId() + " driver 닉네임 TimeoutException");
+                    playerPrevSoloRank.setTier(null);
+                    playerPrevSoloRank.setRankNum(null);
+                    playerPrevSoloRank.setMostDatas(null);
+                    MostChampionServiceImpl.failCount++;
+                } catch (Exception e) {
+                    System.out.println("playerInfo.getPlayerId() = " + playerInfo.getPlayerId() + " driver 닉네임 Exception");
+                    playerPrevSoloRank.setTier(null);
+                    playerPrevSoloRank.setRankNum(null);
+                    playerPrevSoloRank.setMostDatas(null);
+                    MostChampionServiceImpl.failCount++;
+                }
+            } catch (TimeoutException e) {
+                System.out.println("playerInfo.getPlayerId() = " + playerInfo.getPlayerId() + " driver 헤더 TimeoutException");
+                playerPrevSoloRank.setTier(null);
+                playerPrevSoloRank.setRankNum(null);
+                playerPrevSoloRank.setMostDatas(null);
+                index--;
+                continue;
+            } catch (Exception e) {
+                System.out.println("playerInfo.getPlayerId() = " + playerInfo.getPlayerId() + " driver 헤더 Exception");
+                playerPrevSoloRank.setTier(null);
+                playerPrevSoloRank.setRankNum(null);
+                playerPrevSoloRank.setMostDatas(null);
+                MostChampionServiceImpl.failCount++;
+            }
+
+            playerPrevSoloRanks.add(playerPrevSoloRank);
+        }
+
         driver.quit();
 
         return playerPrevSoloRanks;

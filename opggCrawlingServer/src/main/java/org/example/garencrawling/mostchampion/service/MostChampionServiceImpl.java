@@ -25,7 +25,7 @@ public class MostChampionServiceImpl implements MostChampionService {
         startTime = System.currentTimeMillis();
         failCount = 0;
 
-        assignThreadTask(startPlayerId, endPlayerId, 1);
+        assignThreadTask(startPlayerId, endPlayerId, 3);
 
         return ResponseEntity.status(HttpStatus.OK).body("success");
     }
