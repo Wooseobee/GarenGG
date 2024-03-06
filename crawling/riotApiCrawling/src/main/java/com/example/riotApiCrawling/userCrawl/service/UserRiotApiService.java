@@ -60,7 +60,7 @@ public class UserRiotApiService {
             System.out.println(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss:SSS")) +": "+tier + rank[i] + ", apikey :"+apiKeysId.get(apiKey)+ "  crawl start.");
             //티어 하나의 유저 목록 불러오기
             crawlUsersByTier(tier, rank[i], startPageNum, endPageNum, apiKey);
-            System.out.println(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss:SSS")) +": "+tier + rank[i] + " " + apiKeysId.get(apiKey) + "Crwaling Done!");
+            System.out.println(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss:SSS")) +": "+tier + rank[i] + ", apikey : " + apiKeysId.get(apiKey) + "Crwaling Done!");
         }
     }
 
