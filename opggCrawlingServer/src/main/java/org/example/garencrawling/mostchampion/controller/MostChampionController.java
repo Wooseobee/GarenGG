@@ -12,10 +12,8 @@ public class MostChampionController {
 
     private final MostChampionService mostChampionService;
 
-    @GetMapping("/crawling/{start_player_id}/{end_player_id}")
-    public ResponseEntity<?> mostChampionCrawling(
-            @PathVariable("start_player_id") Long startPlayerId
-            , @PathVariable("end_player_id") Long endPlayerId) {
-        return mostChampionService.mostChampionCrawling(startPlayerId, endPlayerId);
+    @GetMapping("/crawling")
+    public ResponseEntity<?> mostChampionCrawling() {
+        return mostChampionService.mostChampionCrawling();
     }
 }

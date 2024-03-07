@@ -2,43 +2,46 @@ package org.example.garencrawling.mostchampion.service;
 
 import lombok.RequiredArgsConstructor;
 
+import org.example.garencrawling.mostchampion.domain.PlayerInfo;
+import org.example.garencrawling.mostchampion.repository.PlayerInfoRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
+
 public class MostChampionServiceImpl implements MostChampionService {
 
     private final AsyncService asyncService;
-
-    public static long startTime;
-    public static long endTime;
-    public static int failFindUser;
-    public static int failCount;
+    private final PlayerInfoRepository playerInfoRepository;
 
     @Override
-    public ResponseEntity<?> mostChampionCrawling(Long startPlayerId, Long endPlayerId) {
-        startTime = System.currentTimeMillis();
-        failFindUser =0;
-        failCount = 0;
+    public ResponseEntity<?> mostChampionCrawling() {
 
-        assignThreadTask(startPlayerId, endPlayerId, 3);
+        List<PlayerInfo> savedPlayerInfos = playerInfoRepository.findAll();
+        for (PlayerInfo savedPlayerInfo : savedPlayerInfos) {
+            String userNickname = savedPlayerInfo.getSummonerName() + "-" + savedPlayerInfo.getTagLine();
+            savedPlayerInfo.setUserNickname(userNickname);
+        }
+
+        assignThreadTask(savedPlayerInfos, 1);
 
         return ResponseEntity.status(HttpStatus.OK).body("success");
     }
 
-    public void assignThreadTask(long startPlayerId, long endPlayerId, int threadSize) {
+    public void assignThreadTask(List<PlayerInfo> savedPlayerInfos, int threadSize) {
 
-        long totalPlayers = endPlayerId - startPlayerId + 1;
-        long share = totalPlayers / threadSize;
-        long remainder = totalPlayers % threadSize;
+        int startPlayerId = 1;
+        int endPlayerId = savedPlayerInfos.size();
 
-        long[] batchSizes = new long[threadSize];
+        int totalPlayers = endPlayerId - startPlayerId + 1;
+        int share = totalPlayers / threadSize;
+        int remainder = totalPlayers % threadSize;
+
+        int[] batchSizes = new int[threadSize];
         for (int i = 0; i < batchSizes.length; i++) {
             batchSizes[i] += share;
         }
@@ -50,31 +53,17 @@ public class MostChampionServiceImpl implements MostChampionService {
             remainder--;
         }
 
-        List<CompletableFuture<Void>> futures = new ArrayList<>();
-
-        long currentStartPlayerId = startPlayerId;
+        int currentStartPlayerId = startPlayerId;
         for (int i = 0; i < batchSizes.length; i++) {
 
             if (batchSizes[i] == 0)
                 break;
 
-            long currentEndPlayerId = currentStartPlayerId + batchSizes[i] - 1;
+            int currentEndPlayerId = currentStartPlayerId + batchSizes[i] - 1;
 
-            CompletableFuture<Void> future = asyncService.processPlayersInRange(currentStartPlayerId, currentEndPlayerId);
-            futures.add(future);
+            asyncService.processPlayersInRange(currentStartPlayerId, currentEndPlayerId, savedPlayerInfos);
 
             currentStartPlayerId = currentEndPlayerId + 1;
         }
-
-        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).thenRun(() -> {
-            endTime = System.currentTimeMillis();
-            System.out.println("startPlayerId = " + startPlayerId + " endPlayerId = " + endPlayerId + " 종료");
-            System.out.println("전체 성공 비율 = " + ((totalPlayers - failCount) * 100L / totalPlayers) + "%");
-            System.out.println("없는 아이디 비율 = " + ((totalPlayers - failCount) * 100L / totalPlayers) + "%");
-            System.out.println("소요 시간 = " + (endTime - startTime) / 1000 + "s");
-
-        });
-
     }
-
 }
