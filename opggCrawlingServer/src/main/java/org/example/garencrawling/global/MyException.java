@@ -7,7 +7,6 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-
 public class MyException extends Exception {
-    String message;
+    private String message;
 }

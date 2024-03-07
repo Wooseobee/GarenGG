@@ -18,21 +18,24 @@ public class MostChampionServiceImpl implements MostChampionService {
     private final AsyncService asyncService;
     private final PlayerInfoRepository playerInfoRepository;
 
+    public static int threadSize = 3;
+
     @Override
     public ResponseEntity<?> mostChampionCrawling() {
 
         List<PlayerInfo> savedPlayerInfos = playerInfoRepository.findAll();
+        System.out.println("savedPlayerInfos.size() = " + savedPlayerInfos.size());
         for (PlayerInfo savedPlayerInfo : savedPlayerInfos) {
             String userNickname = savedPlayerInfo.getSummonerName() + "-" + savedPlayerInfo.getTagLine();
             savedPlayerInfo.setUserNickname(userNickname);
         }
 
-        assignThreadTask(savedPlayerInfos, 1);
+        assignThreadTask(savedPlayerInfos);
 
         return ResponseEntity.status(HttpStatus.OK).body("success");
     }
 
-    public void assignThreadTask(List<PlayerInfo> savedPlayerInfos, int threadSize) {
+    public void assignThreadTask(List<PlayerInfo> savedPlayerInfos) {
 
         int startPlayerId = 1;
         int endPlayerId = savedPlayerInfos.size();
@@ -56,12 +59,11 @@ public class MostChampionServiceImpl implements MostChampionService {
         int currentStartPlayerId = startPlayerId;
         for (int i = 0; i < batchSizes.length; i++) {
 
-            if (batchSizes[i] == 0)
-                break;
-
             int currentEndPlayerId = currentStartPlayerId + batchSizes[i] - 1;
 
-            asyncService.processPlayersInRange(currentStartPlayerId, currentEndPlayerId, savedPlayerInfos);
+            System.out.println(i + 1 + "번 thread " + currentStartPlayerId + "부터 " + currentEndPlayerId + "까지");
+
+            asyncService.processPlayersInRange(currentStartPlayerId, currentEndPlayerId, savedPlayerInfos, i + 1);
 
             currentStartPlayerId = currentEndPlayerId + 1;
         }
