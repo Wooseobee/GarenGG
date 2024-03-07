@@ -40,20 +40,34 @@ public class AsyncService {
 
             List<PlayerPrevSoloRank> savedPlayerPrevSoloRanks = playerPrevSoloRankRepository.findAll();
 
-            List<PlayerInfo> playerInfos = new ArrayList<>();
+            List<PlayerInfo> tmpPlayerInfos = new ArrayList<>();
             for (int i = currentStartPlayerId; i <= currentEndPlayerId; i++) {
 
-                int playerId = savedPlayerInfos.get(i).getPlayerId();
+                PlayerInfo currentSavedPlayerInfo = savedPlayerInfos.get(i - 1);
 
-                boolean exists = savedPlayerPrevSoloRanks.stream()
-                        .anyMatch(rank -> rank.getPlayerId() == playerId);
+                boolean exist = false;
+                for (PlayerPrevSoloRank savedPlayerPrevSoloRank : savedPlayerPrevSoloRanks) {
+                    if (savedPlayerPrevSoloRank.getPlayerId() == currentSavedPlayerInfo.getPlayerId()) {
 
-                if (!exists) {
-                    playerInfos.add(savedPlayerInfos.get(i - 1));
+                        System.out.println("savedPlayerPrevSoloRank.getPlayerId() = " + savedPlayerPrevSoloRank.getPlayerId());
+                        System.out.println("savedPlayerPrevSoloRank.getTier() = " + savedPlayerPrevSoloRank.getTier());
+                        System.out.println("savedPlayerPrevSoloRank.getRankNum() = " + savedPlayerPrevSoloRank.getRankNum());
+                        System.out.println("savedPlayerPrevSoloRank.getMostDatas().size() = " + savedPlayerPrevSoloRank.getMostDatas().size());
+
+                        if (savedPlayerPrevSoloRank.getTier() != null) {
+                            if (savedPlayerPrevSoloRank.getMostDatas() != null) {
+                                if (!savedPlayerPrevSoloRank.getMostDatas().isEmpty())
+                                    exist = true;
+                            }
+                        }
+                    }
+                }
+                if (!exist) {
+                    tmpPlayerInfos.add(currentSavedPlayerInfo);
                 }
             }
 
-            crawling(playerInfos);
+            crawling(tmpPlayerInfos);
             currentStartPlayerId = currentEndPlayerId + 1;
         }
 
@@ -152,9 +166,12 @@ public class AsyncService {
                                             throw new MyException("Therearenoresultsrecorded.");
                                         }
 
-                                        if (i == 0)
+                                        if (i == 0) {
+                                            if (tmp == null || tmp.equals("Therearenoresultsrecorded.") || tmp.equals("")) {
+                                                throw new MyException();
+                                            }
                                             mostData.setMostSeq(tmp);
-                                        else if (i == 1)
+                                        } else if (i == 1)
                                             mostData.setChampion(tmp);
                                         else if (i == 2)
                                             mostData.setGame(tmp);
@@ -186,6 +203,16 @@ public class AsyncService {
 
                                 System.out.print("성공");
                                 System.out.println(" " + playerInfo.getUserNickname());
+                            } catch (NoSuchElementException e2) {
+                                System.out.print("driver 모스트 목록 NoSuchElementException - tr 못 찾음 - 재시도");
+                                System.out.println(" " + playerInfo.getUserNickname());
+                                index--;
+                                continue;
+                            } catch (MyException myException) {
+                                System.out.print("driver 모스트 목록 MyException - MostSeq 오류 - 재시도");
+                                System.out.println(" " + playerInfo.getUserNickname());
+                                index--;
+                                continue;
                             } catch (Exception exception) {
                                 System.out.print("driver 모스트 목록 Exception - 예상치 못한 오류 - 재시도");
                                 System.out.println(" " + playerInfo.getUserNickname());
