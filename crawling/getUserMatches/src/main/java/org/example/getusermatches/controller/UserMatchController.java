@@ -12,9 +12,13 @@ public class UserMatchController {
 
     private final UserMatchService userMatchService;
 
-    @GetMapping("/test/{offset}")
-    public String test(@PathVariable int offset) throws InterruptedException {
-        userMatchService.getUser(offset);
+    @GetMapping("/match/{tier}/{rankNum}/{apiKeyId}/{startTime}/{endTime}")
+    public String match(@PathVariable("tier") String tier,
+                        @PathVariable("rankNum") String rankNum,
+                        @PathVariable("apiKeyId") int apiKeyId,
+                        @PathVariable("startTime") String startTime,
+                        @PathVariable("endTime") String endTime) throws InterruptedException {
+        userMatchService.getUser(tier, rankNum, apiKeyId, startTime, endTime);
         return "OK";
     }
 }

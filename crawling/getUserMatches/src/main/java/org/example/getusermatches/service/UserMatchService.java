@@ -7,9 +7,6 @@ import org.example.getusermatches.domain.PlayerInfo;
 import org.example.getusermatches.repository.UserMatchRepository;
 import org.example.getusermatches.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -28,30 +25,29 @@ public class UserMatchService {
     @Value("${riot.apiKeys}")
     private List<String> API_KEY;
 
-    public void getUser(int offset) throws InterruptedException {
-        Pageable pageable = PageRequest.of(offset, 100);
-        Page<PlayerInfo> all = userRepository.findAll(pageable);
-        List<PlayerInfo> content = all.getContent();
+    public void getUser(String tier, String rankNum, int apiKeyId, String startTime, String endTime) throws InterruptedException {
+        List<PlayerInfo> content = userRepository.findAllByTierAndRankAndApiKeyId(tier, rankNum, apiKeyId);
 
+        int totalSize = content.size();
         for (int i = 0; i < content.size(); i++) {
             PlayerInfo playerInfo = content.get(i);
             String puuid = playerInfo.getPuuid();
             if (puuid == null) continue;
-            int apiKeyId = playerInfo.getApiKeyId();
             String apiKey = API_KEY.get(apiKeyId);
-            HttpStatusCode matches = getMatches(puuid, apiKey);
+            HttpStatusCode matches = getMatches(puuid, apiKey, startTime, endTime);
             if (matches.is4xxClientError()) {
                 log.info("getUser= {}", matches);
                 i--;
             } else {
                 Thread.sleep(1200); // 1.2초 대기
             }
-            log.info("유저저장완료 offset:{}, num:{}", offset, i);
+            log.info("유저저장완료 - totalSize:{} & count:{} & tier:{} & keyId:{}", totalSize, i, tier, apiKeyId);
         }
+        log.info("유저저장완료 - tier:{} & apiKeyId:{} 완료", tier, apiKeyId);
     }
 
-    public HttpStatusCode getMatches(String puuid, String apiKey) throws InterruptedException {
-        String url = "https://asia.api.riotgames.com/lol/match/v5/matches/by-puuid/" + puuid + "/ids?start=0&count=100&api_key=" + apiKey;
+    public HttpStatusCode getMatches(String puuid, String apiKey, String startTime, String endTime) throws InterruptedException {
+        String url = "https://asia.api.riotgames.com/lol/match/v5/matches/by-puuid/" + puuid + "/ids?startTime="+ startTime + "&endTime=" + endTime + "&queue=420&start=0&count=100&api_key=" + apiKey;
         RestTemplate restTemplate = new RestTemplate();
         try {
             ResponseEntity<List> response = restTemplate.getForEntity(url, List.class);
@@ -71,7 +67,7 @@ public class UserMatchService {
             }
             return statusCode;
         } catch (Exception e) {
-            Thread.sleep(120000); // 120초 대기
+            Thread.sleep(12000); // 12초 대기
             return HttpStatusCode.valueOf(429);
         }
     }
@@ -89,7 +85,7 @@ public class UserMatchService {
             }
             return result.getStatusCode();
         } catch (Exception e) {
-            Thread.sleep(120000); // 120초 대기
+            Thread.sleep(12000); // 12초 대기
             return HttpStatusCode.valueOf(429);
         }
     }

@@ -8,7 +8,14 @@ import lombok.ToString;
 @Entity
 @Getter
 @Setter
-@Table(name = "combination")
+@Table(name = "combination", indexes = {
+        @Index(name = "idx_win_rate", columnList = "winRate"),
+        @Index(name = "idx_champion1", columnList = "champion1"),
+        @Index(name = "idx_champion2", columnList = "champion2"),
+        @Index(name = "idx_champion3", columnList = "champion3"),
+        @Index(name = "idx_champion4", columnList = "champion4"),
+        @Index(name = "idx_champion5", columnList = "champion5")
+})
 @ToString
 public class Combination {
     @Id
@@ -32,4 +39,6 @@ public class Combination {
 
     private Long victory = 0L;
     private Long defeat = 0L;
+
+    private Double winRate = 0.0;
 }

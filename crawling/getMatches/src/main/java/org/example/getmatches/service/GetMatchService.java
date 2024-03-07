@@ -12,7 +12,6 @@ import org.example.getmatches.repository.CombinationMatchRepository;
 import org.example.getmatches.repository.CombinationRepository;
 import org.example.getmatches.repository.UserMatchRepository;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,10 +28,10 @@ public class GetMatchService {
     private final UserMatchRepository userMatchRepository;
 
     @Transactional
-    public void saveMatchData(int offset) {
-        Pageable pageable = PageRequest.of(offset, 1000);
+    public int saveMatchData(Pageable pageable) {
         Page<MatchInfo> matchList = userMatchRepository.findAll(pageable);
         List<MatchInfo> content = matchList.getContent();
+        int successData = 0;
         for (MatchInfo matchInfo : content) {
             Info info = matchInfo.getInfo();
 
@@ -45,59 +44,62 @@ public class GetMatchService {
                 String individualPosition = participant.getIndividualPosition();
                 boolean win = participant.isWin();
 
-                switch (individualPosition) {
-                    case "TOP":
-                        if (win) {
-                            victory.setTop(championId);
-                        } else {
-                            defeat.setTop(championId);
-                        }
-                        break;
-                    case "JUNGLE":
-                        if (win) {
-                            victory.setJungle(championId);
-                        } else {
-                            defeat.setJungle(championId);
-                        }
-                        break;
-                    case "MIDDLE":
-                        if (win) {
-                            victory.setMiddle(championId);
-                        } else {
-                            defeat.setMiddle(championId);
-                        }
-                        break;
-                    case "BOTTOM":
-                        if (win) {
-                            victory.setBottom(championId);
-                        } else {
-                            defeat.setBottom(championId);
-                        }
-                        break;
-                    case "UTILITY":
-                        if (win) {
-                            victory.setUtility(championId);
-                        } else {
-                            defeat.setUtility(championId);
-                        }
-                        break;
-                    default:
-                        break;
+                    switch (individualPosition) {
+                        case "TOP":
+                            if (win) {
+                                victory.setTop(championId);
+                            } else {
+                                defeat.setTop(championId);
+                            }
+                            break;
+                        case "JUNGLE":
+                            if (win) {
+                                victory.setJungle(championId);
+                            } else {
+                                defeat.setJungle(championId);
+                            }
+                            break;
+                        case "MIDDLE":
+                            if (win) {
+                                victory.setMiddle(championId);
+                            } else {
+                                defeat.setMiddle(championId);
+                            }
+                            break;
+                        case "BOTTOM":
+                            if (win) {
+                                victory.setBottom(championId);
+                            } else {
+                                defeat.setBottom(championId);
+                            }
+                            break;
+                        case "UTILITY":
+                            if (win) {
+                                victory.setUtility(championId);
+                            } else {
+                                defeat.setUtility(championId);
+                            }
+                            break;
+                        default:
+                            break;
+                    }
                 }
-            }
 
             if (!(isValidCombination(victory) && isValidCombination(defeat))) {
                 continue;
             }
             saveVictory(victory, matchInfo.getMetadata().getMatchId());
             saveDefeat(defeat, matchInfo.getMetadata().getMatchId());
+            successData++;
         }
+        return successData;
     }
 
     private void saveVictory(Combination victory, String matchId) {
         Combination findVictoryCombination = combinationRepository.findByWithPessimisticLock(victory.getTop(), victory.getJungle(), victory.getMiddle(), victory.getBottom(), victory.getUtility());
         if (findVictoryCombination == null) {
             victory.setVictory(1L);
+            victory.setWinRate(100.0);
             Combination savedCombination = combinationRepository.save(victory);
             Long combinationId = savedCombination.getId();
             CombinationMatchKey combinationMatchKey = new CombinationMatchKey(combinationId, matchId);
@@ -113,6 +115,7 @@ public class GetMatchService {
             return;
         }
         findVictoryCombination.setVictory(findVictoryCombination.getVictory() + 1);
+        updateWinRate(findVictoryCombination);
         combinationRepository.save(findVictoryCombination);
     }
 
@@ -131,14 +134,21 @@ public class GetMatchService {
         Long combinationId = findDefeatCombination.getId();
 
         // 이미 계산된 매치와 조합
-        if (combinationMatchRepository.findById(new CombinationMatchKey(combinationId, matchId)).isEmpty()) {
+        if (combinationMatchRepository.findById(new CombinationMatchKey(combinationId, matchId)).isPresent()) {
             log.info("already calculated match: matchId={}, combinationId={}", matchId, combinationId);
             return;
         }
         findDefeatCombination.setDefeat(findDefeatCombination.getDefeat() + 1);
+        updateWinRate(findDefeatCombination);
         combinationRepository.save(findDefeatCombination);
     }
 
+    private void updateWinRate(Combination combination) {
+        long totalGames = combination.getVictory() + combination.getDefeat();
+        if (totalGames > 0) {
+            combination.setWinRate((double) combination.getVictory() / totalGames * 100.0);
+        }
+    }
     private boolean isValidCombination(Combination match) {
         return match.getTop() != null && match.getJungle() != null && match.getMiddle() != null && match.getBottom() != null && match.getUtility() != null;
     }
