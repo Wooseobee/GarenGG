@@ -18,7 +18,7 @@ public class MostChampionServiceImpl implements MostChampionService {
     private final AsyncService asyncService;
     private final PlayerInfoRepository playerInfoRepository;
 
-    public static int threadSize = 3;
+    public static int threadSize = 4;
 
     @Override
     public ResponseEntity<?> mostChampionCrawling() {
