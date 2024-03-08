@@ -9,6 +9,6 @@ import org.springframework.data.jpa.repository.Query;
 public interface CombinationRepository extends JpaRepository<Combination, String> {
 
     @Lock(value = LockModeType.PESSIMISTIC_WRITE)
-    @Query("select m from Combination m where m.top= :top and m.jungle = :jungle and m.middle = :middle and m.bottom = :bottom and m.utility = :utility")
-    Combination findByWithPessimisticLock(Integer top, Integer jungle, Integer middle, Integer bottom, Integer utility);
+    @Query("select m from Combination m where m.champion1= :champion1 and m.lane1 = :lane1 and m.champion2 = :champion2 and m.lane2= :lane2")
+    Combination findByWithPessimisticLock(Integer champion1, String lane1, Integer champion2, String lane2);
 }
