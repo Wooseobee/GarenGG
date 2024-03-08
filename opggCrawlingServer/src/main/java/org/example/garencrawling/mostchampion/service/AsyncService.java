@@ -164,7 +164,7 @@ public class AsyncService {
                                 playerPrevSoloRank.getMostDatas().add(mostData);
                             }
                             sb.append("----------------------성공");
-                            System.out.println(sb);
+//                            System.out.println(sb);
                         }
                         // 로딩 실패 or 기록된 전적이 없습니다.
                         catch (TimeoutException e) {
@@ -224,7 +224,7 @@ public class AsyncService {
 
                 // 없는 계정
                 try {
-                    wait.until(ExpectedConditions.textToBePresentInElementLocated(By.xpath("/html/body/div[1]/div[6]/div/table/tbody/tr/td/div/div/p"), "기록된 전적이 없습니다."));
+                    wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("/html/body/div[1]/header/div[2]/a")));
                     sb.append("최초 접속 - 없는 사용자입니다");
                     System.out.println(sb);
                     playerPrevSoloRank.setTier(null);
