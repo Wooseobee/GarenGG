@@ -52,17 +52,17 @@ def process_game_data(game_data):
     # 정규 표현식을 사용하여 승리 수, 패배 수, 승리율을 추출합니다.
     # 이 패턴은 "승리수W패배수L승리율%" 형식을 처리할 수 있으며,
     # 승리 수나 패배 수 중 하나만 존재하는 경우에도 작동합니다.
-    match = re.match(r'(\d+)W(\d+)L(\d+)%', game_data)
+    match = re.match(r'(\d+)승(\d+)패(\d+)%', game_data)
     if not match:
         # "승리수W패배수L승리율%" 형식이 아닌 경우, 다른 패턴으로 시도합니다.
-        match = re.match(r'(\d+)(W|L)(\d+)%', game_data)
+        match = re.match(r'(\d+)(승|패)(\d+)%', game_data)
         if not match:
             logging.error(f"Invalid game_data format: {game_data}")
             return 0, 0
 
-    if 'W' in game_data:
+    if '승' in game_data:
         wins = int(match.group(1))
-        losses = int(match.group(2)) if 'L' in game_data else 0
+        losses = int(match.group(2)) if '패' in game_data else 0
     else:
         wins = 0
         losses = int(match.group(1))
@@ -75,7 +75,7 @@ def process_game_data(game_data):
 async def save_result_to_csv(result):
     filepath = "data/score_data.csv"
      # CSV 파일을 쓰기 모드로 엽니다
-    with open(filepath, mode='w', newline='') as f:
+    with open(filepath, mode='w', newline='', encoding='utf-8') as f:
         writer = csv.writer(f)
 
         # CSV 파일의 헤더를 작성합니다
