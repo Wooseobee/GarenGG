@@ -7,8 +7,6 @@ import numpy as np
 import warnings
 warnings.filterwarnings("ignore")
 
-import motor.motor_asyncio
-from db import get_player_prev_solo_rank
 # 데이터 불러오기
 def load_data():
     # result = get_player_prev_solo_rank()
@@ -37,7 +35,7 @@ def preprocess_data(score_data, champ_data):
     matrix_user_mean = matrix - user_scores_mean.reshape(-1, 1)
 
     # svd(특이값 분해) 모델링 부분
-    U, sigma, Vt = svds(matrix_user_mean, k = 12)
+    U, sigma, Vt = svds(matrix_user_mean, k = 50)
     # sigma는 0이 아닌 특이값의 나열(1차원 행렬)으로(sigma.shape (12,)), 0이 포함된 대칭행렬을 사용하기 위해 np.diag 적용(12,12)
     sigma = np.diag(sigma)
 
