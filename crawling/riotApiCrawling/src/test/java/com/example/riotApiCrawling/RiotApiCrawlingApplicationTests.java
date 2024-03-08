@@ -10,8 +10,8 @@ class RiotApiCrawlingApplicationTests {
 	@Autowired
 	UserRiotApiService userRiotApiService;
 	@Test
-	void contextLoads() {
-//		userRiotApiService.test();
+	void contextLoads() throws Exception{
+//		userRiotApiService.crawlUsersByTier("DIAMOND","I",1,1, "RGAPI-6a511b87-ee81-4213-9b40-9b204acfaef2");
 	}
 
 }
