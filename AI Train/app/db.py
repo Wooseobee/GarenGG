@@ -2,6 +2,7 @@ from pymongo import MongoClient
 import motor.motor_asyncio
 import logging
 import re
+import csv
 
 logging.basicConfig(level=logging.INFO)
 
@@ -43,9 +44,8 @@ async def get_player_prev_solo_rank():
             result.append({
                 "id": player["_id"],
                 "champion": champion_data["champion"],
-                "score": [total_games * win_rate / 100]  # 총 게임 수와 승리율을 배열로 저장
+                "score": total_games * win_rate / 100  # 총 게임 수와 승리율을 배열로 저장
             })
-
     return result
 
 def process_game_data(game_data):
@@ -71,3 +71,25 @@ def process_game_data(game_data):
     total_games = wins + losses
 
     return total_games, win_rate
+
+async def save_result_to_csv(result):
+    filepath = "data/score_data.csv"
+     # CSV 파일을 쓰기 모드로 엽니다
+    with open(filepath, mode='w', newline='') as f:
+        writer = csv.writer(f)
+
+        # CSV 파일의 헤더를 작성합니다
+        writer.writerow(['user_id', 'champion', 'score'])
+        
+        # 결과를 CSV 파일에 작성합니다
+        for item in result:
+            writer.writerow([item['id'], item['champion'], item['score']])
+
+if __name__ == "__main__":
+    import asyncio
+
+    async def main():
+        result = await get_player_prev_solo_rank()
+
+        await save_result_to_csv(result)
+    asyncio.run(main())
