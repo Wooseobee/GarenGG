@@ -61,6 +61,7 @@ public class AsyncService {
         WebDriverWait wait;
         List<WebElement> rows;
         ArrayList<PlayerPrevSoloRank> playerPrevSoloRanks = new ArrayList<>();
+        int failCount = 0;
 
         ////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -84,6 +85,12 @@ public class AsyncService {
         ////////////////////////////////////////////////////////////////////////////////////////////
 
         for (int index = 0; index < playerInfos.size(); index++) {
+
+            if (failCount >= 100) {
+                failCount = 0;
+                continue;
+            }
+
             PlayerInfo playerInfo = playerInfos.get(index);
 
             StringBuilder sb = new StringBuilder();
@@ -165,6 +172,8 @@ public class AsyncService {
                             }
                             sb.append("----------------------성공");
 //                            System.out.println(sb);
+                            failCount=0;
+                            playerPrevSoloRanks.add(playerPrevSoloRank);
                         }
                         // 로딩 실패 or 기록된 전적이 없습니다.
                         catch (TimeoutException e) {
@@ -174,15 +183,14 @@ public class AsyncService {
                                 wait.until(ExpectedConditions.textToBePresentInElementLocated(By.xpath("/html/body/div[1]/div[6]/div/table/tbody/tr/td/div/div/p"), "기록된 전적이 없습니다."));
                                 sb.append("챔피언 목록 - 기록된 전적이 없습니다.");
                                 System.out.println(sb);
-                                playerPrevSoloRank.setTier(null);
-                                playerPrevSoloRank.setRankNum(null);
-                                playerPrevSoloRank.setMostDatas(null);
+                                failCount=0;
                             }
                             // 로딩 실패
                             catch (TimeoutException e2) {
                                 sb.append("챔피언 목록 - 429 error");
                                 System.out.println(sb);
                                 index--;
+                                failCount++;
                                 continue;
                             }
                         }
@@ -191,6 +199,7 @@ public class AsyncService {
                             sb.append("챔피언 목록 - StaleElementReferenceException");
                             System.out.println(sb);
                             index--;
+                            failCount++;
                             continue;
                         }
                     }
@@ -199,6 +208,7 @@ public class AsyncService {
                         sb.append("챔피언 목록 접속 - 429 error");
                         System.out.println(sb);
                         index--;
+                        failCount++;
                         continue;
                     }
 
@@ -207,15 +217,14 @@ public class AsyncService {
                 catch (TimeoutException e) {
                     sb.append("현재 티어 - 없음");
                     System.out.println(sb);
-                    playerPrevSoloRank.setTier(null);
-                    playerPrevSoloRank.setRankNum(null);
-                    playerPrevSoloRank.setMostDatas(null);
+                    failCount=0;
                 }
                 // 티어를 못 읽음 왜??? 도대체
                 catch (NoSuchElementException e) {
                     sb.append("현재 티어 - xpath 못 찾음");
                     System.out.println(sb);
                     index--;
+                    failCount++;
                     continue;
                 }
             }
@@ -227,15 +236,14 @@ public class AsyncService {
                     wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("/html/body/div[1]/header/div[2]/a")));
                     sb.append("최초 접속 - 없는 사용자입니다");
                     System.out.println(sb);
-                    playerPrevSoloRank.setTier(null);
-                    playerPrevSoloRank.setRankNum(null);
-                    playerPrevSoloRank.setMostDatas(null);
+                    failCount=0;
                 }
                 // 로딩 실패
                 catch (TimeoutException e2) {
                     sb.append("최초 접속 - 429 error");
                     System.out.println(sb);
                     index--;
+                    failCount++;
                     continue;
                 }
             }
@@ -244,9 +252,9 @@ public class AsyncService {
                 sb.append("최초 접속 - 예상치 못한 알림 이슈");
                 System.out.println(sb);
                 index--;
+                failCount++;
                 continue;
             }
-            playerPrevSoloRanks.add(playerPrevSoloRank);
         }
 
         driver.quit();
