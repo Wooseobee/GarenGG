@@ -2,11 +2,10 @@ package org.example.garencrawling.mostchampion.service;
 
 import io.github.bonigarcia.wdm.WebDriverManager;
 import lombok.RequiredArgsConstructor;
-import org.example.garencrawling.global.MyException;
 import org.example.garencrawling.mostchampion.domain.MostData;
+import org.example.garencrawling.mostchampion.domain.PlayerCurSoloRank;
 import org.example.garencrawling.mostchampion.domain.PlayerInfo;
-import org.example.garencrawling.mostchampion.domain.PlayerPrevSoloRank;
-import org.example.garencrawling.mostchampion.repository.PlayerPrevSoloRankRepository;
+import org.example.garencrawling.mostchampion.repository.PlayerCurSoloRankRepository;
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -22,58 +21,50 @@ import java.util.NoSuchElementException;
 
 @Service
 @RequiredArgsConstructor
-@EnableMongoRepositories(basePackageClasses = {PlayerPrevSoloRankRepository.class})
+@EnableMongoRepositories(basePackageClasses = {PlayerCurSoloRankRepository.class})
 public class AsyncService {
 
-    private final PlayerPrevSoloRankRepository playerPrevSoloRankRepository;
+    private final PlayerCurSoloRankRepository playerCurSoloRankRepository;
     public final String[] proxyAddress = new String[]{
-            "localhost",
             "52.79.226.142:3128",
             "15.164.142.18:3128",
             "13.209.64.11:3128",
     };
 
-    int saveSize = 20;
+    int saveSize = 10;
 
     @Async("threadPoolTaskExecutor")
-    public void processPlayersInRange(int startPlayerId, int endPlayerId, List<PlayerInfo> savedPlayerInfos, int threadNumber) {
+    public void processPlayersInRange(int startPlayerId, int endPlayerId, List<PlayerInfo> savedPlayerInfos, int threadNumber) throws InterruptedException {
 
         int currentStartPlayerId = startPlayerId;
         while (currentStartPlayerId <= endPlayerId) {
             int currentEndPlayerId = Math.min(currentStartPlayerId + saveSize - 1, endPlayerId);
 
-            List<PlayerInfo> tmpPlayerInfos = new ArrayList<>();
-            for (int i = currentStartPlayerId; i <= currentEndPlayerId; i++) {
-                PlayerInfo currentSavedPlayerInfo = savedPlayerInfos.get(i - 1);
-                tmpPlayerInfos.add(currentSavedPlayerInfo);
-            }
-
-            crawling(tmpPlayerInfos, threadNumber);
+            crawling(savedPlayerInfos.subList(currentStartPlayerId - 1, currentEndPlayerId), threadNumber);
             currentStartPlayerId = currentEndPlayerId + 1;
         }
 
     }
 
-    public void crawling(List<PlayerInfo> playerInfos, int threadNumber) {
+    public void crawling(List<PlayerInfo> playerInfos, int threadNumber) throws InterruptedException {
         WebElement element;
         ChromeOptions options;
         ChromeDriver driver;
         WebDriverWait wait;
         List<WebElement> rows;
-        ArrayList<PlayerPrevSoloRank> playerPrevSoloRanks = new ArrayList<>();
-        int failCount = 0;
+        ArrayList<PlayerCurSoloRank> playerCurSoloRanks = new ArrayList<>();
 
         ////////////////////////////////////////////////////////////////////////////////////////////
 
         WebDriverManager.chromedriver().setup();
         options = new ChromeOptions();
 
-        if (threadNumber - 1 != 0) {
-            Proxy proxy = new Proxy();
-            proxy.setHttpProxy(proxyAddress[threadNumber - 1])
-                    .setSslProxy(proxyAddress[threadNumber - 1]);
-            options.setProxy(proxy);
-        }
+//        Proxy 관련
+        Proxy proxy = new Proxy();
+        proxy.setHttpProxy(proxyAddress[threadNumber - 1])
+                .setSslProxy(proxyAddress[threadNumber - 1]);
+        options.setProxy(proxy);
+
         options.addArguments("--headless"); // headless 모드 활성화
         options.addArguments("--disable-gpu"); // 최신 버전에서는 필요하지 않지만 호환성을 위해 추천
         options.setPageLoadStrategy(PageLoadStrategy.NONE);
@@ -86,11 +77,6 @@ public class AsyncService {
 
         for (int index = 0; index < playerInfos.size(); index++) {
 
-            if (failCount >= 100) {
-                failCount = 0;
-                continue;
-            }
-
             PlayerInfo playerInfo = playerInfos.get(index);
 
             StringBuilder sb = new StringBuilder();
@@ -98,27 +84,40 @@ public class AsyncService {
             sb.append("playerInfo.getPlayerId() = ").append(playerInfo.getPlayerId()).append(" ");
             sb.append("playerInfo.getUserNickname() = ").append(playerInfo.getUserNickname()).append(" ");
 
-            PlayerPrevSoloRank playerPrevSoloRank = new PlayerPrevSoloRank();
-            playerPrevSoloRank.setPlayerId(playerInfo.getPlayerId());
+            PlayerCurSoloRank playerCurSoloRank = new PlayerCurSoloRank();
 
+            // playerId
+            playerCurSoloRank.setPlayerId(playerInfo.getPlayerId());
+
+            // tier rankNum
             driver.get("https://www.op.gg/summoners/kr/" + playerInfo.getUserNickname());
             try {
+                // 게임 중이여도 뭐 오케이
                 wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("/html/body/div[1]/div[7]/div[1]/div[1]")));
 
                 try {
+                    // 티어
                     wait.until(ExpectedConditions.presenceOfElementLocated(By.className("tier")));
 
-                    StringTokenizer st = new StringTokenizer(driver.findElement(By.className("tier")).getText());
-                    String tier = st.nextToken();
-                    playerPrevSoloRank.setTier(tier);
+                    String str = driver.findElement(By.className("tier")).getText();
+                    if (str == null || str.isEmpty()) {
+                        sb.append("최초 접속 - 알림");
+                        System.out.println(sb);
+                        index--;
+                        continue;
+                    }
 
+                    StringTokenizer st = new StringTokenizer(str);
+                    String tier = st.nextToken();
+                    playerCurSoloRank.setTier(tier);
                     if (tier.equals("Master") || tier.equals("Grandmaster") || tier.equals("Challenger")) {
 
                     } else {
-                        playerPrevSoloRank.setRankNum(st.nextToken());
+                        playerCurSoloRank.setRankNum(st.nextToken());
                     }
 
                     try {
+                        // 챔피언
                         driver.get("https://www.op.gg/summoners/kr/" + playerInfo.getUserNickname() + "/champions");
 
                         wait.until(ExpectedConditions.elementToBeClickable(By.xpath("/html/body/div[1]/div[6]/div/div/div[2]/button[2]")));
@@ -168,12 +167,10 @@ public class AsyncService {
                                     else if (i == 13)
                                         mostData.setPentaKills(tmp);
                                 }
-                                playerPrevSoloRank.getMostDatas().add(mostData);
+                                playerCurSoloRank.getMostDatas().add(mostData);
                             }
                             sb.append("----------------------성공");
-//                            System.out.println(sb);
-                            failCount=0;
-                            playerPrevSoloRanks.add(playerPrevSoloRank);
+                            playerCurSoloRanks.add(playerCurSoloRank);
                         }
                         // 로딩 실패 or 기록된 전적이 없습니다.
                         catch (TimeoutException e) {
@@ -182,82 +179,66 @@ public class AsyncService {
                             try {
                                 wait.until(ExpectedConditions.textToBePresentInElementLocated(By.xpath("/html/body/div[1]/div[6]/div/table/tbody/tr/td/div/div/p"), "기록된 전적이 없습니다."));
                                 sb.append("챔피언 목록 - 기록된 전적이 없습니다.");
-                                System.out.println(sb);
-                                failCount=0;
                             }
                             // 로딩 실패
                             catch (TimeoutException e2) {
-                                sb.append("챔피언 목록 - 429 error");
-                                System.out.println(sb);
+                                sb.append("챔피언 목록 - 로딩 실패");
+                                Thread.sleep(2000);
                                 index--;
-                                failCount++;
-                                continue;
                             }
                         }
                         // 이상한 에러
                         catch (StaleElementReferenceException e) {
                             sb.append("챔피언 목록 - StaleElementReferenceException");
-                            System.out.println(sb);
                             index--;
-                            failCount++;
-                            continue;
                         }
                     }
                     // 로딩 실패
                     catch (TimeoutException e) {
-                        sb.append("챔피언 목록 접속 - 429 error");
-                        System.out.println(sb);
+                        sb.append("챔피언 목록 접속 - 로딩 실패");
+                        Thread.sleep(2000);
                         index--;
-                        failCount++;
-                        continue;
                     }
-
+                    // 버튼 xpath 못 찾음
+                    catch (NoSuchElementException e) {
+                        sb.append("챔피언 목록 접속 - 버튼 xpath 못 찾음");
+                        index--;
+                    }
                 }
                 // 현재 티어가 없음
                 catch (TimeoutException e) {
                     sb.append("현재 티어 - 없음");
-                    System.out.println(sb);
-                    failCount=0;
                 }
-                // 티어를 못 읽음 왜??? 도대체
+                // 티어
                 catch (NoSuchElementException e) {
-                    sb.append("현재 티어 - xpath 못 찾음");
-                    System.out.println(sb);
+                    sb.append("현재 티어 - className 못 찾음");
                     index--;
-                    failCount++;
-                    continue;
                 }
             }
-            // 로딩 실패 or 없는 계정
+            // 없는 계정 or 로딩 실패
             catch (TimeoutException e) {
-
                 // 없는 계정
                 try {
-                    wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("/html/body/div[1]/header/div[2]/a")));
+                    wait.until(ExpectedConditions.textToBePresentInElementLocated(By.xpath("/html/body/div[1]/div[3]/div/h2"),
+                            "OP.GG에 등록되지 않은 소환사입니다. 오타를 확인 후 다시 검색해주세요."));
                     sb.append("최초 접속 - 없는 사용자입니다");
-                    System.out.println(sb);
-                    failCount=0;
                 }
                 // 로딩 실패
                 catch (TimeoutException e2) {
-                    sb.append("최초 접속 - 429 error");
-                    System.out.println(sb);
+                    sb.append("최초 접속 - 로딩 실패");
+                    Thread.sleep(2000);
                     index--;
-                    failCount++;
-                    continue;
                 }
             }
             // 갑자기 알림 이슈
             catch (UnhandledAlertException e) {
-                sb.append("최초 접속 - 예상치 못한 알림 이슈");
-                System.out.println(sb);
+                sb.append("최초 접속 - 알림 ");
                 index--;
-                failCount++;
-                continue;
             }
+            System.out.println(sb);
         }
 
         driver.quit();
-        playerPrevSoloRankRepository.saveAll(playerPrevSoloRanks);
+        playerCurSoloRankRepository.saveAll(playerCurSoloRanks);
     }
 }

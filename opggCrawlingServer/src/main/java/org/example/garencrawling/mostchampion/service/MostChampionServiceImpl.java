@@ -18,10 +18,10 @@ public class MostChampionServiceImpl implements MostChampionService {
     private final AsyncService asyncService;
     private final PlayerInfoRepository playerInfoRepository;
 
-    public static int threadSize = 4;
+    public static int threadSize = 5;
 
     @Override
-    public ResponseEntity<?> mostChampionCrawling() {
+    public ResponseEntity<?> mostChampionCrawling() throws InterruptedException {
 
         List<PlayerInfo> savedPlayerInfos = playerInfoRepository.findAll();
         System.out.println("savedPlayerInfos.size() = " + savedPlayerInfos.size());
@@ -35,7 +35,7 @@ public class MostChampionServiceImpl implements MostChampionService {
         return ResponseEntity.status(HttpStatus.OK).body("success");
     }
 
-    public void assignThreadTask(List<PlayerInfo> savedPlayerInfos) {
+    public void assignThreadTask(List<PlayerInfo> savedPlayerInfos) throws InterruptedException {
 
         int startPlayerId = 1;
         int endPlayerId = savedPlayerInfos.size();

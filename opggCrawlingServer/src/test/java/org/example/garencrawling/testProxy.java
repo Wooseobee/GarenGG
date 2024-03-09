@@ -16,7 +16,8 @@ public class testProxy {
 //                "52.79.226.142:3128",
 //                "15.164.142.18:3128",
 //                "13.209.64.11:3128",
-                "119.193.137.104:3128"
+                "49.254.127.5:9407",
+                "121.126.48.22:6401"
 
         };
 
@@ -38,7 +39,7 @@ public class testProxy {
 
             driver = new ChromeDriver(options);
             driver.get("https://www.naver.com");
-            Thread.sleep(3000);
+            Thread.sleep(2000);
 
             driver.quit();
         }

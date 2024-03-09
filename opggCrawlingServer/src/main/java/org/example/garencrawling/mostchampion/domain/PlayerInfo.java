@@ -20,9 +20,5 @@ public class PlayerInfo {
 
     private String tagLine;
 
-    private String tier;
-
-    private String rankNum;
-
     private String userNickname;
 }

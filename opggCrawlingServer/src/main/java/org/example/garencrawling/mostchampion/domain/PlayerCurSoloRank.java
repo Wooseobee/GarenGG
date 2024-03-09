@@ -12,11 +12,14 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Document(collection = "player_prev_solo_rank")
-public class PlayerPrevSoloRank {
+@Document(collection = "player_cur_solo_rank")
+public class PlayerCurSoloRank {
     @Id
     private Integer playerId;
+
     private String tier;
+
     private String rankNum;
+
     private List<MostData> mostDatas = new ArrayList<>();
 }

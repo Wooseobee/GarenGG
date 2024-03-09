@@ -13,7 +13,7 @@ public class MostChampionController {
     private final MostChampionService mostChampionService;
 
     @GetMapping("/crawling")
-    public ResponseEntity<?> mostChampionCrawling() {
+    public ResponseEntity<?> mostChampionCrawling() throws InterruptedException {
         return mostChampionService.mostChampionCrawling();
     }
 }
