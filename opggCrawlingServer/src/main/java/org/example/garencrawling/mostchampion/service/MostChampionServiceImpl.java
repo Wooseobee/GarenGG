@@ -21,51 +21,26 @@ public class MostChampionServiceImpl implements MostChampionService {
     public static int threadSize = 5;
 
     @Override
-    public ResponseEntity<?> mostChampionCrawling() throws InterruptedException {
+    public void mostChampionCrawling(int startPlayerId, int endPlayerId) throws InterruptedException {
 
-        List<PlayerInfo> savedPlayerInfos = playerInfoRepository.findAll();
-        System.out.println("savedPlayerInfos.size() = " + savedPlayerInfos.size());
-        for (PlayerInfo savedPlayerInfo : savedPlayerInfos) {
-            String userNickname = savedPlayerInfo.getSummonerName() + "-" + savedPlayerInfo.getTagLine();
-            savedPlayerInfo.setUserNickname(userNickname);
+        List<PlayerInfo> findedPlayerInfos = playerInfoRepository.findByPlayerIdBetween(startPlayerId, endPlayerId);
+
+        for (PlayerInfo findedPlayerInfo : findedPlayerInfos) {
+            String userNickname = findedPlayerInfo.getSummonerName() + "-" + findedPlayerInfo.getTagLine();
+            findedPlayerInfo.setUserNickname(userNickname);
         }
 
-        assignThreadTask(savedPlayerInfos);
-
-        return ResponseEntity.status(HttpStatus.OK).body("success");
-    }
-
-    public void assignThreadTask(List<PlayerInfo> savedPlayerInfos) throws InterruptedException {
-
-        int startPlayerId = 1;
-        int endPlayerId = savedPlayerInfos.size();
-
-        int totalPlayers = endPlayerId - startPlayerId + 1;
-        int share = totalPlayers / threadSize;
-        int remainder = totalPlayers % threadSize;
-
-        int[] batchSizes = new int[threadSize];
-        for (int i = 0; i < batchSizes.length; i++) {
-            batchSizes[i] += share;
+        ArrayList<ArrayList<PlayerInfo>> subFindedPlayerInfos = new ArrayList<>();
+        for (int i = 0; i < threadSize; i++) {
+            subFindedPlayerInfos.add(new ArrayList<>());
         }
 
-        for (int i = 0; i < batchSizes.length; i++) {
-            if (remainder == 0)
-                break;
-            batchSizes[i]++;
-            remainder--;
+        for (int i = 0; i < findedPlayerInfos.size(); i++) {
+            subFindedPlayerInfos.get(i % threadSize).add(findedPlayerInfos.get(i));
         }
 
-        int currentStartPlayerId = startPlayerId;
-        for (int i = 0; i < batchSizes.length; i++) {
-
-            int currentEndPlayerId = currentStartPlayerId + batchSizes[i] - 1;
-
-            System.out.println(i + 1 + "번 thread " + currentStartPlayerId + "부터 " + currentEndPlayerId + "까지");
-
-            asyncService.processPlayersInRange(currentStartPlayerId, currentEndPlayerId, savedPlayerInfos, i + 1);
-
-            currentStartPlayerId = currentEndPlayerId + 1;
+        for (int i = 0; i < threadSize; i++) {
+            asyncService.processPlayersInRange(subFindedPlayerInfos.get(i), i + 1);
         }
     }
 }

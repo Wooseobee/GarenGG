@@ -13,13 +13,20 @@ public class testProxy {
         ChromeDriver driver;
 
         String[] proxyAddress = new String[]{
-//                "52.79.226.142:3128",
-//                "15.164.142.18:3128",
-//                "13.209.64.11:3128",
-                "49.254.127.5:9407",
-                "121.126.48.22:6401"
+//                "52.79.226.142:3128", // 진용
+//                "15.164.142.18:3128", // 우섭
+//                "13.209.64.11:3128", // 준범
+//                "15.164.221.137:3128", // 진용2
+//                "115.144.140.64:8302" // 하이온넷
+
+                "15.236.106.236:3128"
 
         };
+
+        String[] proxyAddress2 = new String[]{
+
+        };
+
 
         for (int i = 0; i < proxyAddress.length; i++) {
 
@@ -38,9 +45,12 @@ public class testProxy {
             ////////////////////////////////////////////////////////////////////////////////////////////
 
             driver = new ChromeDriver(options);
-            driver.get("https://www.naver.com");
-            Thread.sleep(2000);
 
+            driver.get("https://www.fow.kr");
+//            driver.get("https://www.op.gg/summoners/kr/진뚱이용-KR1");
+//            driver.get("https://www.naver.com");
+
+            Thread.sleep(1000);
             driver.quit();
         }
     }
