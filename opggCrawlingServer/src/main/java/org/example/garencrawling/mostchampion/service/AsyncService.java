@@ -105,7 +105,7 @@ public class AsyncService {
             driver.get("https://www.op.gg/summoners/kr/" + playerInfo.getUserNickname());
             try {
                 // 게임 중이여도 뭐 오케이
-                wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("/html/body/div[1]/div[7]/div[1]/div[1]")));
+                wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(".css-1kw4425.ecc8cxr0")));
 
                 try {
                     // 티어
