@@ -134,8 +134,9 @@ public class AsyncService {
                             driver.executeScript("arguments[0].click();", element);
 
                             try {
-                                wait.until(ExpectedConditions.textToBePresentInElementLocated(By.xpath("/html/body/div[1]/div[6]/div/table/tbody/tr[1]/td[1]"), "1"));
+//                                wait.until(ExpectedConditions.textToBePresentInElementLocated(By.xpath("/html/body/div[1]/div[6]/div/table/tbody/tr[1]/td[1]"), "1"));
 
+                                wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(".rank.css-116yacx.eyczova1")));
                                 rows = driver.findElements(By.xpath("/html/body/div[1]/div[6]/div/table/tbody/tr"));
 
                                 for (WebElement row : rows) {
