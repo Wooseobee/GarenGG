@@ -37,7 +37,7 @@ public class UserRiotApiService {
     @PostConstruct
     public  void init() {
         apiKeysId = new HashMap<String, Integer>();
-        for(int i= 0; i < 12; i++){
+        for(int i= 0; i < 13; i++){
             apiKeysId.put(apiKeys.get(i), i);
         }
     }
