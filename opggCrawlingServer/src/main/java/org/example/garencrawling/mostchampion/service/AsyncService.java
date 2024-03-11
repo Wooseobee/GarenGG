@@ -2,6 +2,7 @@ package org.example.garencrawling.mostchampion.service;
 
 import io.github.bonigarcia.wdm.WebDriverManager;
 import lombok.RequiredArgsConstructor;
+import org.example.garencrawling.global.GlobalConstants;
 import org.example.garencrawling.mostchampion.domain.MostData;
 import org.example.garencrawling.mostchampion.domain.PlayerCurSoloRank;
 import org.example.garencrawling.mostchampion.domain.PlayerInfo;
@@ -17,7 +18,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.util.*;
-import java.util.NoSuchElementException;
 
 @Service
 @RequiredArgsConstructor
@@ -26,21 +26,6 @@ public class AsyncService {
 
     private final PlayerCurSoloRankRepository playerCurSoloRankRepository;
 
-    String[] proxyAddress = new String[]{
-            "local",
-            "52.79.226.142:3128", // 진용
-            "15.164.142.18:3128", // 우섭
-            "13.209.64.11:3128", // 준범
-            "15.164.221.137:3128" // 진용2
-    };
-
-    String[] proxyAddress2 = new String[]{
-            "115.144.140.64:8302" // 하이온넷
-    };
-
-    public static int saveSize = 10;
-    public static int sleepTime = 5000;
-
     @Async("threadPoolTaskExecutor")
     public void processPlayersInRange(List<PlayerInfo> subFindedPlayerInfos, int threadNumber) throws InterruptedException {
 
@@ -48,12 +33,13 @@ public class AsyncService {
         int endIndex = subFindedPlayerInfos.size() - 1;
 
         while (currentStartIndex <= endIndex) {
-            int currentEndIndex = Math.min(currentStartIndex + saveSize - 1, endIndex);
+            int currentEndIndex = Math.min(currentStartIndex + GlobalConstants.saveSize - 1, endIndex);
 
             crawling(subFindedPlayerInfos.subList(currentStartIndex, currentEndIndex + 1), threadNumber);
             currentStartIndex = currentEndIndex + 1;
         }
 
+        System.out.println("threadNumber = " + threadNumber + " 종료");
     }
 
     public void crawling(List<PlayerInfo> playerInfos, int threadNumber) throws InterruptedException {
@@ -69,13 +55,10 @@ public class AsyncService {
         WebDriverManager.chromedriver().setup();
         options = new ChromeOptions();
 
-//        Proxy 관련
-        if (threadNumber != 1) {
-            Proxy proxy = new Proxy();
-            proxy.setHttpProxy(proxyAddress[threadNumber - 1])
-                    .setSslProxy(proxyAddress[threadNumber - 1]);
-            options.setProxy(proxy);
-        }
+        Proxy proxy = new Proxy();
+        proxy.setHttpProxy(GlobalConstants.proxyAddress[(threadNumber - 1) % GlobalConstants.proxyAddress.length])
+                .setSslProxy(GlobalConstants.proxyAddress[(threadNumber - 1) % GlobalConstants.proxyAddress.length]);
+        options.setProxy(proxy);
 
         options.addArguments("--headless"); // headless 모드 활성화
         options.addArguments("--disable-gpu"); // 최신 버전에서는 필요하지 않지만 호환성을 위해 추천
@@ -101,20 +84,19 @@ public class AsyncService {
             // playerId
             playerCurSoloRank.setPlayerId(playerInfo.getPlayerId());
 
-            // tier rankNum
-            driver.get("https://www.op.gg/summoners/kr/" + playerInfo.getUserNickname());
-            try {
-                // 게임 중이여도 뭐 오케이
-                wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(".css-1kw4425.ecc8cxr0")));
+            // opgg
+            if (threadNumber <= GlobalConstants.proxyAddress.length) {
 
+                // tier rankNum
+                driver.get("https://www.op.gg/summoners/kr/" + playerInfo.getUserNickname());
                 try {
-                    // 티어
-                    wait.until(ExpectedConditions.presenceOfElementLocated(By.className("tier")));
+                    // 게임 중이여도 뭐 오케이
+                    wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(".css-1kw4425.ecc8cxr0")));
 
-                    String str = driver.findElement(By.className("tier")).getText();
-                    if (str == null || str.isEmpty()) {
-                        sb.append("현재 티어 - str 이상함");
-                    } else {
+                    try {
+                        // 티어
+                        wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(".tier")));
+                        String str = driver.findElement(By.cssSelector(".tier")).getText();
 
                         StringTokenizer st = new StringTokenizer(str);
                         String tier = st.nextToken();
@@ -129,15 +111,14 @@ public class AsyncService {
                             // 챔피언
                             driver.get("https://www.op.gg/summoners/kr/" + playerInfo.getUserNickname() + "/champions");
 
-                            wait.until(ExpectedConditions.elementToBeClickable(By.xpath("/html/body/div[1]/div[6]/div/div/div[2]/button[2]")));
-                            element = driver.findElement(By.xpath("/html/body/div[1]/div[6]/div/div/div[2]/button[2]"));
+                            wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(".css-myjiba.eggkc9d0")));
+                            element = driver.findElement(By.cssSelector(".css-myjiba.eggkc9d0"));
                             driver.executeScript("arguments[0].click();", element);
 
                             try {
-//                                wait.until(ExpectedConditions.textToBePresentInElementLocated(By.xpath("/html/body/div[1]/div[6]/div/table/tbody/tr[1]/td[1]"), "1"));
 
                                 wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(".rank.css-116yacx.eyczova1")));
-                                rows = driver.findElements(By.xpath("/html/body/div[1]/div[6]/div/table/tbody/tr"));
+                                rows = driver.findElements(By.cssSelector(".css-npdgn9.emhbfki4 tbody tr"));
 
                                 for (WebElement row : rows) {
                                     List<WebElement> cols = row.findElements(By.tagName("td"));
@@ -146,109 +127,151 @@ public class AsyncService {
 
                                     for (int i = 0; i < cols.size(); i++) {
                                         WebElement col = cols.get(i);
-                                        String tmp = col.getText().replace("\n", "").replace(" ", "");
+                                        String tmp = col.getText().replace("\n", "").replace("'", "").replace(" ", "");
+//                                        String tmp = col.getText();
 
                                         if (i == 0)
                                             mostData.setMostSeq(tmp);
-                                        else if (i == 1)
-                                            mostData.setChampion(tmp);
-                                        else if (i == 2)
+                                        else if (i == 1) {
+                                            if (GlobalConstants.championNames.get(tmp) == null) {
+                                                sb.append(tmp).append(" ");
+                                            }
+                                            mostData.setChampion(GlobalConstants.championNames.get(tmp));
+                                        } else if (i == 2) {
+                                            tmp.replace("승", "W");
+                                            tmp.replace("패", "L");
                                             mostData.setGame(tmp);
-                                        else if (i == 3)
-                                            mostData.setRating(tmp);
-                                        else if (i == 4)
-                                            mostData.setGold(tmp);
-                                        else if (i == 5)
-                                            mostData.setCreepScore(tmp);
-                                        else if (i == 6)
-                                            mostData.setMaxKills(tmp);
-                                        else if (i == 7)
-                                            mostData.setMaxDeaths(tmp);
-                                        else if (i == 8)
-                                            mostData.setAverageDamageDealt(tmp);
-                                        else if (i == 9)
-                                            mostData.setAverageDamageTaken(tmp);
-                                        else if (i == 10)
-                                            mostData.setDoubleKills(tmp);
-                                        else if (i == 11)
-                                            mostData.setTripleKills(tmp);
-                                        else if (i == 12)
-                                            mostData.setQuadraKills(tmp);
-                                        else if (i == 13)
-                                            mostData.setPentaKills(tmp);
+                                        }
+
                                     }
                                     playerCurSoloRank.getMostDatas().add(mostData);
                                 }
                                 sb.append("----------------------성공");
                                 playerCurSoloRanks.add(playerCurSoloRank);
+                            } catch (Exception e) {
+                                sb.append("챔피언 목록 - StaleElementReferenceException or Exception");
+                                Thread.sleep(GlobalConstants.sleepTime);
                             }
-                            // 로딩 실패 or 기록된 전적이 없습니다.
-                            catch (TimeoutException e) {
+                        } catch (Exception e) {
+                            sb.append("챔피언 목록 접속 - Exception");
+                            Thread.sleep(GlobalConstants.sleepTime);
+                        }
 
-                                // 기록된 전적이 없습니다.
-                                try {
-//                                    wait.until(ExpectedConditions.textToBePresentInElementLocated(By.xpath("/html/body/div[1]/div[6]/div/table/tbody/tr/td/div/div/p"), "기록된 전적이 없습니다."));
-//                                    wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("/html/body/div[1]/div[6]/div/table/tbody/tr/td/div/div/p")));
-                                    wait.until(ExpectedConditions.presenceOfElementLocated(By.className("Image")));
-                                    sb.append("챔피언 목록 - 기록된 전적이 없습니다.");
-                                }
-                                // 로딩 실패
-                                catch (TimeoutException e2) {
-                                    sb.append("챔피언 목록 - 로딩 실패");
-                                    Thread.sleep(sleepTime);
-                                    index--;
-                                }
-                            }
-                            // 이상한 에러
-                            catch (StaleElementReferenceException e) {
-                                sb.append("챔피언 목록 - StaleElementReferenceException");
-                                index--;
-                            }
-                        }
-                        // 로딩 실패
-                        catch (TimeoutException e) {
-                            sb.append("챔피언 목록 접속 - 로딩 실패");
-                            Thread.sleep(sleepTime);
-                            index--;
-                        }
-                        // 버튼 xpath 못 찾음
-                        catch (NoSuchElementException e) {
-                            sb.append("챔피언 목록 접속 - 버튼 xpath 못 찾음");
-                            index--;
-                        }
+                    } catch (Exception e) {
+                        sb.append("현재 티어 - Exception");
+                        Thread.sleep(GlobalConstants.sleepTime);
                     }
-                }
-                // 현재 티어가 없음
-                catch (TimeoutException e) {
-                    sb.append("현재 티어 - 없음");
-                }
-                // 티어
-                catch (NoSuchElementException e) {
-                    sb.append("현재 티어 - className 못 찾음");
-                    index--;
+                } catch (Exception e) {
+                    sb.append("최초 접속 - Exception");
+                    Thread.sleep(GlobalConstants.sleepTime);
                 }
             }
-            // 없는 계정 or 로딩 실패
-            catch (TimeoutException e) {
-                // 없는 계정
+
+            // fowkr
+            else {
+                // tier rankNum
+                driver.get("https://fow.kr/find/" + playerInfo.getUserNickname());
+
                 try {
-//                    wait.until(ExpectedConditions.textToBePresentInElementLocated(By.xpath("/html/body/div[1]/div[3]/div/h2"),
-//                            "OP.GG에 등록되지 않은 소환사입니다. 오타를 확인 후 다시 검색해주세요."));
-                    wait.until(ExpectedConditions.presenceOfElementLocated(By.className("header__title")));
-//                    wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("/html/body/div[1]/div[3]/div/h2")));
-                    sb.append("최초 접속 - 없는 사용자입니다");
+                    // 게임 중이여도 뭐 오케이
+                    wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(".table_summary")));
+
+                    try {
+                        // 티어
+                        wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("/html/body/div[5]/div[1]/div[1]/div[5]/div[1]/div[2]/b")));
+                        String line = driver.findElement(By.xpath("/html/body/div[5]/div[1]/div[1]/div[5]/div[1]/div[2]/b")).getText();
+                        StringTokenizer st = new StringTokenizer(line);
+
+                        String tier = st.nextToken();
+
+                        if (tier.equals("배치")) {
+                            sb.append("현재 티어 - 없습니다");
+                            Thread.sleep(GlobalConstants.sleepTime);
+                        } else {
+
+                            tier = tier.toLowerCase();
+                            tier = Character.toUpperCase(tier.charAt(0)) + tier.substring(1);
+                            playerCurSoloRank.setTier(tier);
+
+                            if (tier.equals("Master") || tier.equals("Grandmaster") || tier.equals("Challenger")) {
+
+                            } else {
+                                String rankNum = st.nextToken();
+                                if (rankNum.equals("I")) {
+                                    playerCurSoloRank.setRankNum("1");
+                                } else if (rankNum.equals("II")) {
+                                    playerCurSoloRank.setRankNum("2");
+                                } else if (rankNum.equals("III")) {
+                                    playerCurSoloRank.setRankNum("3");
+                                } else if (rankNum.equals("IV")) {
+                                    playerCurSoloRank.setRankNum("4");
+                                }
+                            }
+
+                            try {
+                                // 챔피언
+                                element = driver.findElement(By.cssSelector(".sbtn.rankchamp_list.rankchamp_list_solo"));
+                                driver.executeScript("arguments[0].click();", element);
+
+                                try {
+                                    wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("/html/body/div[5]/div[1]/div[1]/div[8]/table/tbody/tr")));
+                                    rows = driver.findElements(By.xpath("/html/body/div[5]/div[1]/div[1]/div[8]/table/tbody/tr"));
+
+                                    int mostSeq = 1;
+                                    for (WebElement row : rows) {
+                                        List<WebElement> cols = row.findElements(By.tagName("td"));
+
+                                        MostData mostData = new MostData();
+                                        mostData.setMostSeq(String.valueOf(mostSeq));
+                                        mostSeq++;
+
+                                        for (int i = 0; i < cols.size(); i++) {
+                                            WebElement col = cols.get(i);
+                                            String tmp = col.getText();
+
+                                            if (i == 0) {
+                                                if (GlobalConstants.championNames.get(tmp) == null) {
+                                                    sb.append(tmp).append(" 없는 챔피언 이름 입니다 ");
+                                                }
+                                                mostData.setChampion(GlobalConstants.championNames.get(tmp));
+                                            } else if (i == 1)
+                                                mostData.setGame(tmp);
+                                            else if (i == 2) {
+                                                double percentage = Double.parseDouble(tmp.substring(0, tmp.length() - 1));
+                                                int win = (int) (Integer.parseInt(mostData.getGame()) * percentage) / 100;
+                                                int lose = Integer.parseInt(mostData.getGame()) - win;
+
+                                                String result = "";
+                                                if (win != 0)
+                                                    result = result + String.valueOf(win) + "W";
+                                                if (lose != 0)
+                                                    result = result + String.valueOf(lose) + "L";
+                                                result = result + String.valueOf((int) percentage) + "%";
+
+                                                mostData.setGame(result);
+                                            }
+                                        }
+                                        playerCurSoloRank.getMostDatas().add(mostData);
+                                    }
+                                    sb.append("----------------------성공");
+                                    playerCurSoloRanks.add(playerCurSoloRank);
+                                } catch (Exception e) {
+                                    sb.append("챔피언 목록 - Exception");
+                                    Thread.sleep(GlobalConstants.sleepTime);
+                                }
+                            } catch (Exception e) {
+                                sb.append("솔로 랭크 버튼 - Exception");
+                                Thread.sleep(GlobalConstants.sleepTime);
+                            }
+                        }
+                    } catch (Exception e) {
+                        sb.append("현재 티어 - Exception");
+                        Thread.sleep(GlobalConstants.sleepTime);
+                    }
+                } catch (Exception e) {
+                    sb.append("최초 접속 - Exception");
+                    Thread.sleep(GlobalConstants.sleepTime);
                 }
-                // 로딩 실패
-                catch (TimeoutException e2) {
-                    sb.append("최초 접속 - 로딩 실패");
-                    Thread.sleep(sleepTime);
-                    index--;
-                }
-            }
-            // 갑자기 알림 이슈
-            catch (UnhandledAlertException e) {
-                sb.append("최초 접속 - 알림 이슈");
-                index--;
             }
             System.out.println(sb);
         }

@@ -11,16 +11,12 @@ import java.util.concurrent.Executor;
 @EnableAsync
 public class SpringAsyncConfig {
 
-    public static int corePoolSize = 10;
-    public static int maxPoolSize = 20;
-    public static int queueCapacity = 100;
-
     @Bean(name = "threadPoolTaskExecutor")
     public Executor threadPoolTaskExecutor() {
         ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
-        taskExecutor.setCorePoolSize(corePoolSize);
-        taskExecutor.setMaxPoolSize(maxPoolSize);
-        taskExecutor.setQueueCapacity(queueCapacity);
+        taskExecutor.setCorePoolSize(GlobalConstants.corePoolSize);
+        taskExecutor.setMaxPoolSize(GlobalConstants.maxPoolSize);
+        taskExecutor.setQueueCapacity(GlobalConstants.queueCapacity);
         taskExecutor.setThreadNamePrefix("Executor-");
         return taskExecutor;
     }

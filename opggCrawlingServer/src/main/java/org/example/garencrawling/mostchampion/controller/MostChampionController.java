@@ -14,9 +14,14 @@ public class MostChampionController {
     private final MostChampionService mostChampionService;
 
     @GetMapping("/crawling/{startPlayerId}/{endPlayerId}")
-    public ResponseEntity<?> mostChampionCrawling(@PathVariable("startPlayerId") int startPlayerId, @PathVariable("endPlayerId") int endPlayerId) throws InterruptedException {
+    public ResponseEntity<?> mostChampionCrawling(
+            @PathVariable("startPlayerId") int startPlayerId,
+            @PathVariable("endPlayerId") int endPlayerId) throws InterruptedException {
+
         System.out.println("startPlayerId = " + startPlayerId + " " + "endPlayerId = " + endPlayerId);
         mostChampionService.mostChampionCrawling(startPlayerId, endPlayerId);
+
         return ResponseEntity.status(HttpStatus.OK).body("success");
     }
+
 }
