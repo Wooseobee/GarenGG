@@ -17,7 +17,7 @@ db = async_client["a605"]
 
 # MongoDB에서 데이터 가져오는 함수 (비동기)!
 async def get_player_prev_solo_rank():
-    collection = db["player_prev_solo_rank"]
+    collection = db["player_cur_solo_rank"]
     
     # here
     # _id가 50 이하인 플레이어 데이터만 조회 {"_id": {"$lte": 10000}}
