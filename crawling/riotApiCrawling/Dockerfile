@@ -5,7 +5,7 @@ FROM openjdk:17
 EXPOSE 8960
 
 # 빌드된 애플리케이션 JAR 파일을 이미지 내부로 복사
-ADD ./build/libs/your-application.jar app.jar
+ADD ./build/libs/riotApiCrawling-0.0.1-SNAPSHOT.jar app.jar
 
 # 애플리케이션 실행 방식
 ENTRYPOINT ["java", "-jar", "/app.jar"]
