@@ -18,15 +18,15 @@ public class GetMatchController {
     private final GetMatchService getMatchService;
     private final RenewChampionService renewChampionService;
 
-    @GetMapping("/combination")
-    public String setMatch() {
-        int page = 0;
-        Pageable pageable = PageRequest.of(page, 100);
+    @GetMapping("/combination/{offset}")
+    public String setMatch(@PathVariable("offset") int offset) {
+        int page = offset;
+        Pageable pageable = PageRequest.of(page, 10);
         int successData;
         do {
             successData = getMatchService.saveMatchData(pageable);
-            pageable = PageRequest.of(++page, 100);
-            log.info("조합 저장 완료 - page:{}", page);
+            pageable = PageRequest.of(++page, 10);
+            log.info("조합 저장 완료 - page:{} & successData:{}", page, successData);
         } while (successData > 0);
         return "ok";
     }

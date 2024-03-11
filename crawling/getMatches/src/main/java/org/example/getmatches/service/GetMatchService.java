@@ -16,6 +16,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -27,6 +29,18 @@ public class GetMatchService {
     private final CombinationRepository combinationRepository;
     private final UserMatchRepository userMatchRepository;
 
+    private static class Choice {
+        String championName;
+        Integer championId;
+        String lane;
+
+        public Choice(String championName, Integer championId, String lane) {
+            this.championName = championName;
+            this.championId = championId;
+            this.lane = lane;
+        }
+    }
+
     @Transactional
     public int saveMatchData(Pageable pageable) {
         Page<MatchInfo> matchList = userMatchRepository.findAll(pageable);
@@ -36,111 +50,92 @@ public class GetMatchService {
             Info info = matchInfo.getInfo();
 
             List<Participant> participants = info.getParticipants();
-            Combination victory = new Combination();
-            Combination defeat = new Combination();
+            List<Choice> victoryChampions = new ArrayList<>();
+            List<Choice> defeatChampions = new ArrayList<>();
 
             for (Participant participant : participants) {
                 int championId = participant.getChampionId();
+                String championName = participant.getChampionName();
                 String individualPosition = participant.getIndividualPosition();
                 boolean win = participant.isWin();
-
-                    switch (individualPosition) {
-                        case "TOP":
-                            if (win) {
-                                victory.setTop(championId);
-                            } else {
-                                defeat.setTop(championId);
-                            }
-                            break;
-                        case "JUNGLE":
-                            if (win) {
-                                victory.setJungle(championId);
-                            } else {
-                                defeat.setJungle(championId);
-                            }
-                            break;
-                        case "MIDDLE":
-                            if (win) {
-                                victory.setMiddle(championId);
-                            } else {
-                                defeat.setMiddle(championId);
-                            }
-                            break;
-                        case "BOTTOM":
-                            if (win) {
-                                victory.setBottom(championId);
-                            } else {
-                                defeat.setBottom(championId);
-                            }
-                            break;
-                        case "UTILITY":
-                            if (win) {
-                                victory.setUtility(championId);
-                            } else {
-                                defeat.setUtility(championId);
-                            }
-                            break;
-                        default:
-                            break;
-                    }
+                Choice choice = new Choice(championName, championId, individualPosition);
+                if (win) {
+                    victoryChampions.add(choice);
+                } else {
+                    defeatChampions.add(choice);
                 }
-
-            if (!(isValidCombination(victory) && isValidCombination(defeat))) {
-                continue;
             }
-            saveVictory(victory, matchInfo.getMetadata().getMatchId());
-            saveDefeat(defeat, matchInfo.getMetadata().getMatchId());
+
+            victoryChampions.sort(Comparator.comparing(o -> o.championName));
+            defeatChampions.sort(Comparator.comparing(o -> o.championName));
+
+            processCombinations(victoryChampions, matchInfo.getMatchId(), true);
+            processCombinations(defeatChampions, matchInfo.getMatchId(), false);
+
             successData++;
         }
         return successData;
     }
 
-    private void saveVictory(Combination victory, String matchId) {
-        Combination findVictoryCombination = combinationRepository.findByWithPessimisticLock(victory.getTop(), victory.getJungle(), victory.getMiddle(), victory.getBottom(), victory.getUtility());
-        if (findVictoryCombination == null) {
-            victory.setVictory(1L);
-            victory.setWinRate(100.0);
-            Combination savedCombination = combinationRepository.save(victory);
-            Long combinationId = savedCombination.getId();
-            CombinationMatchKey combinationMatchKey = new CombinationMatchKey(combinationId, matchId);
-            CombinationMatch combinationMatch = new CombinationMatch(combinationMatchKey, savedCombination);
-            combinationMatchRepository.save(combinationMatch);
-            return;
+    private void processCombinations(List<Choice> champions, String matchId, boolean isVictory) {
+        for (int i = 0; i < champions.size(); i++) {
+            for (int j = i + 1; j < champions.size(); j++) {
+                Combination combination = createCombination(champions.get(i), champions.get(j));
+                if (isValidCombination(combination)) {
+                    saveCombination(combination, matchId, isVictory);
+                }
+            }
         }
-        Long combinationId = findVictoryCombination.getId();
-
-        // 이미 계산된 매치와 조합
-        if (combinationMatchRepository.findById(new CombinationMatchKey(combinationId, matchId)).isPresent()) {
-            log.info("already calculated match: matchId={}, combinationId={}", matchId, combinationId);
-            return;
-        }
-        findVictoryCombination.setVictory(findVictoryCombination.getVictory() + 1);
-        updateWinRate(findVictoryCombination);
-        combinationRepository.save(findVictoryCombination);
     }
 
-    private void saveDefeat(Combination defeat, String matchId) {
-        Combination findDefeatCombination = combinationRepository.findByWithPessimisticLock(defeat.getTop(), defeat.getJungle(), defeat.getMiddle(), defeat.getBottom(), defeat.getUtility());
-        if (findDefeatCombination == null) {
-            defeat.setDefeat(1L);
-            Combination savedCombination = combinationRepository.save(defeat);
-            Long combinationId = savedCombination.getId();
-            CombinationMatchKey combinationMatchKey = new CombinationMatchKey(combinationId, matchId);
-            CombinationMatch combinationMatch = new CombinationMatch(combinationMatchKey, savedCombination);
-            combinationMatchRepository.save(combinationMatch);
+    private Combination createCombination(Choice champion1, Choice champion2) {
+        Combination combination = new Combination();
+        combination.setChampion1(champion1.championId);
+        combination.setLane1(champion1.lane);
+        combination.setChampion2(champion2.championId);
+        combination.setLane2(champion2.lane);
+        return combination;
+    }
+
+    private void saveCombination(Combination combination, String matchId, boolean isVictory) {
+        Combination foundCombination = combinationRepository.findByWithPessimisticLock(combination.getChampion1(), combination.getLane1(), combination.getChampion2(), combination.getLane2());
+
+        if (foundCombination == null) {
+            if (isVictory) {
+                combination.setVictory(1L);
+            } else {
+                combination.setDefeat(1L);
+            }
+            combination.setTotalMatch(1L);
+            combination.setWinRate(isVictory ? 100.0 : 0.0);
+            Combination savedCombination = combinationRepository.save(combination);
+
+            saveCombinationMatch(savedCombination, matchId);
             return;
         }
-
-        Long combinationId = findDefeatCombination.getId();
-
-        // 이미 계산된 매치와 조합
-        if (combinationMatchRepository.findById(new CombinationMatchKey(combinationId, matchId)).isPresent()) {
-            log.info("already calculated match: matchId={}, combinationId={}", matchId, combinationId);
-            return;
+        if (combinationMatchRepository.findById(new CombinationMatchKey(foundCombination.getId(), matchId)).isEmpty()) {
+            updateAndSaveFoundCombination(foundCombination, isVictory);
+            saveCombinationMatch(foundCombination, matchId);
+        } else {
+            log.info("already calculated match: matchId={}, combinationId={}", matchId, foundCombination.getId());
         }
-        findDefeatCombination.setDefeat(findDefeatCombination.getDefeat() + 1);
-        updateWinRate(findDefeatCombination);
-        combinationRepository.save(findDefeatCombination);
+    }
+
+    private void saveCombinationMatch(Combination combination, String matchId) {
+        CombinationMatchKey combinationMatchKey = new CombinationMatchKey(combination.getId(), matchId);
+        CombinationMatch combinationMatch = new CombinationMatch(combinationMatchKey, combination);
+        combinationMatchRepository.save(combinationMatch);
+    }
+
+    private void updateAndSaveFoundCombination(Combination foundCombination, boolean isVictory) {
+        if (isVictory) {
+            foundCombination.setVictory(foundCombination.getVictory() + 1);
+        } else {
+            foundCombination.setDefeat(foundCombination.getDefeat() + 1);
+        }
+        foundCombination.setTotalMatch(foundCombination.getTotalMatch() + 1);
+        updateWinRate(foundCombination);
+        combinationRepository.save(foundCombination);
     }
 
     private void updateWinRate(Combination combination) {
@@ -149,7 +144,8 @@ public class GetMatchService {
             combination.setWinRate((double) combination.getVictory() / totalGames * 100.0);
         }
     }
+
     private boolean isValidCombination(Combination match) {
-        return match.getTop() != null && match.getJungle() != null && match.getMiddle() != null && match.getBottom() != null && match.getUtility() != null;
+        return match.getChampion1() != null && match.getChampion2() != null && match.getLane1() != null && match.getLane2() != null;
     }
 }
