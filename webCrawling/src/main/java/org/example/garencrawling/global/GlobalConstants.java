@@ -9,6 +9,7 @@ public class GlobalConstants {
     public static final int queueCapacity = 100;
 
     public static final String[] proxyAddress = new String[]{
+            "local",
             "52.79.226.142:3128", // 진용
             "15.164.142.18:3128", // 우섭
             "13.209.64.11:3128", // 준범
@@ -18,7 +19,7 @@ public class GlobalConstants {
     public static int threadSize;
 
     public static final int saveSize = 10;
-    public static final int sleepTime = 5000;
+    public static final int sleepTime = 3000;
 
     public static final HashMap<String, String> championNames = new HashMap<>();
 }

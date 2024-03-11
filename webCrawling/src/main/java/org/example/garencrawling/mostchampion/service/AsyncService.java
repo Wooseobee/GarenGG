@@ -55,10 +55,12 @@ public class AsyncService {
         WebDriverManager.chromedriver().setup();
         options = new ChromeOptions();
 
-        Proxy proxy = new Proxy();
-        proxy.setHttpProxy(GlobalConstants.proxyAddress[(threadNumber - 1) % GlobalConstants.proxyAddress.length])
-                .setSslProxy(GlobalConstants.proxyAddress[(threadNumber - 1) % GlobalConstants.proxyAddress.length]);
-        options.setProxy(proxy);
+        if ((threadNumber - 1) % GlobalConstants.proxyAddress.length != 0) {
+            Proxy proxy = new Proxy();
+            proxy.setHttpProxy(GlobalConstants.proxyAddress[(threadNumber - 1) % GlobalConstants.proxyAddress.length])
+                    .setSslProxy(GlobalConstants.proxyAddress[(threadNumber - 1) % GlobalConstants.proxyAddress.length]);
+            options.setProxy(proxy);
+        }
 
         options.addArguments("--headless"); // headless 모드 활성화
         options.addArguments("--disable-gpu"); // 최신 버전에서는 필요하지 않지만 호환성을 위해 추천
@@ -127,8 +129,7 @@ public class AsyncService {
 
                                     for (int i = 0; i < cols.size(); i++) {
                                         WebElement col = cols.get(i);
-                                        String tmp = col.getText().replace("\n", "").replace("'", "").replace(" ", "");
-//                                        String tmp = col.getText();
+                                        String tmp = col.getText();
 
                                         if (i == 0)
                                             mostData.setMostSeq(tmp);
@@ -138,6 +139,7 @@ public class AsyncService {
                                             }
                                             mostData.setChampion(GlobalConstants.championNames.get(tmp));
                                         } else if (i == 2) {
+                                            tmp = tmp.replace("\n", "").replace(" ", "");
                                             tmp.replace("승", "W");
                                             tmp.replace("패", "L");
                                             mostData.setGame(tmp);
@@ -149,7 +151,7 @@ public class AsyncService {
                                 sb.append("----------------------성공");
                                 playerCurSoloRanks.add(playerCurSoloRank);
                             } catch (Exception e) {
-                                sb.append("챔피언 목록 - StaleElementReferenceException or Exception");
+                                sb.append("챔피언 목록 - Exception");
                                 Thread.sleep(GlobalConstants.sleepTime);
                             }
                         } catch (Exception e) {
@@ -230,13 +232,14 @@ public class AsyncService {
                                             String tmp = col.getText();
 
                                             if (i == 0) {
+
                                                 if (GlobalConstants.championNames.get(tmp) == null) {
-                                                    sb.append(tmp).append(" 없는 챔피언 이름 입니다 ");
+                                                    sb.append(tmp).append(" ");
                                                 }
                                                 mostData.setChampion(GlobalConstants.championNames.get(tmp));
-                                            } else if (i == 1)
+                                            } else if (i == 1) {
                                                 mostData.setGame(tmp);
-                                            else if (i == 2) {
+                                            } else if (i == 2) {
                                                 double percentage = Double.parseDouble(tmp.substring(0, tmp.length() - 1));
                                                 int win = (int) (Integer.parseInt(mostData.getGame()) * percentage) / 100;
                                                 int lose = Integer.parseInt(mostData.getGame()) - win;
