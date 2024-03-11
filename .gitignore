@@ -91,5 +91,8 @@ dist/
 npm-debug.log
 yarn-error.log
 
+### yml ###
+*.yml
+
 # End of https://www.toptal.com/developers/gitignore/api/visualstudiocode,vuejs
 
