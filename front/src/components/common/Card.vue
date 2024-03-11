@@ -41,7 +41,7 @@
 }
 .card .face-front {
   transform: rotateY(0deg);
-  background-image: url("https://heropy.blog/css/images/pattern.png");
+  /* background-image: url("https://heropy.blog/css/images/pattern.png"); */
 }
 .card:hover .face-front {
   transform: rotateY(-180deg);
@@ -57,8 +57,8 @@
 
 .card .face-front img {
   width: 90px;
-  filter: grayscale();
-  opacity: 0.7;
+  /* filter: grayscale(); */
+  /* opacity: 0.7; */
 }
 .card .face-back img {
   height: 120px;
