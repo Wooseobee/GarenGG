@@ -21,7 +21,7 @@ async def get_player_prev_solo_rank():
     
     # here
     # _id가 50 이하인 플레이어 데이터만 조회 {"_id": {"$lte": 10000}}
-    players = collection.find({"_id": {"$lte": 100}})
+    players = collection.find()
     result = []  # 최종 결과를 저장할 빈 리스트
 
     async for player in players:

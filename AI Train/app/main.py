@@ -2,9 +2,9 @@ import sys, os
 import pickle
 import pandas as pd
 
-from typing import Union
+from typing import Union, List, Optional
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from recommend import get_recommendations
 from db import get_player_prev_solo_rank  # db.py에서 함수 가져오기
@@ -12,8 +12,20 @@ from train import load_data
 
 app = FastAPI()
 
+# class MostData(BaseModel):
+#     champion: str
+#     game: str
+#     rating: str
+
+# class PredictionInput(BaseModel):
+#     _id: int
+#     tier: str
+#     rankNum: str
+#     mostDatas: List[MostData]
+
 class PredictionInput(BaseModel):
-    riotId: str
+    riotId : str
+    
 
 # MatrixFactorization or 학습된 모델 가져오기
 with open('models/df_svd_preds.pkl', 'rb') as f:
