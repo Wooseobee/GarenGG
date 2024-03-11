@@ -27,25 +27,19 @@ public class UserRiotApiService {
     private final UserRiotApiRepository userRiotApiRepository;
     @Value("${riot.apiKeys}")
     List<String> apiKeys;
-
     Map<String, Integer> apiKeysId;
+    public String[] rank = {"", "I", "II", "III", "IV"};
+
+    UserRiotApiService(UserRiotApiRepository userRiotApiRepository){
+        this.userRiotApiRepository = userRiotApiRepository;
+    }
 
     @PostConstruct
     public  void init() {
         apiKeysId = new HashMap<String, Integer>();
-//        System.out.println(apiKeys.size());
-//        System.out.println(apiKeys);
-        for(int i= 0; i < 12; i++){
+        for(int i= 0; i < 13; i++){
             apiKeysId.put(apiKeys.get(i), i);
         }
-    }
-    //    public String[] tier = {"IRON", "BRONZE", "SILVER", "GOLD", "PLATINUM", "EMERALD", "DIAMOND"};
-    public String[] rank = {"", "I", "II", "III", "IV"};
-//        public String[] tier = {"DIAMOND"};
-//        public String[] rank = {"IV"};
-
-    UserRiotApiService(UserRiotApiRepository userRiotApiRepository){
-        this.userRiotApiRepository = userRiotApiRepository;
     }
 
     public void crawlUser(RequestDto requestDto) throws IOException, InterruptedException {
@@ -57,15 +51,18 @@ public class UserRiotApiService {
         int endPageNum = requestDto.getEndPageNum();
         String apiKey = requestDto.getApiKey();
         for(int  i = startRank;  i <= endRank; i++) {
+            long startTime = System.currentTimeMillis(); // 시작 시간 측정
             System.out.println(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss:SSS")) +": "+tier + rank[i] + ", apikey :"+apiKeysId.get(apiKey)+ "  crawl start.");
             //티어 하나의 유저 목록 불러오기
             crawlUsersByTier(tier, rank[i], startPageNum, endPageNum, apiKey);
-            System.out.println(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss:SSS")) +": "+tier + rank[i] + ", apikey : " + apiKeysId.get(apiKey) + "Crwaling Done!");
+            long endTime = System.currentTimeMillis(); // 종료 시간 측정
+            long totalTime = endTime - startTime;
+            System.out.println(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss:SSS")) +": "+tier + rank[i] + ", apikey : " + apiKeysId.get(apiKey) + "Crwaling Done! execution time: " + totalTime + "ms");
         }
     }
 
     public void crawlUsersByTier(String tier, String rank, int startPageNum, int endPageNum, String apiKey) throws InterruptedException {
-//        long startTime = System.currentTimeMillis(); // 시작 시간 측정
+       
         int responseCode = 0;
         int pageNum = startPageNum;
         while (pageNum <= endPageNum) {
@@ -134,15 +131,11 @@ public class UserRiotApiService {
 
                 pageNum++;
             } catch (IOException e) {
-                e.printStackTrace();
 //                System.out.println(apiKeysId.get(apiKey)+" key, users per tier IOException. 10secs sleep. current Page : " + pageNum);
                 Thread.sleep(10000);
             }
         }
 
-//        long endTime = System.currentTimeMillis(); // 종료 시간 측정
-//        long totalTime = endTime - startTime;
-//        System.out.println("Total execution time: " + totalTime + "ms");
     }
 
     //현재 playerInfoList에있는 정보에 PUUID 삽입
@@ -189,12 +182,12 @@ public class UserRiotApiService {
                     Thread.sleep(10000);
                 }
                 else{
-//                    System.out.println("puuid not found. continue." + count);
+                    System.out.println("puuid not found. continue." + count);
                 }
             } catch (NullPointerException e){
-//                System.out.println("null pointer exception. no summonerId. continue. count  : "+ count);
+                System.out.println("null pointer exception. no summonerId. continue. count  : "+ count);
             } catch(Exception e){
-//                System.out.println("unexpected error. continue. :" );
+                System.out.println("unexpected error during finding uuid. continue. :" );
             }
         }
     }
@@ -234,7 +227,7 @@ public class UserRiotApiService {
                 playerInfoList.get(count).setTagLine(accountDto.getTagLine());
                 playerInfoList.get(count).setSummonerName(accountDto.getGameName());
 
-//                System.out.println("tagline setting done. count : "+ count);
+//                System.out.println("tagline setting done. count : "+ count + ", "+accountDto);
 
             } catch (IOException e) {
 //                e.printStackTrace();
@@ -244,12 +237,12 @@ public class UserRiotApiService {
                     Thread.sleep(10000);
                 }
                 else{
-//                    System.out.println("tagline not found. continue." + count);
+                    System.out.println("tagline not found. continue." + count);
                 }
             }catch (NullPointerException e){
-//                System.out.println("null pointer exception. no PUUID. continue. count  : "+ count);
+                System.out.println("null pointer exception. no PUUID. continue. count  : "+ count);
             } catch (Exception e){
-//                System.out.println("unexpected error. continue. :" );
+                System.out.println("unexpected error during finding tagline. continue. :" );
             }
 
         }
