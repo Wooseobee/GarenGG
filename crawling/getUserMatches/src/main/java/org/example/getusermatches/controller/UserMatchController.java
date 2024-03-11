@@ -18,7 +18,7 @@ public class UserMatchController {
                         @PathVariable("apiKeyId") int apiKeyId,
                         @PathVariable("startTime") String startTime,
                         @PathVariable("endTime") String endTime) throws InterruptedException {
-        userMatchService.getUser(tier, rankNum, apiKeyId, startTime, endTime);
+        userMatchService.saveUserMatch(tier, rankNum, apiKeyId, startTime, endTime);
         return "OK";
     }
 }

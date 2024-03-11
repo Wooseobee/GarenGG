@@ -25,7 +25,7 @@ public class UserMatchService {
     @Value("${riot.apiKeys}")
     private List<String> API_KEY;
 
-    public void getUser(String tier, String rankNum, int apiKeyId, String startTime, String endTime) throws InterruptedException {
+    public void saveUserMatch(String tier, String rankNum, int apiKeyId, String startTime, String endTime) throws InterruptedException {
         List<PlayerInfo> content = userRepository.findAllByTierAndRankAndApiKeyId(tier, rankNum, apiKeyId);
 
         int totalSize = content.size();
