@@ -52,17 +52,17 @@ def process_game_data(game_data):
     # 정규 표현식을 사용하여 승리 수, 패배 수, 승리율을 추출합니다.
     # 이 패턴은 "승리수W패배수L승리율%" 형식을 처리할 수 있으며,
     # 승리 수나 패배 수 중 하나만 존재하는 경우에도 작동합니다.
-    match = re.match(r'(\d+)승(\d+)패(\d+)%', game_data)
+    match = re.match(r'(\d+)W(\d+)L(\d+)%', game_data)
     if not match:
         # "승리수W패배수L승리율%" 형식이 아닌 경우, 다른 패턴으로 시도합니다.
-        match = re.match(r'(\d+)(승|패)(\d+)%', game_data)
+        match = re.match(r'(\d+)(W|L)(\d+)%', game_data)
         if not match:
             logging.error(f"Invalid game_data format: {game_data}")
             return 0, 0
 
-    if '승' in game_data:
+    if 'W' in game_data:
         wins = int(match.group(1))
-        losses = int(match.group(2)) if '패' in game_data else 0
+        losses = int(match.group(2)) if 'L' in game_data else 0
     else:
         wins = 0
         losses = int(match.group(1))
