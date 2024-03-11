@@ -134,9 +134,12 @@ public class AsyncService {
                                         if (i == 0)
                                             mostData.setMostSeq(tmp);
                                         else if (i == 1) {
+                                            if (GlobalConstants.championNames.get(tmp) == null) {
+                                                sb.append(tmp).append(" ");
+                                            }
                                             mostData.setChampion(GlobalConstants.championNames.get(tmp));
                                         } else if (i == 2) {
-                                            tmp = tmp.replace("\n","").replace(" ","");
+                                            tmp = tmp.replace("\n", "").replace(" ", "");
                                             tmp.replace("승", "W");
                                             tmp.replace("패", "L");
                                             mostData.setGame(tmp);
@@ -229,10 +232,14 @@ public class AsyncService {
                                             String tmp = col.getText();
 
                                             if (i == 0) {
+
+                                                if (GlobalConstants.championNames.get(tmp) == null) {
+                                                    sb.append(tmp).append(" ");
+                                                }
                                                 mostData.setChampion(GlobalConstants.championNames.get(tmp));
-                                            } else if (i == 1)
+                                            } else if (i == 1) {
                                                 mostData.setGame(tmp);
-                                            else if (i == 2) {
+                                            } else if (i == 2) {
                                                 double percentage = Double.parseDouble(tmp.substring(0, tmp.length() - 1));
                                                 int win = (int) (Integer.parseInt(mostData.getGame()) * percentage) / 100;
                                                 int lose = Integer.parseInt(mostData.getGame()) - win;
@@ -269,7 +276,7 @@ public class AsyncService {
                     Thread.sleep(GlobalConstants.sleepTime);
                 }
             }
-//            System.out.println(sb);
+            System.out.println(sb);
         }
 
         driver.quit();
