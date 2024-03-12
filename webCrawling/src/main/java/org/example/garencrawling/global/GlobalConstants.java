@@ -9,7 +9,7 @@ public class GlobalConstants {
     public static final int maxPoolSize = 20;
     public static final int queueCapacity = 100;
 
-    public static final int threadSize = 1;
+    public static final int threadSize = 5;
     public static final int saveSize = 10;
 
     public static final int waitTime = 10;
