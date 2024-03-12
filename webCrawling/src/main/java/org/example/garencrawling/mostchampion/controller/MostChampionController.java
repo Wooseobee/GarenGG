@@ -1,10 +1,13 @@
 package org.example.garencrawling.mostchampion.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.example.garencrawling.global.GlobalConstants;
 import org.example.garencrawling.mostchampion.service.MostChampionService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Date;
 
 @RestController
 @RequiredArgsConstructor
@@ -18,7 +21,7 @@ public class MostChampionController {
             @PathVariable("startPlayerId") int startPlayerId,
             @PathVariable("endPlayerId") int endPlayerId) throws InterruptedException {
 
-        System.out.println("startPlayerId = " + startPlayerId + " " + "endPlayerId = " + endPlayerId);
+        System.out.println("현재 시간: " + GlobalConstants.formatter.format(new Date()) + " startPlayerId = " + startPlayerId + " " + "endPlayerId = " + endPlayerId);
         mostChampionService.mostChampionCrawling(startPlayerId, endPlayerId);
 
         return ResponseEntity.status(HttpStatus.OK).body("success");

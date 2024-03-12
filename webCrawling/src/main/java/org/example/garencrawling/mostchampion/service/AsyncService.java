@@ -17,6 +17,7 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.util.*;
 
@@ -30,18 +31,19 @@ public class AsyncService {
     @Async("threadPoolTaskExecutor")
     public void processPlayersInRange(List<PlayerInfo> subFindedPlayerInfos, int threadNumber) throws InterruptedException {
 
+
         int currentStartIndex = 0;
         int endIndex = subFindedPlayerInfos.size() - 1;
 
         while (currentStartIndex <= endIndex) {
             int currentEndIndex = Math.min(currentStartIndex + GlobalConstants.saveSize - 1, endIndex);
 
-            System.out.println("threadNumber = " + threadNumber + " 일하는 중");
+            System.out.println("현재 시간: " + GlobalConstants.formatter.format(new Date()) + " threadNumber = " + threadNumber + " 일하는 중");
             crawling(subFindedPlayerInfos.subList(currentStartIndex, currentEndIndex + 1), threadNumber);
             currentStartIndex = currentEndIndex + 1;
         }
 
-        System.out.println("threadNumber = " + threadNumber + " 종료");
+        System.out.println("현재 시간: " + GlobalConstants.formatter.format(new Date()) + " threadNumber = " + threadNumber + " 종료");
     }
 
     public void crawling(List<PlayerInfo> playerInfos, int threadNumber) throws InterruptedException {

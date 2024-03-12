@@ -1,5 +1,6 @@
 package org.example.garencrawling.global;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class GlobalConstants {
@@ -17,5 +18,7 @@ public class GlobalConstants {
     public static final int tryMaxCount = 5;
 
     public static final HashMap<String, String> championNames = new HashMap<>();
+
+    public static final SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 }
