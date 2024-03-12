@@ -6,7 +6,7 @@ from typing import Union, List, Optional
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
-from recommend import get_recommendations
+from recommend import get_recommendations, get_recommendations_not
 from db import get_player_prev_solo_rank  # db.py에서 함수 가져오기
 from train import load_data
 
@@ -55,6 +55,11 @@ async def test():
     return {
         "champ_data": champ_data_dict
     }
+
+@app.get("/predict/not")
+async def prediction_not():
+    unrated_top_champions_dicts = get_recommendations_not()
+    return unrated_top_champions_dicts
 
 
 @app.post("/predict/")
