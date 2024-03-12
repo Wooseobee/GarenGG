@@ -17,7 +17,6 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.util.*;
 
@@ -31,14 +30,11 @@ public class AsyncService {
     @Async("threadPoolTaskExecutor")
     public void processPlayersInRange(List<PlayerInfo> subFindedPlayerInfos, int threadNumber) throws InterruptedException {
 
-
         int currentStartIndex = 0;
         int endIndex = subFindedPlayerInfos.size() - 1;
 
         while (currentStartIndex <= endIndex) {
             int currentEndIndex = Math.min(currentStartIndex + GlobalConstants.saveSize - 1, endIndex);
-
-            System.out.println("현재 시간: " + GlobalConstants.formatter.format(new Date()) + " threadNumber = " + threadNumber + " 일하는 중");
             crawling(subFindedPlayerInfos.subList(currentStartIndex, currentEndIndex + 1), threadNumber);
             currentStartIndex = currentEndIndex + 1;
         }
@@ -61,8 +57,14 @@ public class AsyncService {
         WebDriverManager.chromedriver().setup();
         options = new ChromeOptions();
 
-        options.addArguments("--headless"); // headless 모드 활성화
-        options.addArguments("--disable-gpu"); // 최신 버전에서는 필요하지 않지만 호환성을 위해 추천
+        options.addArguments("--headless");
+        options.addArguments("--disable-gpu");
+        options.addArguments("--no-sandbox");
+        options.addArguments("--disable-dev-shm-usage");
+        options.addArguments("--disable-extensions");
+        options.addArguments("--disable-popup-blocking");
+        options.addArguments("--disable-infobars");
+        options.addArguments("--start-maximized");
         options.setPageLoadStrategy(PageLoadStrategy.NONE);
 
         driver = new ChromeDriver(options);
@@ -101,7 +103,7 @@ public class AsyncService {
             }
             if (tryCount > GlobalConstants.tryMaxCount) {
                 sb.append("닉네임 tryCount 초과");
-                //System.out.println(sb);
+                System.out.println(sb);
                 continue;
             }
 
@@ -130,7 +132,7 @@ public class AsyncService {
             }
             if (tryCount > GlobalConstants.tryMaxCount) {
                 sb.append("현재 티어 tryCount 초과");
-                //System.out.println(sb);
+                System.out.println(sb);
                 continue;
             }
 
@@ -167,7 +169,7 @@ public class AsyncService {
             }
             if (tryCount > GlobalConstants.tryMaxCount) {
                 sb.append("솔로 랭크 버튼 tryCount 초과");
-                //System.out.println(sb);
+                System.out.println(sb);
                 continue;
             }
 
@@ -224,7 +226,7 @@ public class AsyncService {
                         playerCurSoloRank.getMostDatas().add(mostData);
                     }
                     sb.append("----------------------성공");
-                    //System.out.println(sb);
+                    System.out.println(sb);
                     playerCurSoloRanks.add(playerCurSoloRank);
                     break;
                 } catch (Exception e) {
@@ -234,7 +236,7 @@ public class AsyncService {
             }
             if (tryCount > GlobalConstants.tryMaxCount) {
                 sb.append("챔피언 목록 tryCount 초과");
-                //System.out.println(sb);
+                System.out.println(sb);
                 continue;
             }
         }
