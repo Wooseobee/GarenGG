@@ -25,10 +25,12 @@ public class MyStartupTask implements ApplicationRunner {
         System.out.println("queueCapacity = " + queueCapacity);
 
         System.out.println("threadSize = " + threadSize);
-
         System.out.println("saveSize = " + saveSize);
 
         System.out.println("waitTime = " + waitTime);
+        System.out.println("sleepTime = " + sleepTime);
+
+        System.out.println("tryMaxCount = " + tryMaxCount);
 
         List<Champion> champions = championRepository.findAll();
         for (int i = 0; i < champions.size(); i++) {
@@ -36,11 +38,3 @@ public class MyStartupTask implements ApplicationRunner {
         }
     }
 }
-
-//        System.out.println("proxyAddress = ");
-//        for (String proxyAdd : proxyAddress)
-//            System.out.println(proxyAdd);
-
-//        threadSize = proxyAddress.length * 2;
-
-//            championNames.put(GlobalConstants.officialChampionNames[i], champions.get(i).getId());

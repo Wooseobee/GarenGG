@@ -21,5 +21,5 @@ public class PlayerCurSoloRank {
 
     private String rankNum;
 
-    private List<MostData> mostDatas = new ArrayList<>();
+    private List<MostData> mostDatas;
 }

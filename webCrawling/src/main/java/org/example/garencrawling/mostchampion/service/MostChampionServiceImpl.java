@@ -11,7 +11,6 @@ import java.util.*;
 
 @Service
 @RequiredArgsConstructor
-
 public class MostChampionServiceImpl implements MostChampionService {
 
     private final AsyncService asyncService;

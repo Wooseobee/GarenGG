@@ -17,9 +17,9 @@ configurations {
     }
 }
 
-//bootRun {
-//    jvmArgs = ['-Xms512m', '-Xmx768m', '-Xss512k']
-//}
+bootRun {
+    jvmArgs = ['-Xms512m', '-Xmx768m', '-Xss512k']
+}
 
 
 repositories {
