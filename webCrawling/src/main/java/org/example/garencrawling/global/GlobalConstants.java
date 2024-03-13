@@ -7,17 +7,15 @@ import java.util.*;
 
 public class GlobalConstants {
 
-    public static final int corePoolSize = 10;
-    public static final int maxPoolSize = 20;
-    public static final int queueCapacity = 100;
+    public static final int corePoolSize = 8;
+    public static final int maxPoolSize = 8;
+    public static final int queueCapacity = 50;
 
-    public static final int threadSize = 5;
+    public static final int threadSize = 8;
     public static final int saveSize = 10;
+    public static final int waitTime = 3;
 
-    public static final int waitTime = 10;
-    public static final int sleepTime = 5000;
-
-    public static final int tryMaxCount = 5;
+    public static final int tryMaxCount = 3;
 
     public static final SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 

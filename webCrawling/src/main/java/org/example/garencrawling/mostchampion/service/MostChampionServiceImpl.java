@@ -21,22 +21,18 @@ public class MostChampionServiceImpl implements MostChampionService {
 
         List<PlayerInfo> findedPlayerInfos = playerInfoRepository.findByPlayerIdBetween(startPlayerId, endPlayerId);
 
-        for (PlayerInfo findedPlayerInfo : findedPlayerInfos) {
-            String userNickname = findedPlayerInfo.getSummonerName() + "-" + findedPlayerInfo.getTagLine();
-            findedPlayerInfo.setUserNickname(userNickname);
-        }
+        for (PlayerInfo findedPlayerInfo : findedPlayerInfos)
+            findedPlayerInfo.setUserNickname(findedPlayerInfo.getSummonerName() + "-" + findedPlayerInfo.getTagLine());
 
         ArrayList<ArrayList<PlayerInfo>> subFindedPlayerInfos = new ArrayList<>();
-        for (int i = 0; i < GlobalConstants.threadSize; i++) {
+        for (int i = 0; i < GlobalConstants.threadSize; i++)
             subFindedPlayerInfos.add(new ArrayList<>());
-        }
 
-        for (int i = 0; i < findedPlayerInfos.size(); i++) {
+        for (int i = 0; i < findedPlayerInfos.size(); i++)
             subFindedPlayerInfos.get(i % GlobalConstants.threadSize).add(findedPlayerInfos.get(i));
-        }
 
-        for (int i = 0; i < GlobalConstants.threadSize; i++) {
+        for (int i = 0; i < GlobalConstants.threadSize; i++)
             asyncService.processPlayersInRange(subFindedPlayerInfos.get(i), i + 1);
-        }
+
     }
 }

@@ -10,7 +10,9 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.example.garencrawling.global.GlobalConstants.*;
 
@@ -29,9 +31,7 @@ public class MyStartupTask implements ApplicationRunner {
 
         System.out.println("threadSize = " + threadSize);
         System.out.println("saveSize = " + saveSize);
-
         System.out.println("waitTime = " + waitTime);
-        System.out.println("sleepTime = " + sleepTime);
 
         System.out.println("tryMaxCount = " + tryMaxCount);
 
@@ -45,11 +45,20 @@ public class MyStartupTask implements ApplicationRunner {
 
         options.addArguments("--headless");
         options.addArguments("--disable-gpu");
-        options.addArguments("--no-sandbox");
-        options.addArguments("--disable-dev-shm-usage");
+        Map<String, Object> prefs = new HashMap<>();
+        prefs.put("profile.managed_default_content_settings.images", 2);
+        options.setExperimentalOption("prefs", prefs);
         options.addArguments("--disable-extensions");
-        options.addArguments("--disable-popup-blocking");
         options.addArguments("--disable-infobars");
+        options.addArguments("--disable-useAutomationExtension");
+        options.addArguments("--no-sandbox");
+
+        options.addArguments("--disk-cache-size=4096");
+        options.addArguments("--dns-prefetch-disable");
+
+        options.addArguments("--disable-dev-shm-usage");
+        options.addArguments("--disable-popup-blocking");
+        options.addArguments("--disable-notifications");
         options.setPageLoadStrategy(PageLoadStrategy.NONE);
     }
 }
