@@ -1,8 +1,11 @@
 package org.example.garencrawling.global;
 
+import io.github.bonigarcia.wdm.WebDriverManager;
 import lombok.RequiredArgsConstructor;
 import org.example.garencrawling.mostchampion.domain.Champion;
 import org.example.garencrawling.mostchampion.repository.ChampionRepository;
+import org.openqa.selenium.PageLoadStrategy;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.stereotype.Component;
@@ -36,5 +39,17 @@ public class MyStartupTask implements ApplicationRunner {
         for (int i = 0; i < champions.size(); i++) {
             championNames.put(champions.get(i).getName(), champions.get(i).getId());
         }
+
+        WebDriverManager.chromedriver().setup();
+        options = new ChromeOptions();
+
+        options.addArguments("--headless");
+        options.addArguments("--disable-gpu");
+        options.addArguments("--no-sandbox");
+        options.addArguments("--disable-dev-shm-usage");
+        options.addArguments("--disable-extensions");
+        options.addArguments("--disable-popup-blocking");
+        options.addArguments("--disable-infobars");
+        options.setPageLoadStrategy(PageLoadStrategy.NONE);
     }
 }

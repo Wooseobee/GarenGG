@@ -1,6 +1,5 @@
 package org.example.garencrawling.mostchampion.service;
 
-import io.github.bonigarcia.wdm.WebDriverManager;
 import lombok.RequiredArgsConstructor;
 import org.example.garencrawling.global.GlobalConstants;
 import org.example.garencrawling.mostchampion.domain.MostData;
@@ -9,7 +8,6 @@ import org.example.garencrawling.mostchampion.domain.PlayerInfo;
 import org.example.garencrawling.mostchampion.repository.PlayerCurSoloRankRepository;
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -37,7 +35,7 @@ public class AsyncService {
 
             int currentEndIndex = Math.min(currentStartIndex + GlobalConstants.saveSize - 1, endIndex);
 
-            System.out.println("현재 시간: " + GlobalConstants.formatter.format(new Date()) + " threadNumber = " + threadNumber+" 일하는 중");
+            System.out.println("현재 시간: " + GlobalConstants.formatter.format(new Date()) + " threadNumber = " + threadNumber + " " + currentStartIndex * 100 / endIndex + "%");
 
             crawling(subFindedPlayerInfos.subList(currentStartIndex, currentEndIndex + 1), threadNumber);
             currentStartIndex = currentEndIndex + 1;
@@ -48,37 +46,24 @@ public class AsyncService {
 
     public void crawling(List<PlayerInfo> playerInfos, int threadNumber) throws InterruptedException {
 
-        WebElement element;
-        ChromeOptions options;
-        ChromeDriver driver = null;
+        ChromeDriver driver;
         WebDriverWait wait;
+
+        WebElement element;
         List<WebElement> rows;
+
         ArrayList<PlayerCurSoloRank> playerCurSoloRanks = new ArrayList<>();
         int tryCount;
         String getText = null;
 
         ////////////////////////////////////////////////////////////////////////////////////////////
 
+        driver = new ChromeDriver(GlobalConstants.options);
+        wait = new WebDriverWait(driver, Duration.ofSeconds(GlobalConstants.waitTime)); // 명시적 대기 시간 설정
+
+        ////////////////////////////////////////////////////////////////////////////////////////////
+
         try {
-            WebDriverManager.chromedriver().setup();
-            options = new ChromeOptions();
-
-            options.addArguments("--headless");
-            options.addArguments("--disable-gpu");
-            options.addArguments("--no-sandbox");
-            options.addArguments("--disable-dev-shm-usage");
-            options.addArguments("--disable-extensions");
-            options.addArguments("--disable-popup-blocking");
-            options.addArguments("--disable-infobars");
-            options.addArguments("--start-maximized");
-            options.setPageLoadStrategy(PageLoadStrategy.NONE);
-
-            driver = new ChromeDriver(options);
-
-            wait = new WebDriverWait(driver, Duration.ofSeconds(GlobalConstants.waitTime)); // 명시적 대기 시간 설정
-
-            ////////////////////////////////////////////////////////////////////////////////////////////
-
             for (int index = 0; index < playerInfos.size(); index++) {
                 StringBuilder sb = new StringBuilder();
                 sb.append("threadNumber = ").append(threadNumber).append(" ");
@@ -142,22 +127,29 @@ public class AsyncService {
                     continue;
                 }
 
-                String tier = getText.split(" ")[0];
-                tier = tier.toLowerCase();
-                tier = Character.toUpperCase(tier.charAt(0)) + tier.substring(1);
-                playerCurSoloRank.setTier(tier);
 
-                if (!(tier.equals("Master") || tier.equals("Grandmaster") || tier.equals("Challenger"))) {
-                    String rankNum = getText.split(" ")[1];
-                    if (rankNum.equals("I")) {
-                        playerCurSoloRank.setRankNum("1");
-                    } else if (rankNum.equals("II")) {
-                        playerCurSoloRank.setRankNum("2");
-                    } else if (rankNum.equals("III")) {
-                        playerCurSoloRank.setRankNum("3");
-                    } else if (rankNum.equals("IV")) {
-                        playerCurSoloRank.setRankNum("4");
+                try {
+                    String tier = getText.split(" ")[0];
+                    tier = tier.toLowerCase();
+                    tier = Character.toUpperCase(tier.charAt(0)) + tier.substring(1);
+                    playerCurSoloRank.setTier(tier);
+
+                    if (!(tier.equals("Master") || tier.equals("Grandmaster") || tier.equals("Challenger"))) {
+                        String rankNum = getText.split(" ")[1];
+                        if (rankNum.equals("I")) {
+                            playerCurSoloRank.setRankNum("1");
+                        } else if (rankNum.equals("II")) {
+                            playerCurSoloRank.setRankNum("2");
+                        } else if (rankNum.equals("III")) {
+                            playerCurSoloRank.setRankNum("3");
+                        } else if (rankNum.equals("IV")) {
+                            playerCurSoloRank.setRankNum("4");
+                        }
                     }
+                } catch (Exception e) {
+                    sb.append("현재 티어 문자열 오류");
+                    // System.out.println(sb);
+                    continue;
                 }
 
                 // 솔로 랭크 버튼
