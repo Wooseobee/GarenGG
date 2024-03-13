@@ -21,7 +21,7 @@ public class MostChampionController {
             @PathVariable("startPlayerId") int startPlayerId,
             @PathVariable("endPlayerId") int endPlayerId) throws InterruptedException {
 
-        System.out.println("현재 시간: " + GlobalConstants.formatter.format(new Date()) + " startPlayerId = " + startPlayerId + " " + "endPlayerId = " + endPlayerId);
+        System.out.println("현재 시간: " + GlobalConstants.formatter.format(new Date()) + " startPlayerId = " + startPlayerId + " endPlayerId" + endPlayerId + " 시작");
         mostChampionService.mostChampionCrawling(startPlayerId, endPlayerId);
 
         return ResponseEntity.status(HttpStatus.OK).body("success");

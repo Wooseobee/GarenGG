@@ -27,50 +27,41 @@ public class AsyncService {
 
     @Async("threadPoolTaskExecutor")
     public void processPlayersInRange(List<PlayerInfo> subFindedPlayerInfos, int threadNumber) throws InterruptedException {
+        System.out.println("현재 시간: " + GlobalConstants.formatter.format(new Date()) + " threadNumber = " + threadNumber + " 시작");
+
+        ChromeDriver driver = new ChromeDriver(GlobalConstants.options);
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(GlobalConstants.waitTime)); // 명시적 대기 시간 설정
 
         int currentStartIndex = 0;
         int endIndex = subFindedPlayerInfos.size() - 1;
 
         while (currentStartIndex <= endIndex) {
-
             int currentEndIndex = Math.min(currentStartIndex + GlobalConstants.saveSize - 1, endIndex);
+            crawling(subFindedPlayerInfos.subList(currentStartIndex, currentEndIndex + 1), threadNumber, driver, wait);
+            currentStartIndex = currentEndIndex + 1;
 
             System.out.println("현재 시간: " + GlobalConstants.formatter.format(new Date()) + " threadNumber = " + threadNumber + " " + currentStartIndex * 100 / endIndex + "%");
-
-            crawling(subFindedPlayerInfos.subList(currentStartIndex, currentEndIndex + 1), threadNumber);
-            currentStartIndex = currentEndIndex + 1;
         }
 
+        driver.quit();
         System.out.println("현재 시간: " + GlobalConstants.formatter.format(new Date()) + " threadNumber = " + threadNumber + " 종료");
     }
 
-    public void crawling(List<PlayerInfo> playerInfos, int threadNumber) throws InterruptedException {
-
-        ChromeDriver driver;
-        WebDriverWait wait;
-
-        WebElement element;
-        List<WebElement> rows;
+    public void crawling(List<PlayerInfo> playerInfos, int threadNumber, ChromeDriver driver, WebDriverWait wait) throws InterruptedException {
 
         ArrayList<PlayerCurSoloRank> playerCurSoloRanks = new ArrayList<>();
-        int tryCount;
-        String getText = null;
-
-        ////////////////////////////////////////////////////////////////////////////////////////////
-
-        driver = new ChromeDriver(GlobalConstants.options);
-        wait = new WebDriverWait(driver, Duration.ofSeconds(GlobalConstants.waitTime)); // 명시적 대기 시간 설정
-
-        ////////////////////////////////////////////////////////////////////////////////////////////
 
         try {
+            WebElement element;
+            List<WebElement> rows;
+            int tryCount;
+            String getText = null;
+
+            ////////////////////////////////////////////////////////////////////////////////////////////
+
             for (int index = 0; index < playerInfos.size(); index++) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("threadNumber = ").append(threadNumber).append(" ");
 
                 PlayerInfo playerInfo = playerInfos.get(index);
-                sb.append("playerInfo.getPlayerId() = ").append(playerInfo.getPlayerId()).append(" ");
-                sb.append("playerInfo.getUserNickname() = ").append(playerInfo.getUserNickname()).append(" ");
 
                 PlayerCurSoloRank playerCurSoloRank = new PlayerCurSoloRank();
                 playerCurSoloRank.setPlayerId(playerInfo.getPlayerId());
@@ -93,8 +84,6 @@ public class AsyncService {
                     tryCount++;
                 }
                 if (tryCount > GlobalConstants.tryMaxCount) {
-                    sb.append("닉네임 tryCount 초과");
-                    // System.out.println(sb);
                     continue;
                 }
 
@@ -122,8 +111,6 @@ public class AsyncService {
                     tryCount++;
                 }
                 if (tryCount > GlobalConstants.tryMaxCount) {
-                    sb.append("현재 티어 tryCount 초과");
-                    // System.out.println(sb);
                     continue;
                 }
 
@@ -147,8 +134,6 @@ public class AsyncService {
                         }
                     }
                 } catch (Exception e) {
-                    sb.append("현재 티어 문자열 오류");
-                    // System.out.println(sb);
                     continue;
                 }
 
@@ -166,8 +151,6 @@ public class AsyncService {
                     tryCount++;
                 }
                 if (tryCount > GlobalConstants.tryMaxCount) {
-                    sb.append("솔로 랭크 버튼 tryCount 초과");
-                    // System.out.println(sb);
                     continue;
                 }
 
@@ -223,8 +206,6 @@ public class AsyncService {
                             }
                             playerCurSoloRank.getMostDatas().add(mostData);
                         }
-                        sb.append("----------------------성공");
-                        // System.out.println(sb);
                         playerCurSoloRanks.add(playerCurSoloRank);
                         break;
                     } catch (Exception e) {
@@ -233,8 +214,6 @@ public class AsyncService {
                     tryCount++;
                 }
                 if (tryCount > GlobalConstants.tryMaxCount) {
-                    sb.append("챔피언 목록 tryCount 초과");
-                    // System.out.println(sb);
                     continue;
                 }
             }
@@ -242,7 +221,6 @@ public class AsyncService {
 
         }
 
-        driver.quit();
         playerCurSoloRankRepository.saveAll(playerCurSoloRanks);
 
     }
