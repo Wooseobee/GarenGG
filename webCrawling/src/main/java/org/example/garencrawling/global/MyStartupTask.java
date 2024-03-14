@@ -5,11 +5,14 @@ import lombok.RequiredArgsConstructor;
 import org.example.garencrawling.mostchampion.domain.Champion;
 import org.example.garencrawling.mostchampion.repository.ChampionRepository;
 import org.openqa.selenium.PageLoadStrategy;
+import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -60,5 +63,14 @@ public class MyStartupTask implements ApplicationRunner {
         options.addArguments("--disable-popup-blocking");
         options.addArguments("--disable-notifications");
         options.setPageLoadStrategy(PageLoadStrategy.NONE);
+
+        for (int i = 0; i < threadSize; i++) {
+            ChromeDriver driver = new ChromeDriver(GlobalConstants.options);
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(GlobalConstants.waitTime));
+            drivers.add(driver);
+            waits.add(wait);
+        }
+
+
     }
 }

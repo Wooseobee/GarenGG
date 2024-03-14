@@ -33,16 +33,14 @@ public class AsyncService {
         sb.append("현재 시간: ").append(GlobalConstants.formatter.format(new Date())).append(" threadNumber = ").append(threadNumber).append(" 시작");
         System.out.println(sb);
 
-        ChromeDriver driver = new ChromeDriver(GlobalConstants.options);
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(GlobalConstants.waitTime));
-
         int currentStartIndex = 0;
         int endIndex = subFindedPlayerInfos.size() - 1;
 
         while (currentStartIndex <= endIndex) {
             int currentEndIndex = Math.min(currentStartIndex + GlobalConstants.saveSize - 1, endIndex);
 
-            crawling(subFindedPlayerInfos.subList(currentStartIndex, currentEndIndex + 1), threadNumber, driver, wait);
+            crawling(subFindedPlayerInfos.subList(currentStartIndex, currentEndIndex + 1), threadNumber);
+
             sb = new StringBuilder();
             sb.append("현재 시간: ").append(GlobalConstants.formatter.format(new Date())).append(" threadNumber = ").append(threadNumber).append(" ").append((currentEndIndex + 1) * 100 / (endIndex + 1)).append("% 완료");
             System.out.println(sb);
@@ -54,47 +52,45 @@ public class AsyncService {
         sb.append("현재 시간: ").append(GlobalConstants.formatter.format(new Date())).append(" threadNumber = ").append(threadNumber).append(" 종료");
         System.out.println(sb);
 
-        driver.quit();
+        GlobalConstants.drivers.get(threadNumber - 1).quit();
     }
 
-    public void crawling(List<PlayerInfo> playerInfos, int threadNumber, ChromeDriver driver, WebDriverWait wait) throws InterruptedException {
+    public void crawling(List<PlayerInfo> playerInfos, int threadNumber) throws InterruptedException {
 
-        driver.manage().deleteAllCookies();
         ArrayList<PlayerCurSoloRank> playerCurSoloRanks = new ArrayList<>();
         WebElement element;
         List<WebElement> rows;
         int tryCount;
         String getText = null;
 
-        for (int index = 0; index < playerInfos.size(); index++) {
-//            System.out.println("-----------------------");
-            try {
+        try {
+
+            for (int index = 0; index < playerInfos.size(); index++) {
 
                 PlayerInfo playerInfo = playerInfos.get(index);
 
                 PlayerCurSoloRank playerCurSoloRank = new PlayerCurSoloRank();
                 playerCurSoloRank.setPlayerId(playerInfo.getPlayerId());
 
-                driver.get("https://fow.kr/find/" + playerInfo.getUserNickname());
+                GlobalConstants.drivers.get(threadNumber - 1).get("https://fow.kr/find/" + playerInfo.getUserNickname());
 
                 // 닉네임
                 tryCount = 1;
                 while (tryCount <= GlobalConstants.tryMaxCount) {
                     try {
-                        getText = wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("#content-container > div:nth-child(1) > div:nth-child(2) > div.topp > div.profile > div:nth-child(2) > span.username"))).getText();
+                        getText = GlobalConstants.waits.get(threadNumber - 1).until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("#content-container > div:nth-child(1) > div:nth-child(2) > div.topp > div.profile > div:nth-child(2) > span.username"))).getText();
                         if (!getText.isEmpty()) {
                             break;
                         }
                     } catch (Exception e) {
                     }
-                    driver.navigate().refresh();
+                    GlobalConstants.drivers.get(threadNumber - 1).navigate().refresh();
                     tryCount++;
                 }
                 if (tryCount > GlobalConstants.tryMaxCount) {
                     // System.out.println("닉네임 초과");
                     continue;
                 }
-
 
 //                // 갱신 가능 버튼
 //                tryCount = 1;
@@ -137,13 +133,13 @@ public class AsyncService {
                 tryCount = 1;
                 while (tryCount <= GlobalConstants.tryMaxCount) {
                     try {
-                        getText = wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("#content-container > div:nth-child(1) > div:nth-child(2) > div.table_summary > div:nth-child(2) > div:nth-child(2) > b > font"))).getText();
+                        getText = GlobalConstants.waits.get(threadNumber - 1).until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("#content-container > div:nth-child(1) > div:nth-child(2) > div.table_summary > div:nth-child(2) > div:nth-child(2) > b > font"))).getText();
                         if (!getText.isEmpty()) {
                             break;
                         }
                     } catch (Exception e) {
                     }
-                    driver.navigate().refresh();
+                    GlobalConstants.drivers.get(threadNumber - 1).navigate().refresh();
                     tryCount++;
                 }
                 if (tryCount > GlobalConstants.tryMaxCount) {
@@ -178,13 +174,13 @@ public class AsyncService {
                 tryCount = 1;
                 while (tryCount <= GlobalConstants.tryMaxCount) {
                     try {
-                        element = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("#content-container > div:nth-child(1) > div:nth-child(2) > div.rankchamp_S14A_menu > a.sbtn.rankchamp_list.rankchamp_list_solo")));
-                        driver.executeScript("arguments[0].click();", element);
+                        element = GlobalConstants.waits.get(threadNumber - 1).until(ExpectedConditions.elementToBeClickable(By.cssSelector("#content-container > div:nth-child(1) > div:nth-child(2) > div.rankchamp_S14A_menu > a.sbtn.rankchamp_list.rankchamp_list_solo")));
+                        GlobalConstants.drivers.get(threadNumber - 1).executeScript("arguments[0].click();", element);
                         break;
                     } catch (Exception e) {
 
                     }
-                    driver.navigate().refresh();
+                    GlobalConstants.drivers.get(threadNumber - 1).navigate().refresh();
                     tryCount++;
                 }
                 if (tryCount > GlobalConstants.tryMaxCount) {
@@ -196,7 +192,7 @@ public class AsyncService {
                 tryCount = 1;
                 while (tryCount <= GlobalConstants.tryMaxCount) {
                     try {
-                        wait.until(new ExpectedCondition<Boolean>() {
+                        GlobalConstants.waits.get(threadNumber - 1).until(new ExpectedCondition<Boolean>() {
                             public Boolean apply(WebDriver driver) {
                                 List<WebElement> elements = driver.findElements(By.cssSelector("#content-container > div:nth-child(1) > div:nth-child(2) > div.rankchamp_S14A_div.rankchamp_S14A_div_solo > table > tbody > tr"));
                                 for (WebElement element : elements) {
@@ -207,7 +203,7 @@ public class AsyncService {
                                 return true;
                             }
                         });
-                        rows = driver.findElements(By.cssSelector("#content-container > div:nth-child(1) > div:nth-child(2) > div.rankchamp_S14A_div.rankchamp_S14A_div_solo > table > tbody > tr"));
+                        rows = GlobalConstants.drivers.get(threadNumber - 1).findElements(By.cssSelector("#content-container > div:nth-child(1) > div:nth-child(2) > div.rankchamp_S14A_div.rankchamp_S14A_div_solo > table > tbody > tr"));
 
                         int mostSeq = 1;
                         playerCurSoloRank.setMostDatas(new ArrayList<>());
@@ -256,9 +252,15 @@ public class AsyncService {
                     // System.out.println("챔피언 목록 초과");
                     continue;
                 }
-            } catch (Exception e) {
-                // System.out.println("예상치 못한 오류 발생!!");
+
             }
+        } catch (Exception e) {
+//             System.out.println("예상치 못한 오류 발생!!");
+            if (GlobalConstants.drivers.get(threadNumber - 1) != null) {
+                GlobalConstants.drivers.get(threadNumber - 1).quit();
+            }
+            GlobalConstants.drivers.set(threadNumber - 1, new ChromeDriver(GlobalConstants.options));
+            GlobalConstants.waits.set(threadNumber - 1, new WebDriverWait(GlobalConstants.drivers.get(threadNumber - 1), Duration.ofSeconds(GlobalConstants.waitTime)));
         }
 
         playerCurSoloRankRepository.saveAll(playerCurSoloRanks);
