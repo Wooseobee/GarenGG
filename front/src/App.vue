@@ -1,6 +1,10 @@
 <template>
   <div>
-    <body class="index-page" data-bs-spy="scroll" data-bs-target="#navmenu">
+    <body
+      class="index-page background"
+      data-bs-spy="scroll"
+      data-bs-target="#navmenu"
+    >
       <RouterView />
     </body>
   </div>
@@ -11,6 +15,10 @@ import { RouterView } from "vue-router";
 </script>
 
 <style>
+.background {
+  background-color: #091428;
+  height: 100vh;
+}
 :root {
   --default-font: "Open Sans", system-ui, -apple-system, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif,
