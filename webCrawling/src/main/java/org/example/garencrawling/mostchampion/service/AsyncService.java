@@ -1,6 +1,6 @@
 package org.example.garencrawling.mostchampion.service;
 
-import io.github.bonigarcia.wdm.WebDriverManager;
+import dev.failsafe.Timeout;
 import lombok.RequiredArgsConstructor;
 import org.example.garencrawling.global.GlobalConstants;
 import org.example.garencrawling.mostchampion.domain.MostData;
@@ -39,7 +39,7 @@ public class AsyncService {
         while (currentStartIndex <= endIndex) {
             int currentEndIndex = Math.min(currentStartIndex + GlobalConstants.saveSize - 1, endIndex);
 
-            crawling(subFindedPlayerInfos.subList(currentStartIndex, currentEndIndex + 1));
+            crawling(subFindedPlayerInfos.subList(currentStartIndex, currentEndIndex + 1), threadNumber);
 
             sb = new StringBuilder();
             sb.append("현재 시간: ").append(GlobalConstants.formatter.format(new Date())).append(" threadNumber = ").append(threadNumber).append(" ").append((currentEndIndex + 1) * 100 / (endIndex + 1)).append("% 완료");
@@ -53,12 +53,9 @@ public class AsyncService {
         System.out.println(sb);
     }
 
-    public void crawling(List<PlayerInfo> playerInfos) {
+    public void crawling(List<PlayerInfo> playerInfos, int threadNumber) throws InterruptedException {
 
         ArrayList<PlayerCurSoloRank> playerCurSoloRanks = new ArrayList<>();
-
-        ChromeDriver driver = null;
-        WebDriverWait wait = null;
 
         for (int index = 0; index < playerInfos.size(); index++) {
             try {
@@ -70,58 +67,64 @@ public class AsyncService {
                 PlayerCurSoloRank playerCurSoloRank = new PlayerCurSoloRank();
                 playerCurSoloRank.setPlayerId(playerInfos.get(index).getPlayerId());
 
-                if (driver == null) {
-                    driver = new ChromeDriver(GlobalConstants.options);
-                    wait = new WebDriverWait(driver, Duration.ofSeconds(GlobalConstants.waitTime));
-                }
-
-                driver.get("https://fow.kr/find/" + playerInfos.get(index).getUserNickname());
+                GlobalConstants.drivers.get(threadNumber - 1).get("https://fow.kr/find/" + playerInfos.get(index).getUserNickname());
 
                 // 서치 컨테이너
-                wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("#searchContainer")));
+                GlobalConstants.waits.get(threadNumber - 1).until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("#searchContainer")));
 
                 // 사용자 정보
                 try {
-                    gotText = wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("#content-container > div:nth-child(1) > div:nth-child(2) > div.topp > div.profile > div:nth-child(2)"))).getText();
-                } catch (Exception e) {
+                    gotText = GlobalConstants.waits.get(threadNumber - 1).until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("#content-container > div:nth-child(1) > div:nth-child(2) > div.topp > div.profile > div:nth-child(2)"))).getText();
+                } catch (TimeoutException e) {
                     continue;
                 }
 
                 // 갱신 할지 말지
-                timeData = gotText.split(" ")[gotText.split(" ").length - 2];
-                if (timeData.charAt(timeData.length() - 1) == '일' && Integer.parseInt(timeData.substring(0, timeData.length() - 1)) > 7) {
-                    webElement = wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("#content-container > div:nth-child(1) > div:nth-child(2) > div.topp > div.profile > div:nth-child(2) > div")));
-                    driver.executeScript("arguments[0].click();", webElement);
-                    index--;
-                    continue;
+                try {
+                    timeData = gotText.split(" ")[gotText.split(" ").length - 2];
+                    if (timeData.charAt(timeData.length() - 1) == '일' && Integer.parseInt(timeData.substring(0, timeData.length() - 1)) > 7) {
+                        webElement = GlobalConstants.waits.get(threadNumber - 1).until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("#content-container > div:nth-child(1) > div:nth-child(2) > div.topp > div.profile > div:nth-child(2) > div")));
+                        GlobalConstants.drivers.get(threadNumber - 1).executeScript("arguments[0].click();", webElement);
+                        throw new TimeoutException();
+                    }
+                } catch (Exception e) {
+                    // gotText 잘못 됨
+                    // 갱신 하기 버튼 안나타남
+                    throw new TimeoutException();
                 }
 
                 // 현재 솔로 랭크 티어
-                gotText = wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("#content-container > div:nth-child(1) > div:nth-child(2) > div.table_summary > div:nth-child(2) > div:nth-child(2) > b > font"))).getText();
-                String tier = gotText.split(" ")[0];
-                tier = tier.toLowerCase();
-                tier = Character.toUpperCase(tier.charAt(0)) + tier.substring(1);
-                playerCurSoloRank.setTier(tier);
+                try {
+                    gotText = GlobalConstants.waits.get(threadNumber - 1).until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("#content-container > div:nth-child(1) > div:nth-child(2) > div.table_summary > div:nth-child(2) > div:nth-child(2) > b > font"))).getText();
+                    String tier = gotText.split(" ")[0];
+                    tier = tier.toLowerCase();
+                    tier = Character.toUpperCase(tier.charAt(0)) + tier.substring(1);
+                    playerCurSoloRank.setTier(tier);
 
-                if (!(tier.equals("Master") || tier.equals("Grandmaster") || tier.equals("Challenger"))) {
-                    String rankNum = gotText.split(" ")[1];
-                    if (rankNum.equals("I")) {
-                        playerCurSoloRank.setRankNum("1");
-                    } else if (rankNum.equals("II")) {
-                        playerCurSoloRank.setRankNum("2");
-                    } else if (rankNum.equals("III")) {
-                        playerCurSoloRank.setRankNum("3");
-                    } else if (rankNum.equals("IV")) {
-                        playerCurSoloRank.setRankNum("4");
+                    if (!(tier.equals("Master") || tier.equals("Grandmaster") || tier.equals("Challenger"))) {
+                        String rankNum = gotText.split(" ")[1];
+                        if (rankNum.equals("I")) {
+                            playerCurSoloRank.setRankNum("1");
+                        } else if (rankNum.equals("II")) {
+                            playerCurSoloRank.setRankNum("2");
+                        } else if (rankNum.equals("III")) {
+                            playerCurSoloRank.setRankNum("3");
+                        } else if (rankNum.equals("IV")) {
+                            playerCurSoloRank.setRankNum("4");
+                        }
                     }
+                } catch (Exception e) {
+                    // 티어 안나타 남
+                    // gotText 잘못 됌
+                    throw new TimeoutException();
                 }
 
                 // 솔로 랭크 버튼
-                webElement = wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("#content-container > div:nth-child(1) > div:nth-child(2) > div.rankchamp_S14A_menu > a.sbtn.rankchamp_list.rankchamp_list_solo")));
-                driver.executeScript("arguments[0].click();", webElement);
+                webElement = GlobalConstants.waits.get(threadNumber - 1).until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("#content-container > div:nth-child(1) > div:nth-child(2) > div.rankchamp_S14A_menu > a.sbtn.rankchamp_list.rankchamp_list_solo")));
+                GlobalConstants.drivers.get(threadNumber - 1).executeScript("arguments[0].click();", webElement);
 
                 // 챔피언 목록
-                webElements = driver.findElements(By.cssSelector("#content-container > div:nth-child(1) > div:nth-child(2) > div.rankchamp_S14A_div.rankchamp_S14A_div_solo > table > tbody > tr"));
+                webElements = GlobalConstants.drivers.get(threadNumber - 1).findElements(By.cssSelector("#content-container > div:nth-child(1) > div:nth-child(2) > div.rankchamp_S14A_div.rankchamp_S14A_div_solo > table > tbody > tr"));
 
                 playerCurSoloRank.setMostDatas(new ArrayList<>());
                 int mostSeq = 1;
@@ -158,34 +161,20 @@ public class AsyncService {
                     playerCurSoloRank.getMostDatas().add(mostData);
                 }
                 playerCurSoloRanks.add(playerCurSoloRank);
+            } catch (TimeoutException e) {
+                index--;
             } catch (Exception e) {
 
-                try {
-                    if (driver != null) {
-                        driver.quit();
-                        driver = null; // driver를 null로 설정하여 참조를 제거합니다.
-                    }
-                } catch (WebDriverException e2) {
-                    System.out.println("WebDriver가 이미 종료되었거나 종료 중 에러가 발생했습니다.");
-                    driver = null; // 예외 발생 시에도 driver를 null로 설정합니다.
+                if (GlobalConstants.drivers.get(threadNumber - 1) != null) {
+                    GlobalConstants.drivers.get(threadNumber - 1).quit();
                 }
+                GlobalConstants.drivers.set(threadNumber - 1, new ChromeDriver(GlobalConstants.options));
+                GlobalConstants.waits.set(threadNumber - 1, new WebDriverWait(GlobalConstants.drivers.get(threadNumber - 1), Duration.ofSeconds(GlobalConstants.waitTime)));
 
                 index--;
             }
         }
-
         playerCurSoloRankRepository.saveAll(playerCurSoloRanks);
         System.out.println("playerCurSoloRanks.size() = " + playerCurSoloRanks.size());
-        try {
-            if (driver != null) {
-                driver.quit();
-                driver = null; // driver를 null로 설정하여 참조를 제거합니다.
-            }
-        } catch (WebDriverException e2) {
-            System.out.println("WebDriver가 이미 종료되었거나 종료 중 에러가 발생했습니다.");
-            driver = null; // 예외 발생 시에도 driver를 null로 설정합니다.
-        }
-
-
     }
 }
