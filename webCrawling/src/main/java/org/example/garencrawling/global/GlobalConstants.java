@@ -7,11 +7,11 @@ import java.util.*;
 
 public class GlobalConstants {
 
-    public static final int corePoolSize = 50;
-    public static final int maxPoolSize = 50;
+    public static final int corePoolSize = 25;
+    public static final int maxPoolSize = 25;
     public static final int queueCapacity = 100;
 
-    public static final int threadSize = 50;
+    public static final int threadSize = 25;
     public static final int saveSize = 10;
     public static final int waitTime = 10;
 

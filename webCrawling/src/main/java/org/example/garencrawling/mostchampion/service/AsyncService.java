@@ -1,5 +1,6 @@
 package org.example.garencrawling.mostchampion.service;
 
+import io.github.bonigarcia.wdm.WebDriverManager;
 import lombok.RequiredArgsConstructor;
 import org.example.garencrawling.global.GlobalConstants;
 import org.example.garencrawling.mostchampion.domain.MostData;
@@ -52,12 +53,12 @@ public class AsyncService {
         System.out.println(sb);
     }
 
-    public void crawling(List<PlayerInfo> playerInfos) throws InterruptedException {
+    public void crawling(List<PlayerInfo> playerInfos) {
 
         ArrayList<PlayerCurSoloRank> playerCurSoloRanks = new ArrayList<>();
 
-        ChromeDriver driver = new ChromeDriver(GlobalConstants.options);
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(GlobalConstants.waitTime));
+        ChromeDriver driver = null;
+        WebDriverWait wait = null;
 
         for (int index = 0; index < playerInfos.size(); index++) {
             try {
@@ -68,6 +69,11 @@ public class AsyncService {
 
                 PlayerCurSoloRank playerCurSoloRank = new PlayerCurSoloRank();
                 playerCurSoloRank.setPlayerId(playerInfos.get(index).getPlayerId());
+
+                if (driver == null) {
+                    driver = new ChromeDriver(GlobalConstants.options);
+                    wait = new WebDriverWait(driver, Duration.ofSeconds(GlobalConstants.waitTime));
+                }
 
                 driver.get("https://fow.kr/find/" + playerInfos.get(index).getUserNickname());
 
@@ -153,16 +159,33 @@ public class AsyncService {
                 }
                 playerCurSoloRanks.add(playerCurSoloRank);
             } catch (Exception e) {
-                driver.quit();
-                driver = new ChromeDriver(GlobalConstants.options);
-                wait = new WebDriverWait(driver, Duration.ofSeconds(GlobalConstants.waitTime));
+
+                try {
+                    if (driver != null) {
+                        driver.quit();
+                        driver = null; // driver를 null로 설정하여 참조를 제거합니다.
+                    }
+                } catch (WebDriverException e2) {
+                    System.out.println("WebDriver가 이미 종료되었거나 종료 중 에러가 발생했습니다.");
+                    driver = null; // 예외 발생 시에도 driver를 null로 설정합니다.
+                }
+
                 index--;
             }
         }
 
         playerCurSoloRankRepository.saveAll(playerCurSoloRanks);
         System.out.println("playerCurSoloRanks.size() = " + playerCurSoloRanks.size());
-        driver.quit();
+        try {
+            if (driver != null) {
+                driver.quit();
+                driver = null; // driver를 null로 설정하여 참조를 제거합니다.
+            }
+        } catch (WebDriverException e2) {
+            System.out.println("WebDriver가 이미 종료되었거나 종료 중 에러가 발생했습니다.");
+            driver = null; // 예외 발생 시에도 driver를 null로 설정합니다.
+        }
+
 
     }
 }
