@@ -1,6 +1,5 @@
 package org.example.garencrawling.mostchampion.service;
 
-import dev.failsafe.Timeout;
 import lombok.RequiredArgsConstructor;
 import org.example.garencrawling.global.GlobalConstants;
 import org.example.garencrawling.mostchampion.domain.MostData;
@@ -39,9 +38,8 @@ public class AsyncService {
         while (currentStartIndex <= endIndex) {
             int currentEndIndex = Math.min(currentStartIndex + GlobalConstants.saveSize - 1, endIndex);
 
-            crawling(subFindedPlayerInfos.subList(currentStartIndex, currentEndIndex + 1), threadNumber);
-
             sb = new StringBuilder();
+            sb.append(crawling(subFindedPlayerInfos.subList(currentStartIndex, currentEndIndex + 1), threadNumber)).append(" ");
             sb.append("현재 시간: ").append(GlobalConstants.formatter.format(new Date())).append(" threadNumber = ").append(threadNumber).append(" ").append((currentEndIndex + 1) * 100 / (endIndex + 1)).append("% 완료");
             System.out.println(sb);
 
@@ -53,7 +51,7 @@ public class AsyncService {
         System.out.println(sb);
     }
 
-    public void crawling(List<PlayerInfo> playerInfos, int threadNumber) throws InterruptedException {
+    public int crawling(List<PlayerInfo> playerInfos, int threadNumber) throws InterruptedException {
 
         ArrayList<PlayerCurSoloRank> playerCurSoloRanks = new ArrayList<>();
 
@@ -70,7 +68,12 @@ public class AsyncService {
                 GlobalConstants.drivers.get(threadNumber - 1).get("https://fow.kr/find/" + playerInfos.get(index).getUserNickname());
 
                 // 서치 컨테이너
-                GlobalConstants.waits.get(threadNumber - 1).until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("#searchContainer")));
+                try {
+                    GlobalConstants.waits.get(threadNumber - 1).until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("#searchContainer")));
+                } catch (TimeoutException e) {
+                    index--;
+                    continue;
+                }
 
                 // 사용자 정보
                 try {
@@ -79,24 +82,22 @@ public class AsyncService {
                     continue;
                 }
 
-                // 갱신 할지 말지
                 try {
+                    // 갱신 할지 말지
                     timeData = gotText.split(" ")[gotText.split(" ").length - 2];
-                    if (timeData.charAt(timeData.length() - 1) == '일' && Integer.parseInt(timeData.substring(0, timeData.length() - 1)) > 7) {
+                    if (timeData.substring(timeData.length() - 1).equals("일") && Integer.parseInt(timeData.substring(0, timeData.length() - 1)) > 3) {
                         webElement = GlobalConstants.waits.get(threadNumber - 1).until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("#content-container > div:nth-child(1) > div:nth-child(2) > div.topp > div.profile > div:nth-child(2) > div")));
                         GlobalConstants.drivers.get(threadNumber - 1).executeScript("arguments[0].click();", webElement);
-                        throw new TimeoutException();
-                    }
-                } catch (Exception e) {
-                    // gotText 잘못 됨
-                    // 갱신 하기 버튼 안나타남
-                    throw new TimeoutException();
-                }
 
-                // 현재 솔로 랭크 티어
-                try {
+                        GlobalConstants.waits.get(threadNumber - 1).until(ExpectedConditions.textToBePresentInElementLocated(By.cssSelector("#content-container > div:nth-child(1) > div:nth-child(2) > div.topp > div.profile > div:nth-child(2) > div"), "갱신불가"));
+                    }
+
+                    // 현재 솔로 랭크 티어
                     gotText = GlobalConstants.waits.get(threadNumber - 1).until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("#content-container > div:nth-child(1) > div:nth-child(2) > div.table_summary > div:nth-child(2) > div:nth-child(2) > b > font"))).getText();
                     String tier = gotText.split(" ")[0];
+                    if (tier.equals("배치")) {
+                        continue;
+                    }
                     tier = tier.toLowerCase();
                     tier = Character.toUpperCase(tier.charAt(0)) + tier.substring(1);
                     playerCurSoloRank.setTier(tier);
@@ -114,67 +115,71 @@ public class AsyncService {
                         }
                     }
                 } catch (Exception e) {
-                    // 티어 안나타 남
-                    // gotText 잘못 됌
-                    throw new TimeoutException();
+                    index--;
+                    continue;
                 }
 
-                // 솔로 랭크 버튼
-                webElement = GlobalConstants.waits.get(threadNumber - 1).until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("#content-container > div:nth-child(1) > div:nth-child(2) > div.rankchamp_S14A_menu > a.sbtn.rankchamp_list.rankchamp_list_solo")));
-                GlobalConstants.drivers.get(threadNumber - 1).executeScript("arguments[0].click();", webElement);
+                try {
+                    // 솔로 랭크 버튼
+                    webElement = GlobalConstants.waits.get(threadNumber - 1).until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("#content-container > div:nth-child(1) > div:nth-child(2) > div.rankchamp_S14A_menu > a.sbtn.rankchamp_list.rankchamp_list_solo")));
+                    GlobalConstants.drivers.get(threadNumber - 1).executeScript("arguments[0].click();", webElement);
 
-                // 챔피언 목록
-                webElements = GlobalConstants.drivers.get(threadNumber - 1).findElements(By.cssSelector("#content-container > div:nth-child(1) > div:nth-child(2) > div.rankchamp_S14A_div.rankchamp_S14A_div_solo > table > tbody > tr"));
+                    // 챔피언 목록
+                    webElements = GlobalConstants.drivers.get(threadNumber - 1).findElements(By.cssSelector("#content-container > div:nth-child(1) > div:nth-child(2) > div.rankchamp_S14A_div.rankchamp_S14A_div_solo > table > tbody > tr"));
+                } catch (TimeoutException e) {
+                    index--;
+                    continue;
+                }
 
-                playerCurSoloRank.setMostDatas(new ArrayList<>());
-                int mostSeq = 1;
-                for (WebElement row : webElements) {
-                    MostData mostData = new MostData();
-                    mostData.setMostSeq(String.valueOf(mostSeq));
-                    mostSeq++;
+                try {
+                    playerCurSoloRank.setMostDatas(new ArrayList<>());
+                    int mostSeq = 1;
+                    for (WebElement row : webElements) {
+                        MostData mostData = new MostData();
+                        mostData.setMostSeq(String.valueOf(mostSeq));
+                        mostSeq++;
 
-                    List<WebElement> cols = row.findElements(By.tagName("td"));
-                    for (int i = 0; i < cols.size(); i++) {
-                        String tmp = cols.get(i).getText();
+                        List<WebElement> cols = row.findElements(By.tagName("td"));
+                        for (int i = 0; i < cols.size(); i++) {
+                            String tmp = cols.get(i).getText();
 
-                        if (i == 0) {
-                            mostData.setChampion(GlobalConstants.championNames.get(tmp));
-                        } else if (i == 1) {
-                            mostData.setGame(tmp);
-                        } else if (i == 2) {
-                            double percentage = Double.parseDouble(tmp.substring(0, tmp.length() - 1));
-                            int win = (int) (Integer.parseInt(mostData.getGame()) * percentage / 100 + 0.99);
-                            int lose = Integer.parseInt(mostData.getGame()) - win;
+                            if (i == 0) {
+                                mostData.setChampion(GlobalConstants.championNames.get(tmp));
+                            } else if (i == 1) {
+                                mostData.setGame(tmp);
+                            } else if (i == 2) {
+                                double percentage = Double.parseDouble(tmp.substring(0, tmp.length() - 1));
+                                int win = (int) (Integer.parseInt(mostData.getGame()) * percentage / 100 + 0.99);
+                                int lose = Integer.parseInt(mostData.getGame()) - win;
 
-                            String result = "";
+                                String result = "";
 
-                            if (win != 0)
-                                result = result + win + "W";
-                            if (lose != 0)
-                                result = result + lose + "L";
+                                if (win != 0)
+                                    result = result + win + "W";
+                                if (lose != 0)
+                                    result = result + lose + "L";
 
-                            result = result + (int) percentage + "%";
+                                result = result + (int) percentage + "%";
 
-                            mostData.setGame(result);
+                                mostData.setGame(result);
+                            }
                         }
+                        playerCurSoloRank.getMostDatas().add(mostData);
                     }
-                    playerCurSoloRank.getMostDatas().add(mostData);
+                    playerCurSoloRanks.add(playerCurSoloRank);
+                } catch (Exception e) {
+                    index--;
+                    continue;
                 }
-                playerCurSoloRanks.add(playerCurSoloRank);
-            } catch (TimeoutException e) {
-                index--;
-            } catch (Exception e) {
 
-                if (GlobalConstants.drivers.get(threadNumber - 1) != null) {
-                    GlobalConstants.drivers.get(threadNumber - 1).quit();
-                }
+            } catch (Exception e) {
+                GlobalConstants.drivers.get(threadNumber - 1).quit();
                 GlobalConstants.drivers.set(threadNumber - 1, new ChromeDriver(GlobalConstants.options));
                 GlobalConstants.waits.set(threadNumber - 1, new WebDriverWait(GlobalConstants.drivers.get(threadNumber - 1), Duration.ofSeconds(GlobalConstants.waitTime)));
-
                 index--;
             }
         }
         playerCurSoloRankRepository.saveAll(playerCurSoloRanks);
-        System.out.println("playerCurSoloRanks.size() = " + playerCurSoloRanks.size());
+        return playerCurSoloRanks.size();
     }
 }

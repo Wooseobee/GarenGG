@@ -60,6 +60,14 @@ public class MyStartupTask implements ApplicationRunner {
         options.addArguments("--disable-dev-shm-usage");
         options.addArguments("--disable-popup-blocking");
         options.addArguments("--disable-notifications");
+        options.addArguments("--disable-blink-features=AutomationControlled");
+
+        String userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36";
+        options.addArguments("--user-agent=" + userAgent);
+
+//        String googlebotUserAgent = "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)";
+//        options.addArguments("--user-agent=" + googlebotUserAgent);
+
         options.setPageLoadStrategy(PageLoadStrategy.NONE);
 
         for (int i = 0; i < threadSize; i++) {
@@ -70,6 +78,5 @@ public class MyStartupTask implements ApplicationRunner {
         }
 
         System.out.println("End MyStartupTask");
-
     }
 }
