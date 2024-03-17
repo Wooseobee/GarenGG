@@ -10,13 +10,13 @@ import java.util.*;
 
 public class GlobalConstants {
 
-    public static final int corePoolSize = 9;
-    public static final int maxPoolSize = 9;
+    public static final int corePoolSize = 8;
+    public static final int maxPoolSize = 8;
     public static final int queueCapacity = 50;
 
-    public static final int threadSize = 9;
+    public static final int threadSize = 8;
     public static final int saveSize = 10;
-    public static final int waitTime = 3;
+    public static final int waitTime = 5;
 
     public static final HashMap<String, String> championNames = new HashMap<>();
 

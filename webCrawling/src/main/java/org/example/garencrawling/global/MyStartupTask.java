@@ -58,6 +58,11 @@ public class MyStartupTask implements ApplicationRunner {
         proxy.setSslProxy("j10a605.p.ssafy.io:3128");
         proxyList.add(proxy);
 
+        proxy = new Proxy();
+        proxy.setHttpProxy(	"115.144.140.64:8302");
+        proxy.setSslProxy("115.144.140.64:8302");
+        proxyList.add(proxy);
+
         for (int i = 0; i <= proxyList.size(); i++) {
             ChromeOptions options = new ChromeOptions();
             options.addArguments("--headless");
