@@ -17,6 +17,9 @@ import org.springframework.stereotype.Service;
 import java.time.Duration;
 import java.util.*;
 
+import static org.example.garencrawling.global.GlobalConstants.optionsList;
+import static org.example.garencrawling.global.GlobalConstants.threadSize;
+
 @Service
 @RequiredArgsConstructor
 @EnableMongoRepositories(basePackageClasses = {PlayerCurSoloRankRepository.class})
@@ -174,7 +177,7 @@ public class AsyncService {
 
             } catch (Exception e) {
                 GlobalConstants.drivers.get(threadNumber - 1).quit();
-                GlobalConstants.drivers.set(threadNumber - 1, new ChromeDriver(GlobalConstants.options));
+                GlobalConstants.drivers.set(threadNumber - 1, new ChromeDriver(GlobalConstants.optionsList.get(threadNumber - 1 / optionsList.size())));
                 GlobalConstants.waits.set(threadNumber - 1, new WebDriverWait(GlobalConstants.drivers.get(threadNumber - 1), Duration.ofSeconds(GlobalConstants.waitTime)));
                 index--;
             }
