@@ -1,9 +1,5 @@
 <template>
-  <header
-    id="header"
-    class="header fixed-top d-flex align-items-center"
-    :class="headerClass"
-  >
+  <header id="header" class="header fixed-top d-flex align-items-center">
     <div class="container-fluid d-flex align-items-center">
       <div class="logo d-flex align-items-center me-auto me-xl-0">
         <RouterLink to="/">
@@ -35,17 +31,15 @@ import { useRouter, useRoute } from "vue-router";
 const router = useRouter();
 const route = useRoute();
 
-const headerClass = computed(() => {
-  if (route.path === "/detail") {
-    return "scrolled";
-  } else if (route.path === "/home") {
-    return "home-view";
-  } else {
-    return "";
-  }
-});
-
-console.log(headerClass);
+// const headerClass = computed(() => {
+//   if (route.path === "/detail") {
+//     return "scrolled";
+//   } else if (route.path === "/home") {
+//     return "home-view";
+//   } else {
+//     return "";
+//   }
+// });
 </script>
 
 <style scoped>
@@ -144,7 +138,7 @@ section {
 /* Home Page Custom Header on page scroll
 ------------------------------*/
 .scrolled {
-  background-color: #0d6efd;
+  /* background-color: #0d6efd; */
   --background-color: #ffffff;
   --heading-color: #444444;
   --nav-color: #444444;

@@ -3,6 +3,7 @@ import HomeView from "@/views/HomeView.vue";
 import ChampView from "@/views/ChampView.vue";
 import PlaygroundView from "@/views/PlaygroundView.vue";
 import CombinationView from "@/views/CombinationView.vue";
+import DetailView from "@/views/DetailView.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -16,6 +17,11 @@ const router = createRouter({
       path: "/champ",
       name: "champ",
       component: ChampView,
+    },
+    {
+      path: "/detail",
+      name: "detail",
+      component: DetailView,
     },
     {
       path: "/combination",
