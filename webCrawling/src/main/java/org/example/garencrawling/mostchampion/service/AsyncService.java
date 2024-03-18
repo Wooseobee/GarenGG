@@ -17,9 +17,6 @@ import org.springframework.stereotype.Service;
 import java.time.Duration;
 import java.util.*;
 
-import static org.example.garencrawling.global.GlobalConstants.optionsList;
-import static org.example.garencrawling.global.GlobalConstants.threadSize;
-
 @Service
 @RequiredArgsConstructor
 @EnableMongoRepositories(basePackageClasses = {PlayerCurSoloRankRepository.class})
@@ -74,6 +71,8 @@ public class AsyncService {
                 try {
                     GlobalConstants.waits.get(threadNumber - 1).until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("#searchContainer")));
                 } catch (TimeoutException e) {
+//                    System.out.print("userNickname() = " + playerInfos.get(index).getUserNickname() + " ");
+                    System.out.println("threadNumber = " + threadNumber + " 서치 컨테이너 실패 - TimeoutException");
                     index--;
                     continue;
                 }
@@ -82,6 +81,8 @@ public class AsyncService {
                 try {
                     gotText = GlobalConstants.waits.get(threadNumber - 1).until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("#content-container > div:nth-child(1) > div:nth-child(2) > div.topp > div.profile > div:nth-child(2)"))).getText();
                 } catch (TimeoutException e) {
+//                    System.out.print("userNickname() = " + playerInfos.get(index).getUserNickname() + " ");
+                    System.out.println("threadNumber = " + threadNumber + " 사용자 정보 - TimeoutException");
                     continue;
                 }
 
@@ -89,10 +90,20 @@ public class AsyncService {
                     // 갱신 할지 말지
                     timeData = gotText.split(" ")[gotText.split(" ").length - 2];
                     if (timeData.substring(timeData.length() - 1).equals("일") && Integer.parseInt(timeData.substring(0, timeData.length() - 1)) > 3) {
-                        webElement = GlobalConstants.waits.get(threadNumber - 1).until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("#content-container > div:nth-child(1) > div:nth-child(2) > div.topp > div.profile > div:nth-child(2) > div")));
+                        webElement = GlobalConstants.waits.get(threadNumber - 1).until(ExpectedConditions.elementToBeClickable(By.cssSelector("#content-container > div:nth-child(1) > div:nth-child(2) > div.topp > div.profile > div:nth-child(2) > div")));
                         GlobalConstants.drivers.get(threadNumber - 1).executeScript("arguments[0].click();", webElement);
+//                        GlobalConstants.waits.get(threadNumber - 1).until(ExpectedConditions.textToBePresentInElementLocated(By.cssSelector("#content-container > div:nth-child(1) > div:nth-child(2) > div.topp > div.profile > div:nth-child(2) > div"), "갱신불가"));
 
-                        GlobalConstants.waits.get(threadNumber - 1).until(ExpectedConditions.textToBePresentInElementLocated(By.cssSelector("#content-container > div:nth-child(1) > div:nth-child(2) > div.topp > div.profile > div:nth-child(2) > div"), "갱신불가"));
+                        while (true) {
+                            try {
+                                GlobalConstants.waits.get(threadNumber - 1).until(ExpectedConditions.textToBe(By.cssSelector("#content-container > div:nth-child(1) > div:nth-child(2) > div.topp > div.profile > div:nth-child(2) > div"), "갱신불가"));
+                                break;
+                            } catch (TimeoutException e) {
+                                GlobalConstants.drivers.get(threadNumber - 1).navigate().refresh();
+//                                System.out.print("userNickname() = " + playerInfos.get(index).getUserNickname() + " ");
+                                System.out.println("threadNumber = " + threadNumber + " 갱신불가 - TimeoutException");
+                            }
+                        }
                     }
 
                     // 현재 솔로 랭크 티어
@@ -118,6 +129,8 @@ public class AsyncService {
                         }
                     }
                 } catch (Exception e) {
+//                    System.out.print("userNickname() = " + playerInfos.get(index).getUserNickname() + " ");
+                    System.out.println("threadNumber = " + threadNumber + " 갱신 할지 말지 + 현재 솔로 랭크 티어 - Exception");
                     index--;
                     continue;
                 }
@@ -130,6 +143,8 @@ public class AsyncService {
                     // 챔피언 목록
                     webElements = GlobalConstants.drivers.get(threadNumber - 1).findElements(By.cssSelector("#content-container > div:nth-child(1) > div:nth-child(2) > div.rankchamp_S14A_div.rankchamp_S14A_div_solo > table > tbody > tr"));
                 } catch (TimeoutException e) {
+//                    System.out.print("userNickname() = " + playerInfos.get(index).getUserNickname() + " ");
+                    System.out.println("threadNumber = " + threadNumber + " 솔로 랭크 버튼 + 챔피언 목록 - TimeoutException");
                     index--;
                     continue;
                 }
@@ -170,16 +185,23 @@ public class AsyncService {
                         playerCurSoloRank.getMostDatas().add(mostData);
                     }
                     playerCurSoloRanks.add(playerCurSoloRank);
+//                    System.out.print("userNickname() = " + playerInfos.get(index).getUserNickname() + " ");
+                    System.out.println("threadNumber = " + threadNumber + " 성공");
                 } catch (Exception e) {
+//                    System.out.print("userNickname() = " + playerInfos.get(index).getUserNickname() + " ");
+                    System.out.println("threadNumber = " + threadNumber + " 챔피언 목록 읽기 - Exception");
                     index--;
                     continue;
                 }
 
             } catch (Exception e) {
+//                System.out.print("userNickname() = " + playerInfos.get(index).getUserNickname() + " ");
+                System.out.println("threadNumber = " + threadNumber + " 전체 - Exception");
                 GlobalConstants.drivers.get(threadNumber - 1).quit();
-                GlobalConstants.drivers.set(threadNumber - 1, new ChromeDriver(GlobalConstants.optionsList.get(threadNumber - 1 / optionsList.size())));
+                GlobalConstants.drivers.set(threadNumber - 1, new ChromeDriver(GlobalConstants.optionsList.get((threadNumber - 1) % GlobalConstants.optionsList.size())));
                 GlobalConstants.waits.set(threadNumber - 1, new WebDriverWait(GlobalConstants.drivers.get(threadNumber - 1), Duration.ofSeconds(GlobalConstants.waitTime)));
                 index--;
+                continue;
             }
         }
         playerCurSoloRankRepository.saveAll(playerCurSoloRanks);
