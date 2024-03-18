@@ -8,6 +8,7 @@ import org.example.garencrawling.mostchampion.domain.PlayerInfo;
 import org.example.garencrawling.mostchampion.repository.PlayerCurSoloRankRepository;
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
@@ -39,7 +40,8 @@ public class AsyncService {
             int currentEndIndex = Math.min(currentStartIndex + GlobalConstants.saveSize - 1, endIndex);
 
             sb = new StringBuilder();
-            sb.append(crawling(subFindedPlayerInfos.subList(currentStartIndex, currentEndIndex + 1), threadNumber)).append(" ");
+            sb.append(fowCrawling(subFindedPlayerInfos.subList(currentStartIndex, currentEndIndex + 1), threadNumber)).append(" ");
+//            sb.append(opggCrawling(subFindedPlayerInfos.subList(currentStartIndex, currentEndIndex + 1), threadNumber)).append(" ");
             sb.append("현재 시간: ").append(GlobalConstants.formatter.format(new Date())).append(" threadNumber = ").append(threadNumber).append(" ").append((currentEndIndex + 1) * 100 / (endIndex + 1)).append("% 완료");
             System.out.println(sb);
 
@@ -51,7 +53,7 @@ public class AsyncService {
         System.out.println(sb);
     }
 
-    public int crawling(List<PlayerInfo> playerInfos, int threadNumber) throws InterruptedException {
+    public int fowCrawling(List<PlayerInfo> playerInfos, int threadNumber) {
 
         ArrayList<PlayerCurSoloRank> playerCurSoloRanks = new ArrayList<>();
 
@@ -71,45 +73,52 @@ public class AsyncService {
                 try {
                     GlobalConstants.waits.get(threadNumber - 1).until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("#searchContainer")));
                 } catch (TimeoutException e) {
-//                    System.out.print("userNickname() = " + playerInfos.get(index).getUserNickname() + " ");
-                    System.out.println("threadNumber = " + threadNumber + " 서치 컨테이너 실패 - TimeoutException");
+                    System.out.println("threadNumber = " + threadNumber + " 서치 컨테이너 - TimeoutException");
                     index--;
                     continue;
                 }
 
-                // 사용자 정보
+                // 유저 정보
                 try {
-                    gotText = GlobalConstants.waits.get(threadNumber - 1).until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("#content-container > div:nth-child(1) > div:nth-child(2) > div.topp > div.profile > div:nth-child(2)"))).getText();
+                    GlobalConstants.waits.get(threadNumber - 1).until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("#content-container > div:nth-child(1) > div:nth-child(2) > div.topp > div.profile > div:nth-child(2)")));
                 } catch (TimeoutException e) {
-//                    System.out.print("userNickname() = " + playerInfos.get(index).getUserNickname() + " ");
-                    System.out.println("threadNumber = " + threadNumber + " 사용자 정보 - TimeoutException");
+                    System.out.println("threadNumber = " + threadNumber + " 유저 정보 - TimeoutException");
                     continue;
                 }
 
+                // 갱신불가
                 try {
-                    // 갱신 할지 말지
-                    timeData = gotText.split(" ")[gotText.split(" ").length - 2];
-                    if (timeData.substring(timeData.length() - 1).equals("일") && Integer.parseInt(timeData.substring(0, timeData.length() - 1)) > 3) {
+                    GlobalConstants.waits.get(threadNumber - 1).until(ExpectedConditions.textToBe(By.cssSelector("#content-container > div:nth-child(1) > div:nth-child(2) > div.topp > div.profile > div:nth-child(2) > div"), "갱신불가"));
+                } catch (TimeoutException e) {
+
+                    // 갱신하기
+                    try {
                         webElement = GlobalConstants.waits.get(threadNumber - 1).until(ExpectedConditions.elementToBeClickable(By.cssSelector("#content-container > div:nth-child(1) > div:nth-child(2) > div.topp > div.profile > div:nth-child(2) > div")));
                         GlobalConstants.drivers.get(threadNumber - 1).executeScript("arguments[0].click();", webElement);
-//                        GlobalConstants.waits.get(threadNumber - 1).until(ExpectedConditions.textToBePresentInElementLocated(By.cssSelector("#content-container > div:nth-child(1) > div:nth-child(2) > div.topp > div.profile > div:nth-child(2) > div"), "갱신불가"));
-
-                        while (true) {
-                            try {
-                                GlobalConstants.waits.get(threadNumber - 1).until(ExpectedConditions.textToBe(By.cssSelector("#content-container > div:nth-child(1) > div:nth-child(2) > div.topp > div.profile > div:nth-child(2) > div"), "갱신불가"));
-                                break;
-                            } catch (TimeoutException e) {
-                                GlobalConstants.drivers.get(threadNumber - 1).navigate().refresh();
-//                                System.out.print("userNickname() = " + playerInfos.get(index).getUserNickname() + " ");
-                                System.out.println("threadNumber = " + threadNumber + " 갱신불가 - TimeoutException");
-                            }
-                        }
+                        System.out.println("threadNumber = " + threadNumber + " 갱신하기");
+                        Thread.sleep(1000);
+                        index--;
+                        continue;
+                    } catch (TimeoutException e2) {
+                        System.out.println("threadNumber = " + threadNumber + " 갱신하기  - TimeoutException");
+                        index--;
+                        continue;
                     }
+                }
 
-                    // 현재 솔로 랭크 티어
+                // 솔로 랭크 티어
+                try {
                     gotText = GlobalConstants.waits.get(threadNumber - 1).until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("#content-container > div:nth-child(1) > div:nth-child(2) > div.table_summary > div:nth-child(2) > div:nth-child(2) > b > font"))).getText();
+                } catch (TimeoutException e) {
+                    System.out.println("threadNumber = " + threadNumber + " 솔로 랭크 티어 - TimeoutException");
+                    continue;
+                }
+
+                // 티어 읽기
+                try {
                     String tier = gotText.split(" ")[0];
                     if (tier.equals("배치")) {
+                        System.out.println("threadNumber = " + threadNumber + " 배치 유저");
                         continue;
                     }
                     tier = tier.toLowerCase();
@@ -129,26 +138,32 @@ public class AsyncService {
                         }
                     }
                 } catch (Exception e) {
-//                    System.out.print("userNickname() = " + playerInfos.get(index).getUserNickname() + " ");
-                    System.out.println("threadNumber = " + threadNumber + " 갱신 할지 말지 + 현재 솔로 랭크 티어 - Exception");
+                    System.out.println("threadNumber = " + threadNumber + " 티어 읽기 - Exception");
                     index--;
                     continue;
                 }
 
+                // 솔로 랭크 버튼
                 try {
-                    // 솔로 랭크 버튼
-                    webElement = GlobalConstants.waits.get(threadNumber - 1).until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("#content-container > div:nth-child(1) > div:nth-child(2) > div.rankchamp_S14A_menu > a.sbtn.rankchamp_list.rankchamp_list_solo")));
+                    webElement = GlobalConstants.waits.get(threadNumber - 1).until(ExpectedConditions.elementToBeClickable(By.cssSelector("#content-container > div:nth-child(1) > div:nth-child(2) > div.rankchamp_S14A_menu > a.sbtn.rankchamp_list.rankchamp_list_solo")));
                     GlobalConstants.drivers.get(threadNumber - 1).executeScript("arguments[0].click();", webElement);
+                    Thread.sleep(1000);
+                } catch (TimeoutException e) {
+                    System.out.println("threadNumber = " + threadNumber + " 솔로 랭크 버튼 - TimeoutException");
+                    index--;
+                    continue;
+                }
 
-                    // 챔피언 목록
+                // 챔피언 목록
+                try {
                     webElements = GlobalConstants.drivers.get(threadNumber - 1).findElements(By.cssSelector("#content-container > div:nth-child(1) > div:nth-child(2) > div.rankchamp_S14A_div.rankchamp_S14A_div_solo > table > tbody > tr"));
                 } catch (TimeoutException e) {
-//                    System.out.print("userNickname() = " + playerInfos.get(index).getUserNickname() + " ");
-                    System.out.println("threadNumber = " + threadNumber + " 솔로 랭크 버튼 + 챔피언 목록 - TimeoutException");
+                    System.out.println("threadNumber = " + threadNumber + " 챔피언 목록 - TimeoutException");
                     index--;
                     continue;
                 }
 
+                // 챔피언 목록 읽기
                 try {
                     playerCurSoloRank.setMostDatas(new ArrayList<>());
                     int mostSeq = 1;
@@ -185,23 +200,168 @@ public class AsyncService {
                         playerCurSoloRank.getMostDatas().add(mostData);
                     }
                     playerCurSoloRanks.add(playerCurSoloRank);
-//                    System.out.print("userNickname() = " + playerInfos.get(index).getUserNickname() + " ");
                     System.out.println("threadNumber = " + threadNumber + " 성공");
                 } catch (Exception e) {
-//                    System.out.print("userNickname() = " + playerInfos.get(index).getUserNickname() + " ");
                     System.out.println("threadNumber = " + threadNumber + " 챔피언 목록 읽기 - Exception");
                     index--;
                     continue;
                 }
 
             } catch (Exception e) {
-//                System.out.print("userNickname() = " + playerInfos.get(index).getUserNickname() + " ");
                 System.out.println("threadNumber = " + threadNumber + " 전체 - Exception");
                 GlobalConstants.drivers.get(threadNumber - 1).quit();
                 GlobalConstants.drivers.set(threadNumber - 1, new ChromeDriver(GlobalConstants.optionsList.get((threadNumber - 1) % GlobalConstants.optionsList.size())));
                 GlobalConstants.waits.set(threadNumber - 1, new WebDriverWait(GlobalConstants.drivers.get(threadNumber - 1), Duration.ofSeconds(GlobalConstants.waitTime)));
                 index--;
-                continue;
+            }
+        }
+        playerCurSoloRankRepository.saveAll(playerCurSoloRanks);
+        return playerCurSoloRanks.size();
+    }
+
+    public int opggCrawling(List<PlayerInfo> playerInfos, int threadNumber) {
+        ArrayList<PlayerCurSoloRank> playerCurSoloRanks = new ArrayList<>();
+
+        for (int index = 0; index < playerInfos.size(); index++) {
+            try {
+                WebElement webElement;
+                List<WebElement> webElements;
+                String gotText;
+
+                PlayerCurSoloRank playerCurSoloRank = new PlayerCurSoloRank();
+                playerCurSoloRank.setPlayerId(playerInfos.get(index).getPlayerId());
+
+                GlobalConstants.drivers.get(threadNumber - 1).get("https://www.op.gg/summoners/kr/" + playerInfos.get(index).getUserNickname());
+
+                // 서치 컨테이너
+                try {
+                    GlobalConstants.waits.get(threadNumber - 1).until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("#__next > header > div.css-r8zyx3.e1pso4io0 > div > div.css-1oynrk.e1pso4io3")));
+                } catch (TimeoutException e) {
+                    System.out.println("threadNumber = " + threadNumber + " 서치 컨테이너 - TimeoutException");
+                    index--;
+                    continue;
+                }
+
+                // 유저 헤더
+                try {
+                    GlobalConstants.waits.get(threadNumber - 1).until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("#content-header")));
+                } catch (TimeoutException e) {
+                    System.out.println("threadNumber = " + threadNumber + " 유저 헤더 - TimeoutException");
+                    continue;
+                }
+
+                // 전적 갱신 블락
+                try {
+                    GlobalConstants.waits.get(threadNumber - 1).until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(".css-1r09es5.e18281hq0")));
+                } catch (TimeoutException e) {
+
+                    // 전적 갱신 허용
+                    try {
+                        webElement = GlobalConstants.waits.get(threadNumber - 1).until(ExpectedConditions.elementToBeClickable(By.cssSelector(".css-1ki6o6m.e18281hq0")));
+                        GlobalConstants.drivers.get(threadNumber - 1).executeScript("arguments[0].click();", webElement);
+                        System.out.println("threadNumber = " + threadNumber + " 전적 갱신");
+                        Thread.sleep(1000);
+                        index--;
+                        continue;
+                    } catch (TimeoutException e2) {
+                        System.out.println("threadNumber = " + threadNumber + " 전적 갱신 허용 - TimeoutException");
+                        index--;
+                        continue;
+                    }
+                }
+
+                // 솔로 랭크 티어
+                try {
+                    gotText = GlobalConstants.waits.get(threadNumber - 1).until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("#content-container > div:nth-child(1) > div.css-1kw4425.ecc8cxr0 > div.content > div.info > div.tier"))).getText();
+                } catch (TimeoutException e) {
+                    System.out.println("threadNumber = " + threadNumber + " 솔로 랭크 티어 - TimeoutException");
+                    continue;
+                }
+
+                // 티어 읽기
+                try {
+                    String tier = gotText.split(" ")[0];
+                    tier = tier.toLowerCase();
+                    tier = Character.toUpperCase(tier.charAt(0)) + tier.substring(1);
+                    playerCurSoloRank.setTier(tier);
+                    if (!(tier.equals("Master") || tier.equals("Grandmaster") || tier.equals("Challenger"))) {
+                        String rankNum = gotText.split(" ")[1];
+                        playerCurSoloRank.setRankNum(rankNum);
+                    }
+                } catch (Exception e) {
+                    System.out.println("threadNumber = " + threadNumber + " 티어 읽기 - Exception");
+                    index--;
+                    continue;
+                }
+
+                // 솔로 랭크 버튼
+                try {
+                    webElement = GlobalConstants.waits.get(threadNumber - 1).until(ExpectedConditions.elementToBeClickable(By.cssSelector("#content-container > div:nth-child(1) > div.css-18w3o0f.eptxecf0 > ul > li:nth-child(2) > button")));
+                    GlobalConstants.drivers.get(threadNumber - 1).executeScript("arguments[0].click();", webElement);
+                    Thread.sleep(1000);
+                } catch (TimeoutException e) {
+                    System.out.println("threadNumber = " + threadNumber + " 솔로 랭크 버튼 - TimeoutException");
+                    index--;
+                    continue;
+                }
+
+                // 챔피언 목록
+                try {
+                    webElements = GlobalConstants.drivers.get(threadNumber - 1).findElements(By.cssSelector("#content-container > div:nth-child(1) > div.css-18w3o0f.eptxecf0 > div > div"));
+                } catch (TimeoutException e) {
+                    System.out.println("threadNumber = " + threadNumber + " 챔피언 목록 - TimeoutException");
+                    index--;
+                    continue;
+                }
+
+                // 챔피언 목록 읽기
+                try {
+                    playerCurSoloRank.setMostDatas(new ArrayList<>());
+                    int mostSeq = 1;
+                    for (WebElement row : webElements) {
+                        MostData mostData = new MostData();
+                        mostData.setMostSeq(String.valueOf(mostSeq));
+                        mostSeq++;
+
+                        String tmp = row.findElement(By.cssSelector("div.info > div.name > a")).getText();
+                        mostData.setChampion(GlobalConstants.championNames.get(tmp));
+
+                        tmp = row.findElement(By.cssSelector("div.played > div.count")).getText();
+                        tmp = tmp.split(" ")[0];
+                        mostData.setGame(tmp);
+
+                        tmp = row.findElement(By.cssSelector("div.played > div:nth-child(1) > div")).getText();
+                        double percentage = Double.parseDouble(tmp.substring(0, tmp.length() - 1));
+                        int win = (int) (Integer.parseInt(mostData.getGame()) * percentage / 100 + 0.99);
+                        int lose = Integer.parseInt(mostData.getGame()) - win;
+
+                        String result = "";
+
+                        if (win != 0)
+                            result = result + win + "W";
+                        if (lose != 0)
+                            result = result + lose + "L";
+
+                        result = result + (int) percentage + "%";
+
+                        mostData.setGame(result);
+
+                        playerCurSoloRank.getMostDatas().add(mostData);
+                    }
+                    playerCurSoloRanks.add(playerCurSoloRank);
+                    System.out.println("threadNumber = " + threadNumber + " 성공");
+                } catch (Exception e) {
+                    System.out.println("threadNumber = " + threadNumber + " 챔피언 목록 읽기 - Exception");
+                    index--;
+                    continue;
+                }
+
+            } catch (Exception e) {
+                System.out.println("threadNumber = " + threadNumber + " 전체 - Exception");
+                GlobalConstants.drivers.get(threadNumber - 1).quit();
+                GlobalConstants.drivers.set(threadNumber - 1, new ChromeDriver(GlobalConstants.optionsList.get((threadNumber - 1) % GlobalConstants.optionsList.size())));
+                GlobalConstants.waits.set(threadNumber - 1, new WebDriverWait(GlobalConstants.drivers.get(threadNumber - 1), Duration.ofSeconds(GlobalConstants.waitTime)));
+                index--;
             }
         }
         playerCurSoloRankRepository.saveAll(playerCurSoloRanks);

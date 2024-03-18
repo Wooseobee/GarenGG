@@ -50,6 +50,7 @@ public class MyStartupTask implements ApplicationRunner {
         proxyList.add("43.201.36.62:3128");
         proxyList.add("j10a605.p.ssafy.io:3128");
         proxyList.add("115.144.140.64:8302");
+
         for (String proxy : proxyList)
             System.out.println("proxy = " + proxy);
         System.out.println("proxyList.size() = " + proxyList.size());
@@ -60,21 +61,23 @@ public class MyStartupTask implements ApplicationRunner {
             ChromeOptions options = new ChromeOptions();
             options.addArguments("--headless");
             options.addArguments("--disable-gpu");
-//            Map<String, Object> prefs = new HashMap<>();
-//            prefs.put("profile.managed_default_content_settings.images", 2);
-//            options.setExperimentalOption("prefs", prefs);
-//            options.addArguments("--disable-extensions");
-//            options.addArguments("--disable-infobars");
-//            options.addArguments("--disable-useAutomationExtension");
-//            options.addArguments("--no-sandbox");
-//            options.addArguments("--disk-cache-size=4096");
-//            options.addArguments("--dns-prefetch-disable");
-//            options.addArguments("--disable-dev-shm-usage");
-//            options.addArguments("--disable-popup-blocking");
-//            options.addArguments("--disable-notifications");
-//            options.addArguments("--disable-blink-features=AutomationControlled");
-//            String userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36";
-//            options.addArguments("--user-agent=" + userAgent);
+            Map<String, Object> prefs = new HashMap<>();
+            prefs.put("profile.managed_default_content_settings.images", 2);
+            options.setExperimentalOption("prefs", prefs);
+            String userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36";
+            options.addArguments("--user-agent=" + userAgent);
+
+            options.addArguments("--disable-extensions");
+            options.addArguments("--disable-infobars");
+            options.addArguments("--disable-useAutomationExtension");
+            options.addArguments("--no-sandbox");
+            options.addArguments("--disk-cache-size=4096");
+            options.addArguments("--dns-prefetch-disable");
+            options.addArguments("--disable-dev-shm-usage");
+            options.addArguments("--disable-popup-blocking");
+            options.addArguments("--disable-notifications");
+            options.addArguments("--disable-blink-features=AutomationControlled");
+
             options.setPageLoadStrategy(PageLoadStrategy.NONE);
 
             if (i != 0) {
@@ -94,6 +97,6 @@ public class MyStartupTask implements ApplicationRunner {
             waits.add(wait);
         }
 
-        System.out.println("----------End MyStartupTask----------");
+        System.out.println("---------------End MyStartupTask---------------");
     }
 }
