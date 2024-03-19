@@ -6,6 +6,7 @@ import gg.garen.back.duoRecommendation.repository.DuoRecommendationRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -38,7 +39,8 @@ public class DuoRecommendationServiceImpl implements DuoRecommendationService{
         log.info("champion : {}", championKeyIdMap);
     }
     public List<DuoRecommendationDto> duoRecommend(String curChampion, String curPosition) {
-        log.info("Service : function duoRecommend called : {}");
+        log.info("Service : function duoRecommend called : {} {}", curChampion, curPosition);
+
         long curChampionKey = championNameKeyMap.get(curChampion);
         log.info("Service : curChampionKey : {}",curChampionKey);
         //입력받은 챔피언의 모든 전적 가져오기

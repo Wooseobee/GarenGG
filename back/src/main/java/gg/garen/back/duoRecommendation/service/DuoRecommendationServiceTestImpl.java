@@ -14,9 +14,9 @@ public class DuoRecommendationServiceTestImpl implements DuoRecommendationServic
     @Override
     public List<DuoRecommendationDto> duoRecommend(String curChampion, String curPosition) {
         List<DuoRecommendationDto> test = new ArrayList<>();
-        test.add(new DuoRecommendationDto("갈리오","jungle","Galio"));
-        test.add(new DuoRecommendationDto("갈리오","jungle","Galio"));
-        test.add(new DuoRecommendationDto("갈리오","jungle","Galio"));
+        test.add(new DuoRecommendationDto("갈리오", "jungle", "Galio"));
+        test.add(new DuoRecommendationDto("갈리오", "jungle", "Galio"));
+        test.add(new DuoRecommendationDto("갈리오", "jungle", "Galio"));
 
         test.add(new DuoRecommendationDto("갈리오","middle","Annie"));
         test.add(new DuoRecommendationDto("갈리오","middle","Annie"));
