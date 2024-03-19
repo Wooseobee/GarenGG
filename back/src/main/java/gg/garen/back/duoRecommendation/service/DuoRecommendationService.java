@@ -41,7 +41,7 @@ public class DuoRecommendationService {
         for(DuoRecord duoRecord : duoRecords){
             //포지션별로 3개씩만 받게하기 고민할 것.
             String position = duoRecord.getLane1().equals(curPosition)? duoRecord.getLane2() : duoRecord.getLane1();
-            int championKey =  duoRecord.getChampion1() == curChampionKey? duoRecord.getChampion2() : duoRecord.getChampion1();
+            Long championKey =  duoRecord.getChampion1() == curChampionKey? duoRecord.getChampion2() : duoRecord.getChampion1();
             String champion = championKeyNameMap.get(championKey);
             int positionNum = -1;
             for(int i = 0; i < 5; i++){

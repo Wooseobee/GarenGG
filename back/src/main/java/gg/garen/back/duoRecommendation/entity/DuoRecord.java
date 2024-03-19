@@ -1,6 +1,7 @@
 package gg.garen.back.duoRecommendation.entity;
 
 
+import gg.garen.back.common.audit.Auditable;
 import jakarta.persistence.Entity;
 import lombok.Getter;
 import lombok.Setter;
@@ -11,24 +12,24 @@ import lombok.ToString;
 @Entity
 @Getter
 @Setter
-@Table(name = "combination", indexes = {
+@Table(indexes = {
         @Index(name = "idx_champion1", columnList = "champion1, lane1"),
         @Index(name = "idx_champion2", columnList = "champion2, lane2")
 })
 @ToString
-public class DuoRecord {
+public class DuoRecord extends Auditable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
-    private Integer champion1;
+    private Long champion1;
 
     @Column(nullable = false)
     private String lane1;
 
     @Column(nullable = false)
-    private Integer champion2;
+    private Long champion2;
 
     @Column(nullable = false)
     private String lane2;

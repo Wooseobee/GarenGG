@@ -30,4 +30,9 @@ public class DuoRecommendationController {
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+
+    @GetMapping("/health-check")
+    String healthCheck(){
+        return "I am healthy";
+    }
 }
