@@ -1,10 +1,9 @@
 package org.example.garencrawling.mostchampion.service;
 
 import lombok.RequiredArgsConstructor;
-
-import org.example.garencrawling.global.GlobalConstants;
-import org.example.garencrawling.mostchampion.domain.PlayerInfo;
+import org.example.garencrawling.mostchampion.domain.*;
 import org.example.garencrawling.mostchampion.repository.PlayerInfoRepository;
+import org.example.garencrawling.mostchampion.repository.PlayerMatchRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -13,26 +12,55 @@ import java.util.*;
 @RequiredArgsConstructor
 public class MostChampionServiceImpl implements MostChampionService {
 
-    private final AsyncService asyncService;
+    private final PlayerMatchRepository playerMatchRepository;
     private final PlayerInfoRepository playerInfoRepository;
 
     @Override
-    public void mostChampionCrawling(int startPlayerId, int endPlayerId) throws InterruptedException {
+    public void calculateMostChampion() {
 
-        List<PlayerInfo> findedPlayerInfos = playerInfoRepository.findByPlayerIdBetween(startPlayerId, endPlayerId);
+        HashMap<String, HashMap<String, Count>> hashMap = new HashMap<>();
 
-        for (PlayerInfo findedPlayerInfo : findedPlayerInfos)
-            findedPlayerInfo.setUserNickname(findedPlayerInfo.getSummonerName() + "-" + findedPlayerInfo.getTagLine());
+//        List<PlayerMatch> findedPlayerMatches = playerMatchRepository.findByMatchIdIn(Arrays.asList("KR_6977559919", "KR_6977540684", "KR_6977509877"));
+//        System.out.println("playerMatchRepository.findByMatchIdIn() 완료");
 
-        ArrayList<ArrayList<PlayerInfo>> subFindedPlayerInfos = new ArrayList<>();
-        for (int i = 0; i < GlobalConstants.threadSize; i++)
-            subFindedPlayerInfos.add(new ArrayList<>());
+        List<PlayerMatch> findedPlayerMatches = playerMatchRepository.findAll();
+        System.out.println("playerMatchRepository.findAll() 완료");
 
-        for (int i = 0; i < findedPlayerInfos.size(); i++)
-            subFindedPlayerInfos.get(i % GlobalConstants.threadSize).add(findedPlayerInfos.get(i));
+        for (PlayerMatch findedPlayerMatch : findedPlayerMatches) {
+            for (Participant findedParticipant : findedPlayerMatch.getInfo().getParticipants()) {
 
-        for (int i = 0; i < GlobalConstants.threadSize; i++)
-            asyncService.processPlayersInRange(subFindedPlayerInfos.get(i), i + 1);
+                HashMap<String, Count> subHashMap;
+                if (hashMap.containsKey(findedParticipant.getPuuid())) {
+                    subHashMap = hashMap.get(findedParticipant.getPuuid());
+                } else {
+                    subHashMap = new HashMap<>();
+                }
 
+                Count curCount;
+                if (subHashMap.containsKey(findedParticipant.getChampionName())) {
+                    curCount = subHashMap.get(findedParticipant.getChampionName());
+                } else {
+                    curCount = new Count();
+                }
+
+                if (findedParticipant.getWin()) {
+                    curCount.setWin(curCount.getWin() + 1);
+                } else {
+                    curCount.setLose(curCount.getLose() + 1);
+                }
+
+                subHashMap.put(findedParticipant.getChampionName(), curCount);
+                hashMap.put(findedParticipant.getPuuid(), subHashMap);
+
+            }
+        }
+        System.out.println("findedPlayerMatches 완료");
+
+        List<PlayerInfo> findedPlayerInfos = playerInfoRepository.findAll();
+        System.out.println("playerInfoRepository.findAll() 완료");
+
+        ArrayList<PlayerMost> newPlayerMosts = new ArrayList<>();
+
+        System.out.println("end");
     }
 }

@@ -16,9 +16,9 @@ public class PlayerInfo {
     @Id
     private Integer playerId;
 
-    private String summonerName;
+    private String puuid;
 
-    private String tagLine;
+    private String tier;
 
-    private String userNickname;
+    private String rank_num;
 }

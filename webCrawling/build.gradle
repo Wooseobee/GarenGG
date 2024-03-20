@@ -11,14 +11,10 @@ java {
     sourceCompatibility = '17'
 }
 
-configurations {
-    compileOnly {
-        extendsFrom annotationProcessor
-    }
-}
-
-//bootRun {
-//    jvmArgs = ['-Xms512m', '-Xmx768m', '-Xss512k']
+//configurations {
+//    compileOnly {
+//        extendsFrom annotationProcessor
+//    }
 //}
 
 repositories {
@@ -30,11 +26,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'com.mysql:mysql-connector-j'
-    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+//    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
     annotationProcessor 'org.projectlombok:lombok'
-
-    implementation 'org.seleniumhq.selenium:selenium-java:4.18.1'
-    implementation 'io.github.bonigarcia:webdrivermanager:5.7.0'
 
     implementation "org.springframework.boot:spring-boot-starter-data-mongodb"
 
