@@ -1,16 +1,17 @@
 <template>
-    <div class="container">
+    <!-- <div class="container">
         <div class="input-group mb-3">
             <input type="text" class="form-control" placeholder="플레이어 이름#KR1" aria-label="Recipient's username"
                 aria-describedby="button-addon2" />
             <button class="btn btn-primary" type="button" id="button-addon2">가렌</button>
         </div>
-    </div>
+    </div> -->
     <div>
         <div class="row">
-            <div class="col-4">
+            <!--  -->
+            <!-- <div class="col-4"> -->
                 <!-- 챔피언 정보 표 -->
-                <table class="table table-bordered">
+                <!-- <table class="table table-bordered">
                     <thead class="table-light">
                         <tr>
                             <th>챔피언</th>
@@ -27,8 +28,9 @@
                         </tr>
                     </tbody>
                 </table>
-            </div>
-            <div class="col-6">
+            </div> -->
+            <!--  -->
+            <div class="image-container col">
                 <!-- 이미지 표시 -->
                 <div v-for="(imageData, index) in imageItems" :key="'image-' + index" class="image-container">
                     <img class="rounded" :src="imageData.url" :style="{ width: imageData.int + 'px', height: imageData.int + 'px' }">
@@ -39,7 +41,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 
 const items = ref([
     { String: "문자열1", int1: 100, int2: 200 },
@@ -50,15 +52,43 @@ const items = ref([
 // 이미지 데이터 예시
 const imageItems = ref([
     { url: "https://ddragon.leagueoflegends.com/cdn/14.4.1/img/champion/Aatrox.png", int: 100 },
-    { url: "https://ddragon.leagueoflegends.com/cdn/14.4.1/img/champion/Ahri.png", int: 150 },
+    { url: "https://ddragon.leagueoflegends.com/cdn/14.4.1/img/champion/Ahri.png", int: 100 },
+    { url: "https://ddragon.leagueoflegends.com/cdn/14.4.1/img/champion/Ahri.png", int: 100 },
+    { url: "https://ddragon.leagueoflegends.com/cdn/14.4.1/img/champion/Ahri.png", int: 100 },
+    { url: "https://ddragon.leagueoflegends.com/cdn/14.4.1/img/champion/Ahri.png", int: 100 },
+    { url: "https://ddragon.leagueoflegends.com/cdn/14.4.1/img/champion/Ahri.png", int: 100 },
+    { url: "https://ddragon.leagueoflegends.com/cdn/14.4.1/img/champion/Ahri.png", int: 100 },
+    { url: "https://ddragon.leagueoflegends.com/cdn/14.4.1/img/champion/Ahri.png", int: 100 },
+    { url: "https://ddragon.leagueoflegends.com/cdn/14.4.1/img/champion/Ahri.png", int: 100 },
+    { url: "https://ddragon.leagueoflegends.com/cdn/14.4.1/img/champion/Ahri.png", int: 100 },
+    { url: "https://ddragon.leagueoflegends.com/cdn/14.4.1/img/champion/Ahri.png", int: 100 },
+    { url: "https://ddragon.leagueoflegends.com/cdn/14.4.1/img/champion/Ahri.png", int: 100 },
+    
     // 더 많은 이미지 데이터...
 ])
 
 // 데이터 개수 제한 (최대 5개)
 const limitedItems = items.value.slice(0, 5)
+
+//페이지 들어올 때, 챔피언 이미지 받아오기
+onMounted(() => {
+    //챔피언 Id(영어이름같은거) 달라고 해서 받기
+
+    //url 세팅해서 
+    
+})
+
+
 </script>
 
 <style scoped>
+
+.image-container{
+    display : flex;
+    flex-wrap : wrap;
+    gap : 10px;
+
+}
 .container {
     margin-top: 130px;
 }
