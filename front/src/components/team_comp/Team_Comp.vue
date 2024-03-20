@@ -6,7 +6,7 @@
           <card
             v-for="(champion, index) in champions"
             :key="index"
-            :champimage="champion.image"
+            :champname="champion.name"
           />
           <!-- <youtube 
           
@@ -24,16 +24,19 @@ const champions = [
   {
     image:
       "https://ddragon.leagueoflegends.com/cdn/img/champion/loading/Aatrox_0.jpg",
+    name: "Aatrox",
     q: "아트록스 강의",
   },
   {
     image:
       "https://ddragon.leagueoflegends.com/cdn/img/champion/loading/Garen_0.jpg",
+    name: "Garen",
     q: "가렌 강의",
   },
   {
     image:
       "https://ddragon.leagueoflegends.com/cdn/img/champion/loading/Gnar_0.jpg",
+    name: "Gnar",
     q: "나르 강의",
   },
 ];

@@ -19,7 +19,7 @@
             data-aos="fade-up"
             data-aos-delay="100"
           >
-            <RouterLink :to="{ name: 'champ' }">
+            <RouterLink :to="{ name: 'champ-rec' }">
               <div class="member-img">
                 <img src="@/assets/garen.avif" class="img-fluid" alt="" />
                 <div class="social">

@@ -10,7 +10,7 @@
       <!-- Nav Menu -->
       <nav id="navmenu" class="navmenu" style="margin-left: 400px">
         <ul>
-          <li><RouterLink to="/champ">롤챔추</RouterLink></li>
+          <li><RouterLink to="/champ-rec">롤챔추</RouterLink></li>
           <li><RouterLink to="/combination">조합추</RouterLink></li>
           <li><RouterLink to="/playground">놀이터</RouterLink></li>
           <!-- <li><RouterLink to="/">챔피언 맞추기</RouterLink></li> -->
