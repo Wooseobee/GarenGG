@@ -6,25 +6,25 @@ from typing import Union, List, Optional
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
-from recommend import get_recommendations, get_recommendations_not
+from recommend import get_recommendations, find_userId
 from db import get_player_prev_solo_rank  # db.py에서 함수 가져오기
 from train import load_data
 
 app = FastAPI()
 
-# class MostData(BaseModel):
-#     champion: str
-#     game: str
-#     rating: str
+class MostData(BaseModel):
+    champion: str
+    game: str
+    mostSeq: str
 
-# class PredictionInput(BaseModel):
-#     _id: int
-#     tier: str
-#     rankNum: str
-#     mostDatas: List[MostData]
+class PredictionInput_Not(BaseModel):
+    id: Optional[int] = Field(None, alias='_id')
+    tier: str
+    rankNum: str
+    mostDatas: List[MostData]
 
 class PredictionInput(BaseModel):
-    riotId : str
+    riotId : int
     
 
 # MatrixFactorization or 학습된 모델 가져오기
@@ -56,17 +56,24 @@ async def test():
         "champ_data": champ_data_dict
     }
 
-@app.get("/predict/not")
-async def prediction_not():
-    unrated_top_champions_dicts = get_recommendations_not()
-    return unrated_top_champions_dicts
+@app.post("/predict/not")
+async def prediction_not(input_data: PredictionInput_Not):
+    most_similar_user_id, most_similar_user_index = find_userId(input_data)
+    print(most_similar_user_id)
+    predictions = get_recommendations(most_similar_user_id, most_similar_user_index)
+    return predictions.to_dict(orient='records')
 
 
 @app.post("/predict/")
 async def prediction(input_data: PredictionInput):
-    user_id = int(input_data.riotId)  # riotId를 int로 변환
-    predictions = get_recommendations(user_id)  # predict 함수 호출하여 결과 가져오기
+    user_ids = user_champ_score.index.tolist()
+    row_index = user_ids.index(input_data.riotId)
+    predictions = get_recommendations(input_data.riotId, row_index)  # predict 함수 호출하여 결과 가져오기
     return predictions.to_dict(orient='records')  # DataFrame을 딕셔너리로 변환하여 반환
+
+
+with open('models/user_champ_score.pkl', 'rb') as f:
+    user_champ_score = pickle.load(f)
 
 if __name__ == "__main__":
     pass

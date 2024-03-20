@@ -7,7 +7,7 @@ import csv
 logging.basicConfig(level=logging.INFO)
 
 # MongoDB 연결 정보 설정
-MONGODB_URL = "mongodb://root:ssafy605@15.164.142.18:27017"
+MONGODB_URL = "mongodb://root:ssafy605@j10a605.p.ssafy.io:27017"
 
 # MongoDB 클라이언트 초기화 (비동기)
 async_client = motor.motor_asyncio.AsyncIOMotorClient(MONGODB_URL)
@@ -21,7 +21,7 @@ async def get_player_prev_solo_rank():
     
     # here
     # _id가 50 이하인 플레이어 데이터만 조회 {"_id": {"$lte": 10000}}
-    players = collection.find()
+    players = collection.find({})
     result = []  # 최종 결과를 저장할 빈 리스트
 
     async for player in players:
@@ -39,6 +39,7 @@ async def get_player_prev_solo_rank():
             total_games, win_rate = process_game_data(game_data)
             if total_games <= 10:
                 continue
+            
             
             # 최종 결과에 추가
             result.append({

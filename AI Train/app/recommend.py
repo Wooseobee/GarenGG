@@ -1,16 +1,18 @@
 import pickle
-
+import re
 import pandas as pd
 import numpy as np
+from sklearn.preprocessing import normalize
+from sklearn.metrics.pairwise import cosine_similarity
 
-from train import load_data
+from train import load_data, preprocess_data
 
 
 # 추천 함수
-def recommend_champs(df_svd_preds, user_id, champ_data, score_data, num_recommendations=10):
+def recommend_champs(df_svd_preds, user_id, champ_data, score_data, num_recommendations, user_index):
     
     # index와 user_id를 맞추는 부분. 현재는 index와 user_id 둘 다 0부터 시작하므로 변화 x.
-    user_row_number = user_id 
+    user_row_number = user_index
     
     # 최종적으로 만든 pred_df에서 사용자 index에 따라 챔피언 데이터 정렬 -> 챔피언 평점이 높은 순으로 정렬 됨
     sorted_user_predictions = df_svd_preds.iloc[user_row_number].sort_values(ascending=False)
@@ -18,7 +20,7 @@ def recommend_champs(df_svd_preds, user_id, champ_data, score_data, num_recommen
     # 원본 평점 데이터에서 user id에 해당하는 데이터를 뽑아낸다. 
     user_data = score_data[score_data.user_id == user_id]
     
-    # 위에서 뽑은 user_data와 원본 챔피언 데이터를 합친다. 
+    # 위에서 뽑은 user_data와 원본 챔피언 데이터를 합친다.
     user_history = pd.merge(user_data, champ_data, left_on='champion', right_on='id', how='inner').sort_values(['score'], ascending=False)
     user_history.drop(columns=['name'], inplace=True)
     # user_history = user_data.merge(champ_data, on = 'id')
@@ -26,80 +28,99 @@ def recommend_champs(df_svd_preds, user_id, champ_data, score_data, num_recommen
     # 원본 챔피언 데이터에서 사용자가 본 챔피언 데이터를 제외한 데이터를 추출
     recommendations = champ_data[~champ_data['id'].isin(user_history['champion'])]
 
-
     # 사용자의 챔피언 평점이 높은 순으로 정렬된 데이터와 위 recommendations을 합친다. 
     recommendations = pd.merge(recommendations, sorted_user_predictions, left_on='id', right_on='champion', how='inner')
     # recommendations = recommendations.merge( pd.DataFrame(sorted_user_predictions).reset_index(), on = 'id')
     # 컬럼 이름 바꾸고 정렬해서 return
     recommendations = recommendations.rename(columns = {user_row_number: 'Predictions'}).sort_values('Predictions', ascending = False).iloc[:num_recommendations, :]
-                      
 
     return user_history, recommendations
 
-def recommend_champions_not_exist(df_svd_preds, new_user_ratings, Vt, user_scores_mean, champ_data):
+def find_userId(player):
     
-    # 배열 하나 생성
-    new_user_vector = np.zeros(Vt.shape[1])
+    if not player.mostDatas:
+        return "데이터가 존재하지 않습니다"
+
+    new_df = pd.DataFrame(0, index=[player.id], columns=df_svd_preds.columns)
+
+    # new_df = pd.DataFrame(columns=df_svd_preds.columns)
+    # print(df_svd_preds.columns.shape)
+    # new_df.fillna(0, inplace=True)
+    # new_df.loc[player.id] = 0
+
+    for champion_data in player.mostDatas:
+        
+        if not champion_data.game:
+            continue  # 'game' 키가 없으면 이 챔피언 데이터를 건너뜀
+        
+        # 게임 데이터에서 총 게임 수와 승리율 추출
+        game_data = champion_data.game
+        total_games, win_rate = process_game_data(game_data)
+        new_df.at[player.id, champion_data.champion] = total_games * win_rate / 100
+
+    # new_champ_score = new_df.pivot(
+    #     index='user_id',
+    #     columns='champion',
+    #     values='score'
+    # ).fillna(0)
+
+    # new_user_matrix = new_champ_score.to_numpy()
+
+    new_user_matrix = new_df.values[0]
+
+    # 정규화
+    # 유저의 평균 Score(영화의 별점)을 각 유저의 score에서 감산
+    user_scores_mean = np.mean(new_user_matrix, axis = 0)
+
+    matrix_user_mean = new_user_matrix - user_scores_mean.reshape(-1, 1)
     
-    # 챔피언에 해당하는 점수를 가진 배열로 만듬
-    for champ, score in new_user_ratings.items():
-        if champ in champ_data['id'].values:
-            champ_idx = champ_data[champ_data['id'] == champ].index[0]
-            new_user_vector[champ_idx] = score
+    norm_new_user_vector = normalize(matrix_user_mean, axis=1, norm='l2')
 
-    # 평균 내고 원본에서 빼는 정규화 과정
-    tempmatrix_mean = np.mean(new_user_vector)
-    tempmatrix_adjusted = new_user_vector - tempmatrix_mean
+    # 코사인 유사도 계산
+    cosine_sim = cosine_similarity(norm_new_user_vector, norm_matrix_user_mean)
+    pd.options.display.max_columns = 167
+    
+    # 가장 유사한 사용자 찾기
+    most_similar_user_index = np.argmax(cosine_sim)
+    print(most_similar_user_index)
+    
+    most_similar_user_id = user_champ_score.index[most_similar_user_index]
+    
+    return most_similar_user_id, most_similar_user_index
 
-    # 기존 정규화 배열 마지막 행에 붙임
-    tempmatrix_adjusted_df = pd.DataFrame(tempmatrix_adjusted.reshape(1, -1), columns=df_svd_preds.columns)
-    new_matrix_user_mean = pd.concat([df_svd_preds, tempmatrix_adjusted_df], ignore_index=True)
-    # Vt 행렬 역행렬 내적
-    new_user_features = np.dot(new_matrix_user_mean, np.linalg.pinv(Vt))
-    # 다시 Vt 행렬 내적
-    predicted_scores = np.dot(new_user_features, Vt)
+def process_game_data(game_data):
+    # 정규 표현식을 사용하여 승리 수, 패배 수, 승리율을 추출합니다.
+    # 이 패턴은 "승리수W패배수L승리율%" 형식을 처리할 수 있으며,
+    # 승리 수나 패배 수 중 하나만 존재하는 경우에도 작동합니다.
+    match = re.match(r'(\d+)W(\d+)L(\d+)%', game_data)
+    if not match:
+        # "승리수W패배수L승리율%" 형식이 아닌 경우, 다른 패턴으로 시도합니다.
+        match = re.match(r'(\d+)(W|L)(\d+)%', game_data)
+        if not match:
+            return 0, 0
 
-    predicted_scores_df = pd.DataFrame(predicted_scores, columns = df_svd_preds.columns)
+    if 'W' in game_data:
+        wins = int(match.group(1))
+        losses = int(match.group(2)) if 'L' in game_data else 0
+    else:
+        wins = 0
+        losses = int(match.group(1))
+    
+    win_rate = int(match.group(3))
+    total_games = wins + losses
 
-    # 새 사용자에 대한 예측 점수 선택
-    new_user_predicted_scores = predicted_scores_df.iloc[-1]
+    return total_games, win_rate
 
-    # 이미 평가한 챔피언의 개수 계산
-    num_rated_champions = len(new_user_ratings)
-
-    # 추천할 챔피언의 총 개수 설정 (이미 평가한 챔피언 수 + 10)
-    num_recommendations = num_rated_champions + 5
-
-    # 상위 N개의 추천 챔피언의 인덱스를 얻음
-    top_indices = np.argsort(new_user_predicted_scores.values)[-num_recommendations:]  # .values를 추가해 numpy 배열로 변환
-
-    # 상위 N개 추천의 챔피언 이름과 예측 점수를 얻음
-    top_champions_with_scores = [(new_user_predicted_scores.index[i], new_user_predicted_scores.iloc[i]) for i in top_indices]
-
-    # 이미 평가한 챔피언을 제외하고 추천 목록을 생성
-    # 각 항목을 딕셔너리 형태로 변환
-    unrated_top_champions_dicts = [{"champion": champion, "score": score} 
-                                for champion, score in top_champions_with_scores 
-                                if champion not in new_user_ratings.keys()]
-
-    unrated_top_champions_dicts = sorted(unrated_top_champions_dicts, key=lambda x: x["score"], reverse=True)
-
-    return unrated_top_champions_dicts
-
-new_user_ratings = {'Yasuo': 100, 'Zed': 100, 'Akali': 100}
+new_user_ratings = {'Aatrox': 13.8, 'Jayce': 6.88, 'Gwen': 5.88}
 score_data, champ_data = load_data()
 
 with open('models/df_svd_preds.pkl', 'rb') as f:
     df_svd_preds = pickle.load(f)
-with open('models/Vt.pkl', 'rb') as f:
-    Vt = pickle.load(f)
-with open('models/user_scores_mean.pkl', 'rb') as f:
-    user_scores_mean = pickle.load(f)
+with open('models/norm_matrix_user_mean.pkl', 'rb') as f:
+    norm_matrix_user_mean = pickle.load(f)
+with open('models/user_champ_score.pkl', 'rb') as f:
+    user_champ_score = pickle.load(f)
 
-def get_recommendations(user_id):
-    already_rated, predictions = recommend_champs(df_svd_preds, user_id, champ_data, score_data, 3)
+def get_recommendations(user_id, user_index):
+    already_rated, predictions = recommend_champs(df_svd_preds, user_id, champ_data, score_data, 5, user_index)
     return predictions
-
-def get_recommendations_not():
-    unrated_top_champions = recommend_champions_not_exist(df_svd_preds, new_user_ratings, Vt, user_scores_mean, champ_data)
-    return unrated_top_champions
