@@ -1,4 +1,4 @@
-package org.example.garencrawling.mostchampion.domain;
+package org.example.garencrawling.mostchampion.domain.writemongo;
 
 import lombok.*;
 import org.springframework.data.annotation.Id;

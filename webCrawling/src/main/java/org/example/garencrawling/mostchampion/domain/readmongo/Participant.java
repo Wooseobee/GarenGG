@@ -1,4 +1,4 @@
-package org.example.garencrawling.mostchampion.domain;
+package org.example.garencrawling.mostchampion.domain.readmongo;
 
 import lombok.*;
 
@@ -8,7 +8,7 @@ import lombok.*;
 @NoArgsConstructor
 @Builder
 public class Participant {
-    private String championName;
     private String puuid;
+    private String championName;
     private Boolean win;
 }

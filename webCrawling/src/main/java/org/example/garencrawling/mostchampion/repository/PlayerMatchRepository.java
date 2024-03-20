@@ -1,11 +1,11 @@
 package org.example.garencrawling.mostchampion.repository;
 
-import org.example.garencrawling.mostchampion.domain.PlayerMatch;
+import org.example.garencrawling.mostchampion.domain.readmongo.PlayerMatch;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
-import java.util.Collection;
-import java.util.List;
-
 public interface PlayerMatchRepository extends MongoRepository<PlayerMatch, String> {
-    List<PlayerMatch> findByMatchIdIn(Collection<String> matchIds);
+
+    Page<PlayerMatch> findAll(Pageable pageable);
 }

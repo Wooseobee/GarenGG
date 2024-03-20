@@ -1,4 +1,4 @@
-package org.example.garencrawling.mostchampion.domain;
+package org.example.garencrawling.mostchampion.domain.tmp;
 
 import lombok.*;
 
@@ -7,7 +7,7 @@ import lombok.*;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Count {
+public class WinLose {
     private Integer win = 0;
     private Integer lose = 0;
 }

@@ -1,6 +1,7 @@
-package org.example.garencrawling.mostchampion.domain;
+package org.example.garencrawling.mostchampion.domain.readmongo;
 
 import lombok.*;
+import org.example.garencrawling.mostchampion.domain.readmongo.Participant;
 
 import java.util.List;
 
