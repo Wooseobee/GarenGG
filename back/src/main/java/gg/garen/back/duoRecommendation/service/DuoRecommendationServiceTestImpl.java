@@ -14,21 +14,21 @@ public class DuoRecommendationServiceTestImpl implements DuoRecommendationServic
     @Override
     public List<DuoRecommendationDto> duoRecommend(String curChampion, String curPosition) {
         List<DuoRecommendationDto> test = new ArrayList<>();
-        test.add(new DuoRecommendationDto("갈리오", "jungle", "Galio"));
-        test.add(new DuoRecommendationDto("갈리오", "jungle", "Galio"));
-        test.add(new DuoRecommendationDto("갈리오", "jungle", "Galio"));
+        test.add(new DuoRecommendationDto("갈리오", "JUNGLE", "Galio"));
+        test.add(new DuoRecommendationDto("갈리오", "JUNGLE", "Galio"));
+        test.add(new DuoRecommendationDto("갈리오", "JUNGLE", "Galio"));
 
-        test.add(new DuoRecommendationDto("갈리오","middle","Annie"));
-        test.add(new DuoRecommendationDto("갈리오","middle","Annie"));
-        test.add(new DuoRecommendationDto("갈리오","middle","Annie"));
+        test.add(new DuoRecommendationDto("갈리오","MIDDLE","Annie"));
+        test.add(new DuoRecommendationDto("갈리오","MIDDLE","Annie"));
+        test.add(new DuoRecommendationDto("갈리오","MIDDLE","Annie"));
 
-        test.add(new DuoRecommendationDto("트리스타나","bottom","Tristana"));
-        test.add(new DuoRecommendationDto("트리스타나","bottom","Tristana"));
-        test.add(new DuoRecommendationDto("트리스타나","bottom","Tristana"));
+        test.add(new DuoRecommendationDto("트리스타나","BOTTOM","Tristana"));
+        test.add(new DuoRecommendationDto("트리스타나","BOTTOM","Tristana"));
+        test.add(new DuoRecommendationDto("트리스타나","BOTTOM","Tristana"));
 
-        test.add(new DuoRecommendationDto("누누","utility","Nunu"));
-        test.add(new DuoRecommendationDto("누누","utility","Nunu"));
-        test.add(new DuoRecommendationDto("누누","utility","Nunu"));
+        test.add(new DuoRecommendationDto("누누","UTILITY","Nunu"));
+        test.add(new DuoRecommendationDto("누누","UTILITY","Nunu"));
+        test.add(new DuoRecommendationDto("누누","UTILITY","Nunu"));
 
         return test;
     }
