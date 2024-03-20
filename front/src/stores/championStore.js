@@ -15,7 +15,10 @@ export const useChampionStore = defineStore("champion", {
             this.championNames = data.map(item => item.name);
             this.championIds = data.map(item => item.id);
             this.championSquareImgUrls = data.map(item => "https://ddragon.leagueoflegends.com/cdn/14.4.1/img/champion/" + item.id+".png")
-            },
+            console.log("championName: "+ this.championNames);
+            console.log("championIds: "+ this.championIds);
+            console.log("championIds: "+ this.championSquareImgUrls);
+          },
             (err)=>{
             console.log(err);
             });
