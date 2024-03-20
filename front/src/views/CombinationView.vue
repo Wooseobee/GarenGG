@@ -1,14 +1,13 @@
 <template>
-    
-    <div class="container section-title" data-aos="fade-up">
-        <h1>듀오 챔피언 추천</h1>
-        <!-- <h1>Duo Champion Recommendation</h1> -->
-    </div>
+  <div class="container section-title" data-aos="fade-up">
+    <h1>듀오 챔피언 추천</h1>
+    <!-- <h1>Duo Champion Recommendation</h1> -->
+  </div>
   <div>
     챔피언과 포지션을 선.택. 하세요!
     <!-- <Header /> -->
-    <MyChamp/>
-    <!-- <Team_Comp /> -->
+    <MyChamp />
+    <Team_Comp />
   </div>
 </template>
 
@@ -38,7 +37,7 @@ import Header from "@/components/common/Header.vue";
   content: "";
   width: 200px;
   height: 2px;
-  background: #C89B3C;
+  background: #c89b3c;
   /* background: var(--accent-color);   */
   display: inline-block;
 }
@@ -54,6 +53,4 @@ import Header from "@/components/common/Header.vue";
 .section-title p {
   margin-bottom: 0;
 }
-
-
 </style>
