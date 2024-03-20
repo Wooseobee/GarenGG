@@ -4,23 +4,31 @@
       <img src="@/assets/riotlogo.png" alt="heropy" />
     </div>
     <div class="face face-back">
-      <img :src="champimage" alt="champ" />
+      <img :src="champImageUrl" alt="champ" />
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref } from "vue";
-const props = defineProps({
-  champimage: {
+import { useRouter } from "vue-router";
+const router = useRouter();
+const { champname } = defineProps({
+  champname: {
     type: String,
     required: true,
   },
 });
 const isFlipped = ref(false);
 const toggleCard = () => {
-  isFlipped.value = !isFlipped.value;
+  if (!isFlipped.value) {
+    isFlipped.value = true;
+  } else {
+    router.push({ name: "champ-detail", params: { champname: champname } });
+  }
+  // isFlipped.value = !isFlipped.value;
 };
+const champImageUrl = `https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${champname}_0.jpg`;
 </script>
 
 <style scoped>

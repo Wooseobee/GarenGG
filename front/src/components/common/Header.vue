@@ -1,9 +1,5 @@
 <template>
-  <header
-    id="header"
-    class="header fixed-top d-flex align-items-center"
-    :class="headerClass"
-  >
+  <header id="header" class="header fixed-top d-flex align-items-center">
     <div class="container-fluid d-flex align-items-center">
       <div class="logo d-flex align-items-center me-auto me-xl-0">
         <RouterLink to="/">
@@ -14,7 +10,7 @@
       <!-- Nav Menu -->
       <nav id="navmenu" class="navmenu" style="margin-left: 400px">
         <ul>
-          <li><RouterLink to="/champ">롤챔추</RouterLink></li>
+          <li><RouterLink to="/champ-rec">롤챔추</RouterLink></li>
           <li><RouterLink to="/combination">조합추</RouterLink></li>
           <li><RouterLink to="/playground">놀이터</RouterLink></li>
           <!-- <li><RouterLink to="/">챔피언 맞추기</RouterLink></li> -->
@@ -35,17 +31,15 @@ import { useRouter, useRoute } from "vue-router";
 const router = useRouter();
 const route = useRoute();
 
-const headerClass = computed(() => {
-  if (route.path === "/detail") {
-    return "scrolled";
-  } else if (route.path === "/home") {
-    return "home-view";
-  } else {
-    return "";
-  }
-});
-
-console.log(headerClass);
+// const headerClass = computed(() => {
+//   if (route.path === "/detail") {
+//     return "scrolled";
+//   } else if (route.path === "/home") {
+//     return "home-view";
+//   } else {
+//     return "";
+//   }
+// });
 </script>
 
 <style scoped>
@@ -144,7 +138,7 @@ section {
 /* Home Page Custom Header on page scroll
 ------------------------------*/
 .scrolled {
-  background-color: #0d6efd;
+  /* background-color: #0d6efd; */
   --background-color: #ffffff;
   --heading-color: #444444;
   --nav-color: #444444;
