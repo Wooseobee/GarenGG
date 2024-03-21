@@ -1,15 +1,13 @@
 import axios from "axios";
 
-const baseURL = "http://localhost:8080/api";
-
+const baseURL = "http://j10a605.p.ssafy.io:8084/api";
 
 const localAxios = axios.create({
   baseURL,
   headers: {
     "Content-Type": "application/json;charset=utf-8",
   },
-//   withCredentials: true, //쿠키사용시 필요
+  //   withCredentials: true, //쿠키사용시 필요
 });
-
 
 export { localAxios };
