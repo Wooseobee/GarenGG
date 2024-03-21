@@ -11,7 +11,7 @@ import java.util.Date;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("api/MostChampion")
+@RequestMapping("api/mostChampion")
 public class MostChampionController {
 
     private final MostChampionService mostChampionService;
