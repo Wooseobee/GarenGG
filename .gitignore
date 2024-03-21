@@ -7,7 +7,7 @@ build/
 
 ### DATA ###
 AI Train/app/data/
-AI Train/app/data/models/
+AI Train/app/models/
 
 ### STS ###
 .apt_generated
