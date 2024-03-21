@@ -68,6 +68,14 @@ def recommend_champs(df_svd_preds, user_id, champ_data, score_data, num_recommen
                 recommendations['Predictions'] * 0.8
             ]
         default = recommendations['Predictions'] * 1.0
+    elif tier in ['Unranked']:
+        conditions = [
+                recommendations['difficulty'] >= 9
+            ] 
+        values = [
+                recommendations['Predictions'] * 1.0
+            ]
+        default = recommendations['Predictions'] * 1.0
     else:
         conditions = [
                 recommendations['difficulty'] >= 9,
@@ -92,11 +100,6 @@ def find_userId(player):
 
     new_df = pd.DataFrame(0, index=[player.id], columns=df_svd_preds.columns)
 
-    # new_df = pd.DataFrame(columns=df_svd_preds.columns)
-    # print(df_svd_preds.columns.shape)
-    # new_df.fillna(0, inplace=True)
-    # new_df.loc[player.id] = 0
-
     for champion_data in player.mostDatas:
         
         if not champion_data.game:
@@ -106,14 +109,6 @@ def find_userId(player):
         game_data = champion_data.game
         total_games, win_rate = process_game_data(game_data)
         new_df.at[player.id, champion_data.champion] = total_games * win_rate / 100
-
-    # new_champ_score = new_df.pivot(
-    #     index='user_id',
-    #     columns='champion',
-    #     values='score'
-    # ).fillna(0)
-
-    # new_user_matrix = new_champ_score.to_numpy()
 
     new_user_matrix = new_df.values[0]
 
@@ -131,7 +126,6 @@ def find_userId(player):
     
     # 가장 유사한 사용자 찾기
     most_similar_user_index = np.argmax(cosine_sim)
-    print(most_similar_user_index)
     
     most_similar_user_id = user_champ_score.index[most_similar_user_index]
     

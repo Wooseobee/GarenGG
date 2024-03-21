@@ -60,7 +60,6 @@ async def test():
 @app.post("/predict/not")
 async def prediction_not(input_data: PredictionInput_Not):
     most_similar_user_id, most_similar_user_index = find_userId(input_data)
-    print(most_similar_user_id)
     predictions = get_recommendations(most_similar_user_id, most_similar_user_index, input_data.tier)
     return predictions.to_dict(orient='records')
 
