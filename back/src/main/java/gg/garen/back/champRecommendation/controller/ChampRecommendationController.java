@@ -1,6 +1,6 @@
 //package gg.garen.back.champRecommendation.controller;
 //
-//import gg.garen.back.common.dto.ChampionDto;
+//import gg.garen.back.champion.dto.ChampionDto;
 //import lombok.RequiredArgsConstructor;
 //import org.springframework.http.HttpStatus;
 //import org.springframework.http.ResponseEntity;
