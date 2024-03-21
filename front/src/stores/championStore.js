@@ -6,23 +6,23 @@ export const useChampionStore = defineStore("champion", {
     championNames : [],
     championIds : [],
     championSquareImgUrls : [],
+    isInitialized : false,
   }),
     actions: {
-        initialize() {
+       async initialize() {
             //champion id, 이름정보 가져오기
-            championInfo(({data})=>{
-            console.log(data);
+            console.log("initialize 호출")
+            await championInfo()
+            .then( ({data}) =>{
             this.championNames = data.map(item => item.name);
             this.championIds = data.map(item => item.id);
             this.championSquareImgUrls = data.map(item => "https://ddragon.leagueoflegends.com/cdn/14.4.1/img/champion/" + item.id+".png")
-            console.log("championName: "+ this.championNames);
-            console.log("championIds: "+ this.championIds);
-            console.log("championIds: "+ this.championSquareImgUrls);
-          },
-            (err)=>{
+            this.isInitialized = true;
+            console.log("initialize ㅊ호출 ㄹ완료")
+            })
+            .catch((err)=> {
             console.log(err);
             });
-        //champion id 기반으로 이미지 url 완성하기
     },
 }    
 });
