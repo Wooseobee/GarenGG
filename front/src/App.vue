@@ -42,7 +42,6 @@ body{
 
 .background {
   background-color: #091428;
-  height: 100vh;
 }
 :root {
   --default-font: "Open Sans", system-ui, -apple-system, "Segoe UI", Roboto,
