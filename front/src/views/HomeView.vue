@@ -43,7 +43,7 @@
             data-aos="fade-up"
             data-aos-delay="200"
           >
-            <RouterLink :to="{ name: 'combination' }">
+            <RouterLink :to="{ name: 'DuoRecommendation' }">
               <div class="member-img">
                 <img src="@/assets/garen.avif" class="img-fluid" alt="" />
                 <div class="social">
