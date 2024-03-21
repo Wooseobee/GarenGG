@@ -33,7 +33,7 @@ const championStore = useChampionStore();
 const searchValue = ref("");
 // 챔피언 데이터
 const champions = ref([]);
-const selectedPosition = ref(""); // 선택된 포지션을 위한 ref 추가S
+const selectedPosition = ref(""); // 선택된 포지션을 위한 ref 추가
 // searchValue에 따라 imageItems를 필터링하는 computed 속성
 const filteredChampions = computed(() => {
     if (!searchValue.value) {
