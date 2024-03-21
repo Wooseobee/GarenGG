@@ -24,6 +24,7 @@ class PredictionInput_Not(BaseModel):
     mostDatas: List[MostData]
 
 class PredictionInput(BaseModel):
+    tier : str
     riotId : int
     
 
@@ -60,7 +61,7 @@ async def test():
 async def prediction_not(input_data: PredictionInput_Not):
     most_similar_user_id, most_similar_user_index = find_userId(input_data)
     print(most_similar_user_id)
-    predictions = get_recommendations(most_similar_user_id, most_similar_user_index)
+    predictions = get_recommendations(most_similar_user_id, most_similar_user_index, input_data.tier)
     return predictions.to_dict(orient='records')
 
 
@@ -68,7 +69,7 @@ async def prediction_not(input_data: PredictionInput_Not):
 async def prediction(input_data: PredictionInput):
     user_ids = user_champ_score.index.tolist()
     row_index = user_ids.index(input_data.riotId)
-    predictions = get_recommendations(input_data.riotId, row_index)  # predict 함수 호출하여 결과 가져오기
+    predictions = get_recommendations(input_data.riotId, row_index, input_data.tier)  # predict 함수 호출하여 결과 가져오기
     return predictions.to_dict(orient='records')  # DataFrame을 딕셔너리로 변환하여 반환
 
 

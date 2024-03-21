@@ -37,16 +37,14 @@ def preprocess_data(score_data):
 
     matrix_user_mean = matrix - user_scores_mean.reshape(-1, 1)
 
-    start_time = time.time()
+    
     norm_matrix_user_mean = normalize(matrix_user_mean, axis=1, norm='l2')
-    end_time = time.time()
-    print(f"Normalization took {end_time - start_time:.4f} seconds")
 
     return norm_matrix_user_mean, matrix_user_mean, user_champ_score
 
 def SVD(matrix_user_mean, user_champ_score):
     # svd(특이값 분해) 모델링 부분
-    U, sigma, Vt = svds(matrix_user_mean, k = 5)
+    U, sigma, Vt = svds(matrix_user_mean, k = 20)
     # sigma는 0이 아닌 특이값의 나열(1차원 행렬)으로(sigma.shape (12,)), 0이 포함된 대칭행렬을 사용하기 위해 np.diag 적용(12,12)
     sigma = np.diag(sigma)
 
@@ -56,9 +54,11 @@ def SVD(matrix_user_mean, user_champ_score):
     # svd_user_predicted_scores = np.dot(np.dot(U, sigma), Vt) + user_scores_mean.reshape(-1, 1)
     svd_user_predicted_scores = np.dot(np.dot(U, sigma), Vt)
     # df_svd_preds = pd.DataFrame(svd_user_predicted_scores, columns = user_champ_score.columns)
+
     return pd.DataFrame(svd_user_predicted_scores, columns = user_champ_score.columns)
 
 if __name__ == "__main__":
+    start_time = time.time()
     score_data, champ_data = load_data()
     norm_matrix_user_mean, matrix_user_mean, user_champ_score = preprocess_data(score_data)
     df_svd_preds = SVD(matrix_user_mean, user_champ_score)
@@ -71,3 +71,5 @@ if __name__ == "__main__":
         pickle.dump(norm_matrix_user_mean, f)
     with open('models/user_champ_score.pkl', 'wb') as f:
         pickle.dump(user_champ_score, f)
+    end_time = time.time()
+    print(f"train took {end_time - start_time:.4f} seconds")

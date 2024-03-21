@@ -3,6 +3,7 @@ import motor.motor_asyncio
 import logging
 import re
 import csv
+import time
 
 logging.basicConfig(level=logging.INFO)
 
@@ -17,6 +18,7 @@ db = async_client["a605"]
 
 # MongoDB에서 데이터 가져오는 함수 (비동기)!
 async def get_player_prev_solo_rank():
+
     collection = db["player_cur_solo_rank"]
     
     # here
@@ -37,16 +39,37 @@ async def get_player_prev_solo_rank():
             # 게임 데이터에서 총 게임 수와 승리율 추출
             game_data = champion_data["game"]
             total_games, win_rate = process_game_data(game_data)
-            if total_games <= 10:
+            if total_games <= 5:
                 continue
             
+            if total_games >= 1000:
+                multiplier = 2.0
+            elif total_games >= 500:
+                multiplier = 1.8
+            elif total_games >= 200:
+                multiplier = 1.6
+            elif total_games >= 100:
+                multiplier = 1.4
+            elif total_games >= 50:
+                multiplier = 1.0
+            elif total_games >= 30:
+                multiplier = 0.9
+            elif total_games >= 20:
+                multiplier = 0.7
+            elif total_games >= 10:
+                multiplier = 0.5
+            else:
+                multiplier = 0.3
             
+            score = multiplier * win_rate
+
             # 최종 결과에 추가
             result.append({
                 "id": player["_id"],
                 "champion": champion_data["champion"],
-                "score": total_games * win_rate / 100  # 총 게임 수와 승리율을 배열로 저장
+                "score": score  # 총 게임 수와 승리율을 배열로 저장
             })
+
     return result
 
 def process_game_data(game_data):
@@ -90,7 +113,9 @@ if __name__ == "__main__":
     import asyncio
 
     async def main():
+        start_time = time.time()
         result = await get_player_prev_solo_rank()
-
         await save_result_to_csv(result)
+        end_time = time.time()
+        print(f"save data took {end_time - start_time:.4f} seconds")
     asyncio.run(main())

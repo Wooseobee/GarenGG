@@ -9,7 +9,7 @@ from train import load_data, preprocess_data
 
 
 # 추천 함수
-def recommend_champs(df_svd_preds, user_id, champ_data, score_data, num_recommendations, user_index):
+def recommend_champs(df_svd_preds, user_id, champ_data, score_data, num_recommendations, user_index, tier):
     
     # index와 user_id를 맞추는 부분. 현재는 index와 user_id 둘 다 0부터 시작하므로 변화 x.
     user_row_number = user_index
@@ -32,9 +32,58 @@ def recommend_champs(df_svd_preds, user_id, champ_data, score_data, num_recommen
     recommendations = pd.merge(recommendations, sorted_user_predictions, left_on='id', right_on='champion', how='inner')
     # recommendations = recommendations.merge( pd.DataFrame(sorted_user_predictions).reset_index(), on = 'id')
     # 컬럼 이름 바꾸고 정렬해서 return
-    recommendations = recommendations.rename(columns = {user_row_number: 'Predictions'}).sort_values('Predictions', ascending = False).iloc[:num_recommendations, :]
+    
+    recommendations = recommendations.rename(columns = {user_row_number: 'Predictions'}).sort_values('Predictions', ascending = False).iloc[:20, :]
+
+    if tier in ['Iron', 'Bronze', 'Silver']:
+        conditions = [
+            recommendations['difficulty'] >= 9,
+            recommendations['difficulty'] >= 7,
+            recommendations['difficulty'] >= 5,
+            recommendations['difficulty'] >= 4
+        ] 
+        values = [
+            recommendations['Predictions'] * 0.5,
+            recommendations['Predictions'] * 0.6,
+            recommendations['Predictions'] * 0.8,
+            recommendations['Predictions'] * 1.0
+        ]
+        default = recommendations['Predictions'] * 1.3
+    
+    elif tier in ['Gold', 'Platinum']:
+        conditions = [
+                recommendations['difficulty'] >= 8,
+                recommendations['difficulty'] >= 7
+            ] 
+        values = [
+                recommendations['Predictions'] * 0.7,
+                recommendations['Predictions'] * 0.8
+            ]
+        default = recommendations['Predictions'] * 1.0
+    elif tier in ['Emerald', 'Diamond']:
+        conditions = [
+                recommendations['difficulty'] >= 9
+            ] 
+        values = [
+                recommendations['Predictions'] * 0.8
+            ]
+        default = recommendations['Predictions'] * 1.0
+    else:
+        conditions = [
+                recommendations['difficulty'] >= 9,
+                recommendations['difficulty'] >= 8
+            ] 
+        values = [
+                recommendations['Predictions'] * 1.3,
+                recommendations['Predictions'] * 1.2
+            ]
+        default = recommendations['Predictions'] * 1.0
+
+    recommendations['Predictions'] = np.select(conditions, values, default=default)
+    recommendations = recommendations.sort_values('Predictions', ascending = False).iloc[:3, :]
 
     return user_history, recommendations
+
 
 def find_userId(player):
     
@@ -121,6 +170,6 @@ with open('models/norm_matrix_user_mean.pkl', 'rb') as f:
 with open('models/user_champ_score.pkl', 'rb') as f:
     user_champ_score = pickle.load(f)
 
-def get_recommendations(user_id, user_index):
-    already_rated, predictions = recommend_champs(df_svd_preds, user_id, champ_data, score_data, 5, user_index)
+def get_recommendations(user_id, user_index, tier):
+    already_rated, predictions = recommend_champs(df_svd_preds, user_id, champ_data, score_data, 5, user_index, tier)
     return predictions
