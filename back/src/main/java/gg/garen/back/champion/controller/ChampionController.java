@@ -2,7 +2,7 @@ package gg.garen.back.champion.controller;
 
 
 import gg.garen.back.champion.dto.ChampionDto;
-import gg.garen.back.champion.service.ChampionService;
+import gg.garen.back.champion.service.ChampionUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -21,10 +21,10 @@ import java.util.List;
 @CrossOrigin("*")
 public class ChampionController {
 
-    private final ChampionService championService;
+    private final ChampionUtils championUtils;
     @GetMapping
     public ResponseEntity<List<ChampionDto>> championInfo(){
-        List<ChampionDto> list = championService.championInfo();
+        List<ChampionDto> list = championUtils.championInfo();
         log.info("ChampList : {}", list);
         return new ResponseEntity<>(list, HttpStatus.OK);
     }

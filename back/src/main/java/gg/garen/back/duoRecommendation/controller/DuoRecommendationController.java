@@ -15,7 +15,7 @@ import java.util.*;
 
 @Slf4j
 @RestController
-@RequestMapping("/duoRecommendation")
+@RequestMapping("/api/duoRecommendation")
 @RequiredArgsConstructor
 public class DuoRecommendationController {
 
@@ -26,7 +26,7 @@ public class DuoRecommendationController {
     ResponseEntity<List<DuoRecommendationDto>> duoRecommend(@PathVariable String champion, @PathVariable String position){
         log.info("controller. request : {} {}", champion, position);
         //각 dto에는 3개의챔피언을 갖는다.
-        List<DuoRecommendationDto> response = duoRecommendationService.duoRecommend(champion, position);
+        List<DuoRecommendationDto> response = duoRecommendationService.duoRecommend(champion, position.toUpperCase());
         log.info("controller. response : {}", response);
         if (response == null) {
             // 에러리턴.

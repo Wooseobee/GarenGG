@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-@Primary
+//@Primary
 public class DuoRecommendationServiceTestImpl implements DuoRecommendationService{
 
     @Override
