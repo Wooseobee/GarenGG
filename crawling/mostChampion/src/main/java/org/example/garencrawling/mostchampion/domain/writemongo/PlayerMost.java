@@ -1,10 +1,9 @@
-package org.example.garencrawling.mostchampion.domain;
+package org.example.garencrawling.mostchampion.domain.writemongo;
 
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -12,8 +11,8 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Document(collection = "player_cur_solo_rank")
-public class PlayerCurSoloRank {
+@Document(collection = "player_most")
+public class PlayerMost {
     @Id
     private Integer playerId;
 
@@ -21,5 +20,5 @@ public class PlayerCurSoloRank {
 
     private String rankNum;
 
-    private List<MostData> mostDatas = new ArrayList<>();
+    private List<MostData> mostDatas;
 }

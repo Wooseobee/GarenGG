@@ -1,4 +1,4 @@
-package org.example.garencrawling.mostchampion.domain;
+package org.example.garencrawling.mostchampion.domain.readmysql;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -16,9 +16,9 @@ public class PlayerInfo {
     @Id
     private Integer playerId;
 
-    private String summonerName;
+    private String puuid;
 
-    private String tagLine;
+    private String tier;
 
-    private String userNickname;
+    private String rankNum;
 }
