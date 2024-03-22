@@ -11,16 +11,19 @@
       {{ champData.lore }}
     </div>
   </div>
-  <img
-    v-if="champData.passive && champData.passive.image"
-    :src="`https://ddragon.leagueoflegends.com/cdn/14.6.1/img/passive/${champData.passive.image.full}`"
-    alt=""
-    @mouseover="showPassiveInfo(true)"
-    @mouseleave="showPassiveInfo(false)"
-  />
-  <div v-if="passiveModal">
-    <h2>{{ passiveInfo.name }}</h2>
-    <h3>{{ passiveInfo.description }}</h3>
+  <div>
+    <img
+      v-if="champData.passive && champData.passive.image"
+      :src="`https://ddragon.leagueoflegends.com/cdn/14.6.1/img/passive/${champData.passive.image.full}`"
+      alt=""
+      @mouseover="showModal('passive')"
+      @mouseleave="closeModal"
+    />
+    <SkillModal
+      :name="passiveName"
+      :description="passiveDescription"
+      v-if="activeSpell === 'passive' && modalVisible"
+    />
   </div>
   <div v-if="champData.spells">
     <img
@@ -28,6 +31,14 @@
       :key="index"
       :src="getSpellImageURL(spell.id)"
       alt=""
+      @mouseover="showModal('spell', spell)"
+      @mouseleave="closeModal"
+    />
+    <SkillModal
+      :name="activeSpellData.name"
+      :tooltip="activeSpellData.tooltip"
+      :description="activeSpellData.description"
+      v-if="activeSpell === 'spell' && modalVisible"
     />
   </div>
   <div>
@@ -46,8 +57,10 @@
 import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import Youtube from "../common/Youtube.vue";
+import SkillModal from "@/components/common/SkillModal.vue";
 import axios from "axios";
 const champData = ref([]);
+
 const { champname } = defineProps({
   champname: {
     type: String,
@@ -97,18 +110,25 @@ const getLatestPatch = function () {
 const getSpellImageURL = (spellId) => {
   return `https://ddragon.leagueoflegends.com/cdn/14.6.1/img/spell/${spellId}.png`;
 };
-const passiveInfo = ref({ name: "", description: "" });
-const passiveModal = ref(false);
-const showPassiveInfo = (isVisible) => {
-  passiveModal.value = isVisible;
-  if (champData.passive) {
-    passiveInfo.value = {
-      name: champData.passive.name,
-      description: champData.passive.description,
-    };
+const modalVisible = ref(false);
+const activeSpell = ref(null);
+const activeSpellData = ref(null);
+const passiveName = ref("");
+const passiveDescription = ref("");
+const showModal = (type, spell = null) => {
+  modalVisible.value = true;
+  activeSpell.value = type;
+  if (type === "passive") {
+    passiveName.value = champData.passive.name;
+    passiveDescription.value = champData.passive.description;
+  } else if (type === "spell") {
+    activeSpellData.value = spell;
   }
 };
 
+const closeModal = () => {
+  modalVisible.value = false;
+};
 // 챔피언 정보 가져오기
 const getChampData = async (champname) => {
   try {
@@ -118,6 +138,8 @@ const getChampData = async (champname) => {
     });
     console.log(res);
     champData.value = res.data.data[champname];
+    passiveName.value = champData.value.passive.name;
+    passiveDescription.value = champData.value.passive.description;
     await searchYouTube(`롤 ${champData.value.name} 강의`);
   } catch (err) {
     console.log(err);
