@@ -12,7 +12,7 @@ public class MatchPredictionController {
 
     private final MatchPredictionService matchPredictionService;
 
-    @GetMapping("/getRandomMatch")
+    @GetMapping("/randomMatch")
     public RandomMatchResponseDto getRandomMatch() {
         return matchPredictionService.getRandomMatch();
     }
