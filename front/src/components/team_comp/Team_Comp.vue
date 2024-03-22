@@ -4,7 +4,7 @@
       <div class="cards col-md-12">
         <div class="cards d-flex flex-wrap justify-content-center">
           <card
-            v-for="(champion, index) in champions"
+            v-for="(champion, index) in transformedChampions"
             :key="index"
             :champname="champion.name"
           />
@@ -20,26 +20,22 @@
 <script setup>
 import Card from "../common/Card.vue";
 import Youtube from "../common/Youtube.vue";
-const champions = [
-  {
-    image:
-      "https://ddragon.leagueoflegends.com/cdn/img/champion/loading/Aatrox_0.jpg",
-    name: "Aatrox",
-    q: "아트록스 강의",
-  },
-  {
-    image:
-      "https://ddragon.leagueoflegends.com/cdn/img/champion/loading/Garen_0.jpg",
-    name: "Garen",
-    q: "가렌 강의",
-  },
-  {
-    image:
-      "https://ddragon.leagueoflegends.com/cdn/img/champion/loading/Gnar_0.jpg",
-    name: "Gnar",
-    q: "나르 강의",
-  },
-];
+import {computed, ref } from "vue"
+
+const props = defineProps({
+  champions: Array
+});
+
+const imageURLPrefix = "https://ddragon.leagueoflegends.com/cdn/img/champion/loading";
+
+// 받은 champions 배열을 가공하여 새로운 배열을 생성합니다.
+const transformedChampions = computed(() => {
+  return props.champions.map(champ => ({
+    image: `${imageURLPrefix}/${champ.id}_0.jpg`,
+    name: champ.id,
+    q: `${champ.name} 강의`
+  }));
+});
 
 const searchYouTube = async () => {
   try {

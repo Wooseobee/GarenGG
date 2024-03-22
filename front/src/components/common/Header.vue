@@ -8,7 +8,7 @@
       </div>
 
       <!-- Nav Menu -->
-      <nav id="navmenu" class="navmenu" style="margin-left: 400px">
+      <nav id="navmenu" class="navmenu" style="margin-left: 20px">
         <ul>
           <li><RouterLink to="/champ-rec">롤챔추</RouterLink></li>
           <li><RouterLink to="/combination">조합추</RouterLink></li>
