@@ -37,6 +37,11 @@
 import { onMounted, ref, computed } from 'vue'
 import { useChampionStore} from "@/stores/championStore.js"
 import Header from "@/components/common/Header.vue"
+import topImage from '@/assets/Position_Diamond-Top.png';
+import jungleImage from '@/assets/Position_Diamond-Jungle.png';
+import midImage from '@/assets/Position_Diamond-Mid.png';
+import bottomImage from '@/assets/Position_Diamond-Bot.png';
+import utilityImage from '@/assets/Position_Diamond-Support.png';
 
 const championStore = useChampionStore();
 const searchValue = ref("");
@@ -46,11 +51,11 @@ const selectedPosition = ref(""); // 선택된 포지션을 위한 ref 추가
 const selectedChampion = ref({});
 
 const positionImages = ref([
-    { position : "TOP", url: 'src/assets/Position_Diamond-Top.png' },
-    { position : "JUNGLE", url: 'src/assets/Position_Diamond-Jungle.png' },
-    { position : "MID", url: 'src/assets/Position_Diamond-Mid.png' },
-    { position : "BOTTOM", url: 'src/assets/Position_Diamond-Bot.png' },
-    {  position : "UTILITY", url: 'src/assets/Position_Diamond-Support.png' }
+    { position: "TOP", url: topImage },
+    { position: "JUNGLE", url: jungleImage },
+    { position: "MID", url: midImage },
+    { position: "BOTTOM", url: bottomImage },
+    { position: "UTILITY", url: utilityImage }
 ]);
 
 const filteredChampions = computed(() => {
