@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { championInfo } from "@/api/champion.js"
+import { championInfo } from "@/api/champion.js";
 
 export const useChampionStore = defineStore("champion", {
   state: () => ({
@@ -22,5 +22,5 @@ export const useChampionStore = defineStore("champion", {
             console.log(err);
             });
     },
-}    
+  },
 });

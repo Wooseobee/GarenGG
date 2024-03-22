@@ -44,9 +44,16 @@ const router = useRouter();
 const word = ref("");
 const searchMyChamp = function () {
   if (word.value.length < 1) {
-    alert("소환사명을 입력해 주세요");
+    alert("소환사명을 입력해 주세요")
   } else {
-    router.push({ name: "detail", query: { word: word.value } });
+    const [summonerName, tagLine] = word.value.split('#')
+
+    // 유효성 검사: 소환사 이름과 태그명이 모두 존재하는지 확인
+    if (!summonerName || !tagLine) {
+      alert("소환사명과 태그명을 올바르게 입력해 주세요. 예: 소환사명#태그명")
+      return // 조기 반환을 통해 함수 실행 종료
+    }
+    router.push({ name: "detail", query: { summonerName: summonerName, tagLine: tagLine } })
   }
 };
 </script>

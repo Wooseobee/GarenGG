@@ -6,6 +6,8 @@ import DuoRecommendationView from "@/views/DuoRecommendationView.vue";
 import DetailView from "@/views/DetailView.vue";
 import ChampDetailView from "@/views/ChampDetailView.vue";
 import { useChampionStore } from "@/stores/championStore";
+import PredictMatchView from "@/views/PredictMatchView.vue";
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -40,6 +42,11 @@ const router = createRouter({
       path: "/playground",
       name: "playground",
       component: PlaygroundView,
+    },
+    {
+      path: "/predictmatch",
+      name: "predictmatch",
+      component: PredictMatchView,
     },
   ],
 });

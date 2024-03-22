@@ -1,7 +1,7 @@
 <template>
   <div>
-    <div v-if="searchResults.length">
-      <div v-for="video in searchResults" :key="video.id">
+    <div v-if="searchResults.length" class="row">
+      <div v-for="video in searchResults" :key="video.id" class="col-md-4">
         <iframe
           width="280"
           height="157"
