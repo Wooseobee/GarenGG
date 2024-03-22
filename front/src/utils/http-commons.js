@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const baseURL = "http://j10a605.p.ssafy.io:8084/api";
+const baseURL = "https://j10a605.p.ssafy.io:8084/api";
 
 const localAxios = axios.create({
   baseURL,
