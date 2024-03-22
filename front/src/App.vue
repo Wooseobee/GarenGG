@@ -37,11 +37,9 @@ import { RouterView } from "vue-router";
 body {
   color: #ffffff;
   font-family: "BeaufortforLOL-Bold", sans-serif;
-}
-
-.background {
   background-color: #091428;
 }
+
 :root {
   --default-font: "Open Sans", system-ui, -apple-system, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif,
