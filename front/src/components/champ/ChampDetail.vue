@@ -1,52 +1,80 @@
 <template>
-  <h2>{{ champname }}</h2>
-  <div>
-    <img
-      :src="`https://ddragon.leagueoflegends.com/cdn/14.6.1/img/champion/${champname}.png`"
-      alt=""
-    />
-    <div v-if="champData">
-      {{ champData.name }}
-      {{ champData.title }}
-      {{ champData.lore }}
+  <h2>{{ champData.name }}</h2>
+  <h4>{{ champData.title }}</h4>
+  <div class="champion-info">
+    <div class="champion-portrait">
+      <!-- 초상화 -->
+      <img
+        :src="`https://ddragon.leagueoflegends.com/cdn/14.6.1/img/champion/${champname}.png`"
+        alt=""
+      />
+    </div>
+    <!-- 패시브 -->
+    <div class="skills-container">
+      <div class="skill">
+        <img
+          v-if="champData.passive && champData.passive.image"
+          :src="`https://ddragon.leagueoflegends.com/cdn/14.6.1/img/passive/${champData.passive.image.full}`"
+          alt=""
+          @mouseover="showModal('passive')"
+          @mouseleave="closeModal"
+        />
+        <SkillModal
+          :name="passiveName"
+          :description="passiveDescription"
+          v-if="activeSpell === 'passive' && modalVisible"
+        />
+      </div>
+      <!-- 패시브 끝 -->
+      <!-- 스킬 -->
+      <div v-if="champData.spells">
+        <img
+          v-for="(spell, index) in champData.spells"
+          :key="index"
+          :src="getSpellImageURL(spell.id)"
+          alt=""
+          @mouseover="showModal('spell', spell)"
+          @mouseleave="closeModal"
+          :style="{
+            marginRight: index < champData.spells.length - 1 ? '20px' : '0',
+          }"
+        />
+
+        <SkillModal
+          :name="activeSpellData.name"
+          :tooltip="activeSpellData.tooltip"
+          :description="activeSpellData.description"
+          v-if="activeSpell === 'spell' && modalVisible"
+        />
+      </div>
+      <!-- 스킬 끝 -->
     </div>
   </div>
-  <div>
-    <img
-      v-if="champData.passive && champData.passive.image"
-      :src="`https://ddragon.leagueoflegends.com/cdn/14.6.1/img/passive/${champData.passive.image.full}`"
-      alt=""
-      @mouseover="showModal('passive')"
-      @mouseleave="closeModal"
-    />
-    <SkillModal
-      :name="passiveName"
-      :description="passiveDescription"
-      v-if="activeSpell === 'passive' && modalVisible"
-    />
+
+  <div v-if="champData">
+    {{ champData.lore }}
   </div>
-  <div v-if="champData.spells">
-    <img
-      v-for="(spell, index) in champData.spells"
-      :key="index"
-      :src="getSpellImageURL(spell.id)"
-      alt=""
-      @mouseover="showModal('spell', spell)"
-      @mouseleave="closeModal"
-    />
-    <SkillModal
-      :name="activeSpellData.name"
-      :tooltip="activeSpellData.tooltip"
-      :description="activeSpellData.description"
-      v-if="activeSpell === 'spell' && modalVisible"
-    />
-  </div>
+
   <div>
     <ul>
       <li v-for="(tip, index) in champData.allytips" :key="index">{{ tip }}</li>
     </ul>
   </div>
-  <Youtube :searchResults="searchResults" />
+  <div>
+    <Youtube :searchResults="searchResults" />
+  </div>
+  <!-- 스킨 -->
+  <div v-if="champData.skins">
+    <img
+      v-for="(skin, index) in champData.skins"
+      :key="index"
+      :src="getSkinImageURL(skin.num)"
+      alt=""
+      :style="{
+        marginRight: index < champData.spells.length - 1 ? '20px' : '0',
+      }"
+    />
+  </div>
   <div>{{ champData }}</div>
   <div>
     {{ latestPatch }}
@@ -79,6 +107,7 @@ const searchYouTube = async (query) => {
           q: query,
           part: "snippet",
           type: "video",
+          maxResults: 6,
           key: "AIzaSyC7dCyrkYg_AJKe-MuFmA9D0KzMZcoS6eM", // Your YouTube Data API key here
         },
       }
@@ -105,6 +134,10 @@ const getLatestPatch = function () {
     .catch((err) => {
       console.log(err);
     });
+};
+// 스킨 정보
+const getSkinImageURL = (skinnum) => {
+  return `https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${champname}_${skinnum}.jpg`;
 };
 // 스킬 정보
 const getSpellImageURL = (spellId) => {
@@ -152,4 +185,20 @@ onMounted(async () => {
 });
 </script>
 
-<style scoped></style>
+<style scoped>
+.champion-info {
+  display: flex;
+}
+.champion-portrait {
+  margin-right: 20px; /* 초상화와 스킬 컨테이너 사이 간격 조정 */
+  flex: none; /* 크기 고정 */
+}
+.skills-container {
+  display: flex;
+  align-items: center;
+}
+.skill {
+  margin-right: 20px; /* 패시브와 스킬 사이 간격 조정 */
+  flex: none; /* 크기 고정 */
+}
+</style>
