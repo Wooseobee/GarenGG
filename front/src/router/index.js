@@ -48,7 +48,6 @@ router.beforeEach(async (to, from, next) => {
   const championStore = useChampionStore();
   if (!championStore.isInitialized) {
     await championStore.initialize();
-    console.log("피니아 초기화안되가지고 초기화했어 라우터비포이치야 나는")
   }
   next();
 });

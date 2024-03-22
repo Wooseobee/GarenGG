@@ -2,12 +2,11 @@
   <div class="container section-title" data-aos="fade-up">
     <h1>듀오 챔피언 추천</h1>
     <!-- <h1>Duo Champion Recommendation</h1> -->
-  </div>
   <div>
-    챔피언과 포지션을 선.택. 하세요!
     <!-- <Header /> -->
     <ChampSearch />
     <Team_Comp />
+  </div>
   </div>
 </template>
 
@@ -17,7 +16,7 @@ import Team_Comp from "@/components/team_comp/Team_Comp.vue";
 import Header from "@/components/common/Header.vue";
 </script>
 
-<style scoped>
+<style>
 /*--------------------------------------------------------------
 # Section Title
 --------------------------------------------------------------*/
