@@ -1,9 +1,9 @@
 package org.example.apikeycrawling.global;
 
+import lombok.*;
 import org.example.apikeycrawling.apikeycrawling.domain.ApiKey;
 import org.example.apikeycrawling.apikeycrawling.repository.ApiKeyRepository;
 import io.github.bonigarcia.wdm.WebDriverManager;
-import lombok.RequiredArgsConstructor;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -11,7 +11,9 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -24,6 +26,12 @@ public class MyStartupTask implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) throws InterruptedException {
 
+        function1();
+//        function2();
+
+    }
+
+    public void function1() throws InterruptedException {
         ChromeOptions options;
         String userAgent;
         ChromeDriver driver;
@@ -90,5 +98,34 @@ public class MyStartupTask implements ApplicationRunner {
 
             apiKeyRepository.save(apiKey);
         }
+    }
+
+    public void function2() {
+
+        List<ApiKey> apiKeys = apiKeyRepository.findAll();
+
+        int count = 0;
+        while (true) {
+            for (int i = 0; i < apiKeys.size(); i++) {
+                count++;
+
+                RestTemplate restTemplate = new RestTemplate();
+                String url = "https://asia.api.riotgames.com/riot/account/v1/accounts/by-riot-id/{gameName}/{tagLine}?api_key={apiKey}";
+                AccountDto accountDto = restTemplate.getForObject(url, AccountDto.class, "틀딱기", "KR1", apiKeys.get(0).getApiKey());
+                System.out.println("count = " + count + " i = " + i + " " + accountDto.getPuuid());
+
+            }
+        }
+
+    }
+
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Getter
+    @Setter
+    public static class AccountDto {
+        private String puuid;
+        private String gameName;
+        private String tagLine;
     }
 }
