@@ -62,9 +62,12 @@ public class MyStartupTask implements ApplicationRunner {
 
         //////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        driver.get("https://authenticate.riotgames.com/?client_id=riot-developer-portal&locale=en_US&method=riot_identity&platform=web&redirect_uri=https%3A%2F%2Fauth.riotgames.com%2Fauthorize%3Fclient_id%3Driot-developer-portal%26redirect_uri%3Dhttps%253A%252F%252Fdeveloper.riotgames.com%252Foauth2-callback%26response_type%3Dcode%26scope%3Dopenid%2520email%2520summoner%26ui_locales%3Den");
-        Thread.sleep(60000);
+        driver.get("https://developer.riotgames.com/apis");
+        Thread.sleep(2000);
 
+        webElement = driver.findElement(By.xpath("/html/body/nav/div/div[2]/div[1]/ul[2]/li/a"));
+        driver.executeScript("arguments[0].click();", webElement);
+        Thread.sleep(60000);
 
         int count = 0;
         while (true) {
