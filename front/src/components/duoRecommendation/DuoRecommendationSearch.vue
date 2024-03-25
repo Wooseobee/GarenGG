@@ -3,7 +3,6 @@
         <div class="input-group mb-3">
             <input v-model="searchValue" type="text" class="form-control" placeholder="챔피언 입력" aria-label="Recipient's username"
                 aria-describedby="button-addon2" />
-            <button class="btn btn-primary" type="button" id="button-addon2">가렌</button>
         </div>
 
         <div class="image-container col">
@@ -30,6 +29,10 @@
             </div>
         </div>
 
+        <button v-if='selectedChampion.id != undefined && selectedPosition != ""' @click="searchDuoChamp()">
+            추천!
+        </button>
+
     </div>
 </template>
 
@@ -42,6 +45,7 @@ import jungleImage from '@/assets/Position_Diamond-Jungle.png';
 import midImage from '@/assets/Position_Diamond-Mid.png';
 import bottomImage from '@/assets/Position_Diamond-Bot.png';
 import utilityImage from '@/assets/Position_Diamond-Support.png';
+import router from '@/router';
 
 const championStore = useChampionStore();
 const searchValue = ref("");
@@ -69,8 +73,15 @@ const filteredChampions = computed(() => {
     if (!searchValue.value) {
         return champions.value; // 검색어가 없으면 전체 목록 반환
     }
-    return champions.value.filter((item) =>
-        item.id.includes(searchValue.value) || item.name.includes(searchValue.value)
+    return champions.value.filter((item) =>{
+        let tmp = "";
+        if( /^[A-Za-z]+$/.test(searchValue.value)){
+            tmp = searchValue.value.toLowerCase();
+        }
+        else tmp = searchValue.value;
+        console.log(tmp)
+       return  item.id.toLowerCase().includes(tmp) || item.name.includes(tmp)
+    }
     );
 });
 
@@ -98,7 +109,7 @@ function selectPosition(positionImage) {
     console.log("click!, position  : ", positionImage);
     if(selectedPosition.value == ""){
         selectedPosition.value = positionImage;
-        console.log("highlight")
+        console.log("selectedPosition.value : ", selectedPosition.value)
     }
     else{
         selectedPosition.value = "";
@@ -106,6 +117,23 @@ function selectPosition(positionImage) {
     }
 }
 
+function searchDuoChamp(){
+    // console.log(selectedChampion.id)
+    if(selectedChampion.value.id == undefined || selectedPosition.value == "" ){
+        alert("잘못된 요청입니다.")
+        return;
+    }
+    // 예시: DuoRecommendationResult로 라우팅하는 메소드나 함수 내에서
+    router.push({
+    name: 'DuoRecommendationResult',
+    query: {
+        name: selectedChampion.value.name, // 챔피언 이름
+        position: selectedPosition.value.position // 역할
+    }
+});
+    // router.push("/result",selectedPosition.position, selectedChampion.value.name+"/");
+    console.log("click")
+}
 
 //페이지 들어올 때, 챔피언 이미지 받아오기
 onMounted(() => {
