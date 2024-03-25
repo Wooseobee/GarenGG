@@ -1,6 +1,7 @@
 <template>
-  <div>챔피언 디테일 페이지</div>
-  <ChampDetail :champname="champname" />
+  <div>
+    <ChampDetail :champname="champname" />
+  </div>
 </template>
 
 <script setup>

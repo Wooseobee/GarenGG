@@ -8,9 +8,9 @@
       />
     </div>
     <div>
-      <div>
+      <div style="color: #f0e6d2">
         <h2>
-          <span>{{ champData.name }}</span>
+          {{ champData.name }}
         </h2>
         <!-- <p>{{ champData.title }}</p> -->
       </div>
@@ -27,7 +27,7 @@
           />
           <SkillModal
             :name="passiveName"
-            :description="passiveDescription"
+            :description="removeHTMLTags(passiveDescription)"
             v-if="activeSpell === 'passive' && modalVisible"
           />
         </div>
@@ -48,10 +48,10 @@
 
           <SkillModal
             :name="activeSpellData.name"
-            :tooltip="activeSpellData.tooltip"
+            :tooltip="`${removeHTMLTags(activeSpellData.tooltip)}`"
             :description="activeSpellData.description"
             :cooldownBurn="`재사용대기시간: ${activeSpellData.cooldownBurn} 초`"
-            :costBurn="`소모: ${activeSpellData.costBurn}`"
+            :costBurn="`소모: ${getCostBurnDisplay(activeSpellData.costBurn)}`"
             :rangeBurn="`범위: ${activeSpellData.rangeBurn}`"
             v-if="activeSpell === 'spell' && modalVisible"
           />
@@ -61,14 +61,20 @@
     </div>
   </div>
 
-  <div v-if="champData">
-    {{ champData.lore }}
-  </div>
-
   <div>
-    <ul>
-      <li v-for="(tip, index) in champData.allytips" :key="index">{{ tip }}</li>
-    </ul>
+    <div class="box">
+      <h2>설정</h2>
+      <p>{{ champData.lore }}</p>
+    </div>
+
+    <div class="box">
+      <h2>플레이 팁</h2>
+      <ul>
+        <li v-for="(tip, index) in champData.allytips" :key="index">
+          {{ tip }}
+        </li>
+      </ul>
+    </div>
   </div>
   <div>
     <Youtube :searchResults="searchResults" />
@@ -153,6 +159,15 @@ const getSkinImageURL = (skinnum) => {
   return `https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${champname}_${skinnum}.jpg`;
 };
 // 스킬 정보
+const getCostBurnDisplay = (costBurn) => {
+  return costBurn === "0" ? "소모값 없음" : costBurn;
+};
+const removeHTMLTags = (str) => {
+  str = str.replace(/<[^>]*>?/gm, "");
+  str = str.replace(/{{(.*?)}}/g, "?");
+  return str;
+};
+
 const getSpellImageURL = (spellId) => {
   return `https://ddragon.leagueoflegends.com/cdn/14.6.1/img/spell/${spellId}.png`;
 };
@@ -215,5 +230,37 @@ const route = useRoute();
 .skill {
   margin-right: 20px; /* 패시브와 스킬 사이 간격 조정 */
   flex: none; /* 크기 고정 */
+}
+
+/* box */
+.box {
+  display: inline-block; /* 인라인 요소로 표시하여 가로로 배열되도록 설정 */
+  width: 36%; /* 상자의 너비를 줄임 */
+  background-color: #010a13;
+  border: 1px solid #c89b3c;
+  border-radius: 5px;
+  padding: 20px;
+  margin-right: 20px; /* 오른쪽 여백 추가 */
+  margin-bottom: 20px;
+  vertical-align: top; /* 상자를 상단으로 정렬 */
+  box-sizing: border-box; /* 패딩과 테두리를 상자 크기에 포함 */
+}
+
+.box h2 {
+  color: #c89b3c;
+  margin-top: 0;
+}
+
+.box p {
+  margin: 0;
+}
+
+.box ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.box ul li {
+  margin-bottom: 5px;
 }
 </style>
