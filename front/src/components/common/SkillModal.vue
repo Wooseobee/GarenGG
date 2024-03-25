@@ -7,6 +7,9 @@
   >
     <div class="modal-content">
       <h2>{{ name }}</h2>
+      <p>{{ costBurn }}</p>
+      <p>{{ cooldownBurn }}</p>
+      <p>{{ rangeBurn }}</p>
       <p>{{ tooltip }}</p>
       <p>{{ description }}</p>
     </div>
@@ -16,7 +19,7 @@
 <script setup>
 import { defineProps, ref } from "vue";
 
-const { name, description } = defineProps({
+const props = defineProps({
   name: {
     type: String,
     required: true,
@@ -24,6 +27,15 @@ const { name, description } = defineProps({
   description: {
     type: String,
     required: true,
+  },
+  costBurn: {
+    type: String,
+  },
+  cooldownBurn: {
+    type: String,
+  },
+  rangeBurn: {
+    type: String,
   },
   tooltip: {
     type: String,

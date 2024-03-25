@@ -1,6 +1,4 @@
 <template>
-  <h2>{{ champData.name }}</h2>
-  <h4>{{ champData.title }}</h4>
   <div class="champion-info">
     <div class="champion-portrait">
       <!-- 초상화 -->
@@ -9,45 +7,57 @@
         alt=""
       />
     </div>
-    <!-- 패시브 -->
-    <div class="skills-container">
-      <div class="skill">
-        <img
-          v-if="champData.passive && champData.passive.image"
-          :src="`https://ddragon.leagueoflegends.com/cdn/14.6.1/img/passive/${champData.passive.image.full}`"
-          alt=""
-          @mouseover="showModal('passive')"
-          @mouseleave="closeModal"
-        />
-        <SkillModal
-          :name="passiveName"
-          :description="passiveDescription"
-          v-if="activeSpell === 'passive' && modalVisible"
-        />
+    <div>
+      <div>
+        <h2>
+          <span>{{ champData.name }}</span>
+        </h2>
+        <!-- <p>{{ champData.title }}</p> -->
       </div>
-      <!-- 패시브 끝 -->
-      <!-- 스킬 -->
-      <div v-if="champData.spells">
-        <img
-          v-for="(spell, index) in champData.spells"
-          :key="index"
-          :src="getSpellImageURL(spell.id)"
-          alt=""
-          @mouseover="showModal('spell', spell)"
-          @mouseleave="closeModal"
-          :style="{
-            marginRight: index < champData.spells.length - 1 ? '20px' : '0',
-          }"
-        />
 
-        <SkillModal
-          :name="activeSpellData.name"
-          :tooltip="activeSpellData.tooltip"
-          :description="activeSpellData.description"
-          v-if="activeSpell === 'spell' && modalVisible"
-        />
+      <!-- 패시브 -->
+      <div class="skills-container">
+        <div class="skill">
+          <img
+            v-if="champData.passive && champData.passive.image"
+            :src="`https://ddragon.leagueoflegends.com/cdn/14.6.1/img/passive/${champData.passive.image.full}`"
+            alt=""
+            @mouseover="showModal('passive')"
+            @mouseleave="closeModal"
+          />
+          <SkillModal
+            :name="passiveName"
+            :description="passiveDescription"
+            v-if="activeSpell === 'passive' && modalVisible"
+          />
+        </div>
+        <!-- 패시브 끝 -->
+        <!-- 스킬 -->
+        <div v-if="champData.spells">
+          <img
+            v-for="(spell, index) in champData.spells"
+            :key="index"
+            :src="getSpellImageURL(spell.id)"
+            alt=""
+            @mouseover="showModal('spell', spell)"
+            @mouseleave="closeModal"
+            :style="{
+              marginRight: index < champData.spells.length - 1 ? '20px' : '0',
+            }"
+          />
+
+          <SkillModal
+            :name="activeSpellData.name"
+            :tooltip="activeSpellData.tooltip"
+            :description="activeSpellData.description"
+            :cooldownBurn="`재사용대기시간: ${activeSpellData.cooldownBurn} 초`"
+            :costBurn="`소모: ${activeSpellData.costBurn}`"
+            :rangeBurn="`범위: ${activeSpellData.rangeBurn}`"
+            v-if="activeSpell === 'spell' && modalVisible"
+          />
+        </div>
+        <!-- 스킬 끝 -->
       </div>
-      <!-- 스킬 끝 -->
     </div>
   </div>
 
@@ -65,17 +75,13 @@
   </div>
   <!-- 스킨 -->
   <div v-if="champData.skins">
-    <img
-      v-for="(skin, index) in champData.skins"
-      :key="index"
-      :src="getSkinImageURL(skin.num)"
-      alt=""
-      :style="{
-        marginRight: index < champData.spells.length - 1 ? '20px' : '0',
-      }"
+    <Carousel
+      :skins="champData.skins.slice(1).reverse()"
+      :getSkinImageURL="getSkinImageURL"
     />
   </div>
-  <div>{{ champData }}</div>
+
+  <!-- 스킨 끝 -->
   <div>
     {{ latestPatch }}
   </div>
@@ -87,6 +93,7 @@ import { useRoute } from "vue-router";
 import Youtube from "../common/Youtube.vue";
 import SkillModal from "@/components/common/SkillModal.vue";
 import axios from "axios";
+import Carousel from "@/components/common/Carousel.vue";
 const champData = ref([]);
 
 const { champname } = defineProps({
@@ -94,6 +101,11 @@ const { champname } = defineProps({
     type: String,
     required: true,
   },
+});
+
+onMounted(async () => {
+  getLatestPatch();
+  await getChampData(champname);
 });
 
 // 영상 가져오기
@@ -179,10 +191,6 @@ const getChampData = async (champname) => {
   }
 };
 const route = useRoute();
-onMounted(async () => {
-  getLatestPatch();
-  await getChampData(champname);
-});
 </script>
 
 <style scoped>
