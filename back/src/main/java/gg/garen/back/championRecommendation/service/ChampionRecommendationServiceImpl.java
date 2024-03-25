@@ -24,8 +24,8 @@ public class ChampionRecommendationServiceImpl implements ChampionRecommendation
     private final PlayerInfoRepository playerInfoRepository;
     private final PlayerMostRepository playerMostRepository;
 
-    @Value("${riot.apiKeys}")
-    private List<String> API_KEY;
+//    @Value("${riot.apiKeys}")
+//    private List<String> API_KEY;
 
     @Override
     public ResponseGetChampionRecommendationDto getChampionRecommendation(String summonerName, String tagLine) {
@@ -38,13 +38,13 @@ public class ChampionRecommendationServiceImpl implements ChampionRecommendation
         if (findedPlayerInfo == null) {
 
             // 롤 API로 유저 정보 얻고 MySQL에 저장
-            API_KEY_index = secureRandom.nextInt(API_KEY.size());
-            AccountDto accountDto = getAccountByRiotId(summonerName, tagLine, API_KEY.get(API_KEY_index));
+//            API_KEY_index = secureRandom.nextInt(API_KEY.size());
+//            AccountDto accountDto = getAccountByRiotId(summonerName, tagLine, API_KEY.get(API_KEY_index));
 
             PlayerInfo newPlayerInfo = new PlayerInfo();
-            newPlayerInfo.setPuuid(accountDto.getPuuid());
-            newPlayerInfo.setSummonerName(accountDto.getGameName());
-            newPlayerInfo.setTagLine(accountDto.getTagLine());
+//            newPlayerInfo.setPuuid(accountDto.getPuuid());
+//            newPlayerInfo.setSummonerName(accountDto.getGameName());
+//            newPlayerInfo.setTagLine(accountDto.getTagLine());
             newPlayerInfo.setApiKeyId(API_KEY_index);
             findedPlayerInfo = playerInfoRepository.save(newPlayerInfo);
 
@@ -55,8 +55,8 @@ public class ChampionRecommendationServiceImpl implements ChampionRecommendation
         if (findedPlayerMost == null) {
 
             // 롤 API로 Most 정보 얻고 몽고 디비에 저장
-            List<String> matches = getMatchesByPuuid(findedPlayerInfo.getPuuid(), API_KEY.get(findedPlayerInfo.getApiKeyId()));
-            System.out.println(getMatchInfoByMatch(matches.get(0), API_KEY.get(findedPlayerInfo.getApiKeyId())).getInfo().getGameDuration());
+//            List<String> matches = getMatchesByPuuid(findedPlayerInfo.getPuuid(), API_KEY.get(findedPlayerInfo.getApiKeyId()));
+//            System.out.println(getMatchInfoByMatch(matches.get(0), API_KEY.get(findedPlayerInfo.getApiKeyId())).getInfo().getGameDuration());
 
 
 
