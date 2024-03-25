@@ -110,7 +110,7 @@ onMounted(async () => {
 
 // 영상 가져오기
 const searchResults = ref([]);
-const searchYouTube = async (query) => {
+const searchYouTube = async (query, publishedAfter) => {
   try {
     const response = await axios.get(
       "https://www.googleapis.com/youtube/v3/search",
@@ -121,6 +121,7 @@ const searchYouTube = async (query) => {
           type: "video",
           maxResults: 6,
           key: "AIzaSyC7dCyrkYg_AJKe-MuFmA9D0KzMZcoS6eM", // Your YouTube Data API key here
+          publishedAfter: publishedAfter,
         },
       }
     );
@@ -185,7 +186,13 @@ const getChampData = async (champname) => {
     champData.value = res.data.data[champname];
     passiveName.value = champData.value.passive.name;
     passiveDescription.value = champData.value.passive.description;
-    await searchYouTube(`롤 ${champData.value.name} 강의`);
+
+    const twoMonthAgo = new Date();
+    twoMonthAgo.setMonth(twoMonthAgo.getMonth() - 2);
+    await searchYouTube(
+      `롤 ${champData.value.name} 강의`,
+      twoMonthAgo.toISOString()
+    );
   } catch (err) {
     console.log(err);
   }
