@@ -3,13 +3,6 @@
     <Header />
     <div class="container">
       <div class="row">
-        <RouterLink :to="{ name: 'combination' }" class="link-wrapper">
-          <GameCardView />
-          <div class="member-info text-center">
-            <h4>경기 승패 맞추기</h4>
-            <p>누가 이겼는지 맞춰보세요~</p>
-          </div>
-        </RouterLink>
         <RouterLink :to="{ name: 'predictmatch' }" class="link-wrapper">
           <GameCardView />
           <div class="member-info text-center">
