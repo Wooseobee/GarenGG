@@ -5,11 +5,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.getmatches.domain.mongo.Info;
 import org.example.getmatches.domain.mongo.MatchInfo;
 import org.example.getmatches.domain.mongo.Participant;
-import org.example.getmatches.domain.mysql.Combination;
-import org.example.getmatches.domain.mysql.CombinationMatch;
-import org.example.getmatches.domain.mysql.CombinationMatchKey;
-import org.example.getmatches.repository.CombinationMatchRepository;
-import org.example.getmatches.repository.CombinationRepository;
+import org.example.getmatches.domain.mysql.DuoRecord;
+import org.example.getmatches.domain.mysql.DuoRecordMatch;
+import org.example.getmatches.domain.mysql.DuoRecordMatchKey;
+import org.example.getmatches.repository.DuoRecordMatchRepository;
+import org.example.getmatches.repository.DuoRecordRepository;
 import org.example.getmatches.repository.UserMatchRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,8 +25,8 @@ import java.util.List;
 @Slf4j
 public class GetMatchService {
 
-    private final CombinationMatchRepository combinationMatchRepository;
-    private final CombinationRepository combinationRepository;
+    private final DuoRecordMatchRepository duoRecordMatchRepository;
+    private final DuoRecordRepository duoRecordRepository;
     private final UserMatchRepository userMatchRepository;
 
     private static class Choice {
@@ -80,72 +80,72 @@ public class GetMatchService {
     private void processCombinations(List<Choice> champions, String matchId, boolean isVictory) {
         for (int i = 0; i < champions.size(); i++) {
             for (int j = i + 1; j < champions.size(); j++) {
-                Combination combination = createCombination(champions.get(i), champions.get(j));
-                if (isValidCombination(combination)) {
-                    saveCombination(combination, matchId, isVictory);
+                DuoRecord duoRecord = createCombination(champions.get(i), champions.get(j));
+                if (isValidCombination(duoRecord)) {
+                    saveCombination(duoRecord, matchId, isVictory);
                 }
             }
         }
     }
 
-    private Combination createCombination(Choice champion1, Choice champion2) {
-        Combination combination = new Combination();
-        combination.setChampion1(champion1.championId);
-        combination.setLane1(champion1.lane);
-        combination.setChampion2(champion2.championId);
-        combination.setLane2(champion2.lane);
-        return combination;
+    private DuoRecord createCombination(Choice champion1, Choice champion2) {
+        DuoRecord duoRecord = new DuoRecord();
+        duoRecord.setChampion1(Long.valueOf(champion1.championId));
+        duoRecord.setLane1(champion1.lane);
+        duoRecord.setChampion2(Long.valueOf(champion2.championId));
+        duoRecord.setLane2(champion2.lane);
+        return duoRecord;
     }
 
-    private void saveCombination(Combination combination, String matchId, boolean isVictory) {
-        Combination foundCombination = combinationRepository.findByWithPessimisticLock(combination.getChampion1(), combination.getLane1(), combination.getChampion2(), combination.getLane2());
+    private void saveCombination(DuoRecord duoRecord, String matchId, boolean isVictory) {
+        DuoRecord foundDuoRecord = duoRecordRepository.findByWithPessimisticLock(duoRecord.getChampion1(), duoRecord.getLane1(), duoRecord.getChampion2(), duoRecord.getLane2());
 
-        if (foundCombination == null) {
+        if (foundDuoRecord == null) {
             if (isVictory) {
-                combination.setVictory(1L);
+                duoRecord.setVictory(1L);
             } else {
-                combination.setDefeat(1L);
+                duoRecord.setDefeat(1L);
             }
-            combination.setTotalMatch(1L);
-            combination.setWinRate(isVictory ? 100.0 : 0.0);
-            Combination savedCombination = combinationRepository.save(combination);
+            duoRecord.setTotalMatch(1L);
+            duoRecord.setWinRate(isVictory ? 100.0 : 0.0);
+            DuoRecord savedDuoRecord = duoRecordRepository.save(duoRecord);
 
-            saveCombinationMatch(savedCombination, matchId);
+            saveCombinationMatch(savedDuoRecord, matchId);
             return;
         }
-        if (combinationMatchRepository.findById(new CombinationMatchKey(foundCombination.getId(), matchId)).isEmpty()) {
-            updateAndSaveFoundCombination(foundCombination, isVictory);
-            saveCombinationMatch(foundCombination, matchId);
+        if (duoRecordMatchRepository.findById(new DuoRecordMatchKey(foundDuoRecord.getId(), matchId)).isEmpty()) {
+            updateAndSaveFoundCombination(foundDuoRecord, isVictory);
+            saveCombinationMatch(foundDuoRecord, matchId);
         } else {
-            log.info("already calculated match: matchId={}, combinationId={}", matchId, foundCombination.getId());
+            log.info("already calculated match: matchId={}, combinationId={}", matchId, foundDuoRecord.getId());
         }
     }
 
-    private void saveCombinationMatch(Combination combination, String matchId) {
-        CombinationMatchKey combinationMatchKey = new CombinationMatchKey(combination.getId(), matchId);
-        CombinationMatch combinationMatch = new CombinationMatch(combinationMatchKey, combination);
-        combinationMatchRepository.save(combinationMatch);
+    private void saveCombinationMatch(DuoRecord duoRecord, String matchId) {
+        DuoRecordMatchKey duoRecordMatchKey = new DuoRecordMatchKey(duoRecord.getId(), matchId);
+        DuoRecordMatch duoRecordMatch = new DuoRecordMatch(duoRecordMatchKey, duoRecord);
+        duoRecordMatchRepository.save(duoRecordMatch);
     }
 
-    private void updateAndSaveFoundCombination(Combination foundCombination, boolean isVictory) {
+    private void updateAndSaveFoundCombination(DuoRecord foundDuoRecord, boolean isVictory) {
         if (isVictory) {
-            foundCombination.setVictory(foundCombination.getVictory() + 1);
+            foundDuoRecord.setVictory(foundDuoRecord.getVictory() + 1);
         } else {
-            foundCombination.setDefeat(foundCombination.getDefeat() + 1);
+            foundDuoRecord.setDefeat(foundDuoRecord.getDefeat() + 1);
         }
-        foundCombination.setTotalMatch(foundCombination.getTotalMatch() + 1);
-        updateWinRate(foundCombination);
-        combinationRepository.save(foundCombination);
+        foundDuoRecord.setTotalMatch(foundDuoRecord.getTotalMatch() + 1);
+        updateWinRate(foundDuoRecord);
+        duoRecordRepository.save(foundDuoRecord);
     }
 
-    private void updateWinRate(Combination combination) {
-        long totalGames = combination.getVictory() + combination.getDefeat();
+    private void updateWinRate(DuoRecord duoRecord) {
+        long totalGames = duoRecord.getVictory() + duoRecord.getDefeat();
         if (totalGames > 0) {
-            combination.setWinRate((double) combination.getVictory() / totalGames * 100.0);
+            duoRecord.setWinRate((double) duoRecord.getVictory() / totalGames * 100.0);
         }
     }
 
-    private boolean isValidCombination(Combination match) {
+    private boolean isValidCombination(DuoRecord match) {
         return match.getChampion1() != null && match.getChampion2() != null && match.getLane1() != null && match.getLane2() != null;
     }
 }
