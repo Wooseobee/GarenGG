@@ -13,7 +13,7 @@
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 const router = useRouter();
-const { champname } = defineProps({
+const props = defineProps({
   champname: {
     type: String,
     required: true,

@@ -1,6 +1,4 @@
 <template>
-  <h2>{{ champData.name }}</h2>
-  <h4>{{ champData.title }}</h4>
   <div class="champion-info">
     <div class="champion-portrait">
       <!-- 초상화 -->
@@ -9,73 +7,87 @@
         alt=""
       />
     </div>
-    <!-- 패시브 -->
-    <div class="skills-container">
-      <div class="skill">
-        <img
-          v-if="champData.passive && champData.passive.image"
-          :src="`https://ddragon.leagueoflegends.com/cdn/14.6.1/img/passive/${champData.passive.image.full}`"
-          alt=""
-          @mouseover="showModal('passive')"
-          @mouseleave="closeModal"
-        />
-        <SkillModal
-          :name="passiveName"
-          :description="passiveDescription"
-          v-if="activeSpell === 'passive' && modalVisible"
-        />
+    <div>
+      <div style="color: #f0e6d2">
+        <h2>
+          {{ champData.name }}
+        </h2>
+        <!-- <p>{{ champData.title }}</p> -->
       </div>
-      <!-- 패시브 끝 -->
-      <!-- 스킬 -->
-      <div v-if="champData.spells">
-        <img
-          v-for="(spell, index) in champData.spells"
-          :key="index"
-          :src="getSpellImageURL(spell.id)"
-          alt=""
-          @mouseover="showModal('spell', spell)"
-          @mouseleave="closeModal"
-          :style="{
-            marginRight: index < champData.spells.length - 1 ? '20px' : '0',
-          }"
-        />
 
-        <SkillModal
-          :name="activeSpellData.name"
-          :tooltip="activeSpellData.tooltip"
-          :description="activeSpellData.description"
-          v-if="activeSpell === 'spell' && modalVisible"
-        />
+      <!-- 패시브 -->
+      <div class="skills-container">
+        <div class="skill">
+          <img
+            v-if="champData.passive && champData.passive.image"
+            :src="`https://ddragon.leagueoflegends.com/cdn/14.6.1/img/passive/${champData.passive.image.full}`"
+            alt=""
+            @mouseover="showModal('passive')"
+            @mouseleave="closeModal"
+          />
+          <SkillModal
+            :name="passiveName"
+            :description="removeHTMLTags(passiveDescription)"
+            v-if="activeSpell === 'passive' && modalVisible"
+          />
+        </div>
+        <!-- 패시브 끝 -->
+        <!-- 스킬 -->
+        <div v-if="champData.spells">
+          <img
+            v-for="(spell, index) in champData.spells"
+            :key="index"
+            :src="getSpellImageURL(spell.id)"
+            alt=""
+            @mouseover="showModal('spell', spell)"
+            @mouseleave="closeModal"
+            :style="{
+              marginRight: index < champData.spells.length - 1 ? '20px' : '0',
+            }"
+          />
+
+          <SkillModal
+            :name="activeSpellData.name"
+            :tooltip="`${removeHTMLTags(activeSpellData.tooltip)}`"
+            :description="activeSpellData.description"
+            :cooldownBurn="`재사용대기시간: ${activeSpellData.cooldownBurn} 초`"
+            :costBurn="`소모: ${getCostBurnDisplay(activeSpellData.costBurn)}`"
+            :rangeBurn="`범위: ${activeSpellData.rangeBurn}`"
+            v-if="activeSpell === 'spell' && modalVisible"
+          />
+        </div>
+        <!-- 스킬 끝 -->
       </div>
-      <!-- 스킬 끝 -->
     </div>
   </div>
 
-  <div v-if="champData">
-    {{ champData.lore }}
-  </div>
-
   <div>
-    <ul>
-      <li v-for="(tip, index) in champData.allytips" :key="index">{{ tip }}</li>
-    </ul>
+    <div class="box">
+      <h2>설정</h2>
+      <p>{{ champData.lore }}</p>
+    </div>
+
+    <div class="box">
+      <h2>플레이 팁</h2>
+      <ul>
+        <li v-for="(tip, index) in champData.allytips" :key="index">
+          {{ tip }}
+        </li>
+      </ul>
+    </div>
   </div>
   <div>
     <Youtube :searchResults="searchResults" />
   </div>
   <!-- 스킨 -->
   <div v-if="champData.skins">
-    <img
-      v-for="(skin, index) in champData.skins"
-      :key="index"
-      :src="getSkinImageURL(skin.num)"
-      alt=""
-      :style="{
-        marginRight: index < champData.spells.length - 1 ? '20px' : '0',
-      }"
+    <Carousel
+      :skins="champData.skins.slice(1).reverse()"
+      :getSkinImageURL="getSkinImageURL"
     />
   </div>
-  <div>{{ champData }}</div>
+
+  <!-- 스킨 끝 -->
   <div>
     {{ latestPatch }}
   </div>
@@ -87,6 +99,7 @@ import { useRoute } from "vue-router";
 import Youtube from "../common/Youtube.vue";
 import SkillModal from "@/components/common/SkillModal.vue";
 import axios from "axios";
+import Carousel from "@/components/common/Carousel.vue";
 const champData = ref([]);
 
 const { champname } = defineProps({
@@ -96,9 +109,14 @@ const { champname } = defineProps({
   },
 });
 
+onMounted(async () => {
+  getLatestPatch();
+  await getChampData(champname);
+});
+
 // 영상 가져오기
 const searchResults = ref([]);
-const searchYouTube = async (query) => {
+const searchYouTube = async (query, publishedAfter) => {
   try {
     const response = await axios.get(
       "https://www.googleapis.com/youtube/v3/search",
@@ -109,6 +127,7 @@ const searchYouTube = async (query) => {
           type: "video",
           maxResults: 6,
           key: "AIzaSyC7dCyrkYg_AJKe-MuFmA9D0KzMZcoS6eM", // Your YouTube Data API key here
+          publishedAfter: publishedAfter,
         },
       }
     );
@@ -140,6 +159,15 @@ const getSkinImageURL = (skinnum) => {
   return `https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${champname}_${skinnum}.jpg`;
 };
 // 스킬 정보
+const getCostBurnDisplay = (costBurn) => {
+  return costBurn === "0" ? "소모값 없음" : costBurn;
+};
+const removeHTMLTags = (str) => {
+  str = str.replace(/<[^>]*>?/gm, "");
+  str = str.replace(/{{(.*?)}}/g, "?");
+  return str;
+};
+
 const getSpellImageURL = (spellId) => {
   return `https://ddragon.leagueoflegends.com/cdn/14.6.1/img/spell/${spellId}.png`;
 };
@@ -173,16 +201,18 @@ const getChampData = async (champname) => {
     champData.value = res.data.data[champname];
     passiveName.value = champData.value.passive.name;
     passiveDescription.value = champData.value.passive.description;
-    await searchYouTube(`롤 ${champData.value.name} 강의`);
+
+    const twoMonthAgo = new Date();
+    twoMonthAgo.setMonth(twoMonthAgo.getMonth() - 2);
+    await searchYouTube(
+      `롤 ${champData.value.name} 강의`,
+      twoMonthAgo.toISOString()
+    );
   } catch (err) {
     console.log(err);
   }
 };
 const route = useRoute();
-onMounted(async () => {
-  getLatestPatch();
-  await getChampData(champname);
-});
 </script>
 
 <style scoped>
@@ -200,5 +230,37 @@ onMounted(async () => {
 .skill {
   margin-right: 20px; /* 패시브와 스킬 사이 간격 조정 */
   flex: none; /* 크기 고정 */
+}
+
+/* box */
+.box {
+  display: inline-block; /* 인라인 요소로 표시하여 가로로 배열되도록 설정 */
+  width: 36%; /* 상자의 너비를 줄임 */
+  background-color: #010a13;
+  border: 1px solid #c89b3c;
+  border-radius: 5px;
+  padding: 20px;
+  margin-right: 20px; /* 오른쪽 여백 추가 */
+  margin-bottom: 20px;
+  vertical-align: top; /* 상자를 상단으로 정렬 */
+  box-sizing: border-box; /* 패딩과 테두리를 상자 크기에 포함 */
+}
+
+.box h2 {
+  color: #c89b3c;
+  margin-top: 0;
+}
+
+.box p {
+  margin: 0;
+}
+
+.box ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.box ul li {
+  margin-bottom: 5px;
 }
 </style>

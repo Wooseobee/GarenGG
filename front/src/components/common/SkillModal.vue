@@ -7,7 +7,14 @@
   >
     <div class="modal-content">
       <h2>{{ name }}</h2>
-      <p>{{ tooltip }}</p>
+      <p>{{ costBurn }}</p>
+      <p>{{ cooldownBurn }}</p>
+      <p>{{ rangeBurn }}</p>
+      <p v-if="tooltip">
+        {{ tooltip }} <br /><br />[?]로 표시된 값은 Riot API에서 제공하지 않는
+        데이터입니다.<br />정확한 값은 LoL 클라이언트에서 확인하실 수
+        있습니다.<br /><br />
+      </p>
       <p>{{ description }}</p>
     </div>
   </div>
@@ -16,7 +23,7 @@
 <script setup>
 import { defineProps, ref } from "vue";
 
-const { name, description } = defineProps({
+const props = defineProps({
   name: {
     type: String,
     required: true,
@@ -24,6 +31,15 @@ const { name, description } = defineProps({
   description: {
     type: String,
     required: true,
+  },
+  costBurn: {
+    type: String,
+  },
+  cooldownBurn: {
+    type: String,
+  },
+  rangeBurn: {
+    type: String,
   },
   tooltip: {
     type: String,
@@ -56,13 +72,14 @@ window.addEventListener("mousemove", (event) => {
 }
 
 .modal-content {
-  background-color: #0a323c;
+  background-color: #010a13;
+  border: 1px solid #c89b3c;
   padding: 20px;
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
 }
-
-h2 {
+.modal-content h2 {
+  color: #c89b3c;
   margin-top: 0;
 }
 
