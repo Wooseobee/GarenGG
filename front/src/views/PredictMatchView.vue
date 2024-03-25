@@ -34,16 +34,34 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 import Header from "@/components/common/Header.vue";
 import TeamList from "@/views/TeamList.vue";
 import RankView from "@/components/common/RankView.vue";
+import { randomMatch } from "@/api/predictRandomMatch.js";
 
 const currentRound = ref(1);
 const totalRounds = 10;
 const currentHint = ref(1);
 const totalHints = 4;
 const showRankModal = ref(false);
+
+const matchData = ref(null);
+
+onMounted(() => {
+  // 컴포넌트가 마운트될 때 API 요청을 실행
+  fetchMatchData();
+});
+
+const fetchMatchData = async () => {
+  try {
+    // const response = await randomMatch(); // 정의된 함수를 호출합니다.
+    matchData.value = response.data;
+  } catch (error) {
+    console.error("There was an error fetching the match data:", error);
+    // 에러 처리 로직
+  }
+};
 
 const showHint = () => {
   if (currentHint.value < totalHints) {
