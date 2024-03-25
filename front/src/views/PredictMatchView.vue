@@ -187,11 +187,10 @@ const teamTwoPlayers = [
   /* 이곳에 더 많은 스타일을 추가할 수 있음 */
   align-items: center;
   background: radial-gradient(
-      circle,
-      rgba(0, 0, 0, 1) 0%,
-      rgba(0, 0, 0, 1) 100%
-    ),
-    url("@/assets/arcade-background.png"); /* 예시 배경 */
+    circle,
+    rgba(0, 0, 0, 1) 0%,
+    rgba(0, 0, 0, 1) 100%
+  );
   background-size: cover;
   box-shadow: 0 0 10px 10px rgba(0, 255, 255, 0.75); /* 네온 효과 */
   border: 1px solid #00ffea; /* 네온 테두리 */
