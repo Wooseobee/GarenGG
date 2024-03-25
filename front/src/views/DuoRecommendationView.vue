@@ -5,7 +5,7 @@
   <div>
     <!-- <Header /> -->
     <ChampSearch />
-    <Team_Comp />
+    <!-- <Team_Comp /> -->
   </div>
   </div>
 </template>
