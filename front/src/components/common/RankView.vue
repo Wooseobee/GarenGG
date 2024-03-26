@@ -15,18 +15,22 @@
         </li>
       </ul>
     </div>
-    <div class="name-entry">
-      <input type="text" v-model="nickname" placeholder="ABC" maxlength="10" />
-      <button @click="enterName">ENTER</button>
-      <button @click="clearName">CLEAR</button>
-    </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { defineProps, ref } from "vue";
 
-const nickname = ref("");
+const props = defineProps({
+  score: {
+    type: Number,
+    required: true,
+  },
+  nickname: {
+    type: String,
+    default: "",
+  },
+});
 const rankEntries = ref([
   // 예시 데이터, 실제 데이터는 백엔드 시스템으로부터 로드할 수 있음
   {
@@ -45,14 +49,6 @@ const rankEntries = ref([
     nickname: "AAA",
   },
 ]);
-
-const enterName = () => {
-  // 사용자 이름을 순위 데이터에 추가하는 로직
-};
-
-const clearName = () => {
-  userName.value = "";
-};
 </script>
 
 <style scoped>
@@ -86,24 +82,9 @@ const clearName = () => {
 }
 
 .score,
-.nickname,
 .stage,
 .time,
 .difficulty {
   width: 100px; /* 적절한 너비로 조정 */
-}
-
-.name-entry {
-  display: flex;
-  justify-content: center;
-  margin-top: 20px;
-}
-
-.name-entry input {
-  text-align: center;
-}
-
-.name-entry button {
-  margin-left: 10px;
 }
 </style>

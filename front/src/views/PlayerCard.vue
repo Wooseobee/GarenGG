@@ -1,18 +1,24 @@
 <template>
   <div class="player-card" :class="{ 'reverse-order': isRightTeam }">
     <img
-      :src="getImage(player.individualPosition)"
-      alt="hi"
-      class="player-image"
+      :src="getPositionImage(player.individualPosition)"
+      alt="position"
+      class="position-image"
+    />
+    <img
+      :src="player.imgUrl"
+      alt="champion"
+      class="champion-image"
+      width="90px"
+      height="auto"
     />
     <div class="player-info">
-      <h5>{{ player.name }}</h5>
-      <p>{{ player.role }}</p>
-      <p>{{ player.status }}</p>
+      <h5>{{ player.championName }}</h5>
+      <p>{{ player.summonerName }} #{{ player.riotIdTagline }}</p>
     </div>
     <div class="status-div">?</div>
     <div class="isFirstKill">?</div>
-    <div class="kd">K/D</div>
+    <div class="kd">K/D/A</div>
   </div>
 </template>
 
@@ -25,7 +31,26 @@ const props = defineProps({
 });
 
 // 이미지 경로를 처리하는 메서드
-const getImage = (path) => {
+const getPositionImage = (path) => {
+  switch (path) {
+    case "TOP":
+      path = "Top";
+      break;
+    case "JUNGLE":
+      path = "Jungle";
+      break;
+    case "MIDDLE":
+      path = "Mid";
+      break;
+    case "BOTTOM":
+      path = "Bot";
+      break;
+    case "UTILITY":
+      path = "Support";
+      break;
+    default:
+      break;
+  }
   return new URL(`../assets/Position_Diamond-${path}.png`, import.meta.url)
     .href;
 };
