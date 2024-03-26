@@ -15,5 +15,5 @@ public class ParticipantDto {
     private String riotIdTagline;
     private int kills;
     private int deaths;
-    private boolean win;
+    private Boolean win;
 }

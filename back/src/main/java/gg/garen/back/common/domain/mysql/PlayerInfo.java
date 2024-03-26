@@ -4,7 +4,7 @@ import gg.garen.back.common.audit.Auditable;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "player_info", uniqueConstraints = {
+@Table(name = "player_info_test", uniqueConstraints = {
         @UniqueConstraint(columnNames = {"summoner_name", "tag_line"})
 })
 public class PlayerInfo extends Auditable {
@@ -26,13 +26,13 @@ public class PlayerInfo extends Auditable {
     int leaguePoints;
     int wins;
     int losses;
-    int apiKeyId;
+    Long apiKeyId;
 
-    public int getApiKeyId() {
+    public Long getApiKeyId() {
         return apiKeyId;
     }
 
-    public void setApiKeyId(int apiKeyId) {
+    public void setApiKeyId(Long apiKeyId) {
         this.apiKeyId = apiKeyId;
     }
 

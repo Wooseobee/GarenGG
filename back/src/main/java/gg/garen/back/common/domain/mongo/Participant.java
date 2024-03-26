@@ -23,5 +23,5 @@ public class Participant {
     private String summonerName;
     private int totalDamageDealtToChampions;
     private int trueDamageDealtToChampions;
-    private boolean win;
+    private Boolean win;
 }

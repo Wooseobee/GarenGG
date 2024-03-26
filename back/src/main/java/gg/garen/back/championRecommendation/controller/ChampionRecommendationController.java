@@ -20,14 +20,11 @@ public class ChampionRecommendationController {
     @GetMapping("/{summonerName}-{tagLine}")
     ResponseEntity<?> getChampionRecommendation(@PathVariable("summonerName") String summonerName,
                                                 @PathVariable("tagLine") String tagLine) {
-
+        System.out.println("---------------------------------------- " + summonerName + "-" + tagLine + " Start ----------------------------------------");
         ResponseGetChampionRecommendationDto responseGetChampionRecommendationDto
                 = championRecommendationService.getChampionRecommendation(summonerName, tagLine);
+        System.out.println("---------------------------------------- " + summonerName + "-" + tagLine + " End ----------------------------------------");
+        return new ResponseEntity<>(responseGetChampionRecommendationDto, HttpStatus.OK);
 
-        if (responseGetChampionRecommendationDto == null) {
-            return new ResponseEntity<>(null, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(responseGetChampionRecommendationDto, HttpStatus.OK);
-        }
     }
 }
