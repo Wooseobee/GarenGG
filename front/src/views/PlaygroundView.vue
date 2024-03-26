@@ -10,6 +10,7 @@
             <p>누가 이겼는지 맞춰보세요~2</p>
           </div>
         </RouterLink>
+        <Card :champname="'Garen'" />
       </div>
     </div>
   </div>
@@ -18,6 +19,7 @@
 <script setup>
 import Header from "@/components/common/Header.vue";
 import GameCardView from "@/components/common/GameCardView.vue";
+import Card from "@/components/common/Card.vue";
 import { RouterLink } from "vue-router";
 </script>
 
