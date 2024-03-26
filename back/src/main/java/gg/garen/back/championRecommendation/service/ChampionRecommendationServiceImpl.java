@@ -43,7 +43,7 @@ public class ChampionRecommendationServiceImpl implements ChampionRecommendation
         List<String> receivedMatchIds;
         MatchInfo receivedMatchInfo;
         List<MatchInfo> receivedMatchInfos;
-        HashMap<String, HashMap<String, WinLose>> players;
+        HashMap<String, WinLose> player;
 
         findedPlayerInfo = playerInfoRepository.findBySummonerNameAndTagLine(summonerName, tagLine);
         if (findedPlayerInfo == null) {
@@ -117,36 +117,41 @@ public class ChampionRecommendationServiceImpl implements ChampionRecommendation
                 }
             }
 
-            System.out.println("receivedMatchIds.size() = "+ receivedMatchIds.size());
-            for(int i =0 ; i < receivedMatchIds.size() ; i++)
-                System.out.println("i = " + i + " receivedMatchId = "+ receivedMatchIds.get(i));
+//            System.out.println("receivedMatchIds.size() = " + receivedMatchIds.size());
+//            for (int i = 0; i < receivedMatchIds.size(); i++)
+//                System.out.println("i = " + i + " receivedMatchId = " + receivedMatchIds.get(i));
 
-            // 롤 API로 매치들 상세 정보 얻기
-            receivedMatchInfos = new ArrayList<>();
-            url = "https://asia.api.riotgames.com/lol/match/v5/matches/{match}?api_key={apiKey}";
-            try {
-                for (String receiveMatchId : receivedMatchIds) {
-                    receivedMatchInfo = restTemplate.getForObject(url, MatchInfo.class, receiveMatchId, apiKey.getApiKey());
-                    receivedMatchInfos.add(receivedMatchInfo);
-
-                    System.out.println(receiveMatchId);
-                }
-            } catch (HttpClientErrorException e) {
-                // 키 폭발
-                if (e.getStatusCode() == HttpStatus.TOO_MANY_REQUESTS) {
-                    System.out.println(e.getStatusText());
-                    return null;
-                } else {
-                    System.out.println("HTTP 오류: " + e.getStatusCode());
-                    System.out.println("오류 메시지: " + e.getStatusText());
-                    return null;
+            while (true) {
+                // 롤 API로 매치들 상세 정보 얻기
+                receivedMatchInfos = new ArrayList<>();
+                url = "https://asia.api.riotgames.com/lol/match/v5/matches/{match}?api_key={apiKey}";
+                try {
+                    for (String receiveMatchId : receivedMatchIds) {
+                        receivedMatchInfo = restTemplate.getForObject(url, MatchInfo.class, receiveMatchId, apiKeyUtils.getOneApiKey().getApiKey());
+                        receivedMatchInfos.add(receivedMatchInfo);
+//                        System.out.println(receiveMatchId);
+                    }
+                    break;
+                } catch (HttpClientErrorException e) {
+                    // 키 폭발
+                    if (e.getStatusCode() == HttpStatus.TOO_MANY_REQUESTS) {
+                        System.out.println(e.getStatusText());
+                    } else if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+                        System.out.println(e.getStatusText());
+                        break;
+                    } else {
+                        System.out.println("HTTP 오류: " + e.getStatusCode());
+                        System.out.println("오류 메시지: " + e.getStatusText());
+                        return null;
+                    }
                 }
             }
 
             // 상세 정보로 모스트 챔피언 정리하기
-            players = new HashMap<>();
-            function1(players, receivedMatchInfos);
-            function2(players, findedPlayerInfo);
+            player = new HashMap<>();
+            function1(player, receivedMatchInfos, findedPlayerInfo);
+            findedPlayerMost = function2(player, findedPlayerInfo);
+
         }
         System.out.println("findedPlayerMost.getPlayerId() = " + findedPlayerMost.getPlayerId());
         System.out.println("findedPlayerMost.getTier() = " + findedPlayerMost.getTier());
@@ -161,33 +166,34 @@ public class ChampionRecommendationServiceImpl implements ChampionRecommendation
         return null;
     }
 
-    public void function1(HashMap<String, HashMap<String, WinLose>> players, List<MatchInfo> receivedMatchInfos) {
+    public void function1(HashMap<String, WinLose> player, List<MatchInfo> receivedMatchInfos, PlayerInfo findedPlayerInfo) {
 
         // 현재 페이지의 데이터 처리
         for (MatchInfo playerMatch : receivedMatchInfos) {
             // 참가자들을 하나씩 확인
             for (Participant participant : playerMatch.getInfo().getParticipants()) {
 
-                if (!players.containsKey(participant.getPuuid()))
-                    players.put(participant.getPuuid(), new HashMap<>());
+                if (participant.getSummonerName().equals(findedPlayerInfo.getSummonerName())) {
 
-                if (!players.get(participant.getPuuid()).containsKey(participant.getChampionName()))
-                    players.get(participant.getPuuid()).put(participant.getChampionName(), new WinLose());
+                    if (!player.containsKey(participant.getChampionName()))
+                        player.put(participant.getChampionName(), new WinLose());
 
-                if (participant.getWin()) {
-                    players.get(participant.getPuuid()).get(participant.getChampionName()).setWin(
-                            players.get(participant.getPuuid()).get(participant.getChampionName()).getWin() + 1
-                    );
-                } else {
-                    players.get(participant.getPuuid()).get(participant.getChampionName()).setLose(
-                            players.get(participant.getPuuid()).get(participant.getChampionName()).getLose() + 1
-                    );
+                    if (participant.getWin()) {
+                        player.get(participant.getChampionName()).setWin(
+                                player.get(participant.getChampionName()).getWin() + 1
+                        );
+                    } else {
+                        player.get(participant.getChampionName()).setLose(
+                                player.get(participant.getChampionName()).getLose() + 1
+                        );
+                    }
+
                 }
             }
         }
     }
 
-    public void function2(HashMap<String, HashMap<String, WinLose>> players, PlayerInfo playerInfo) {
+    public PlayerMost function2(HashMap<String, WinLose> player, PlayerInfo playerInfo) {
 
         PlayerMost playerMost = new PlayerMost();
 
@@ -196,15 +202,15 @@ public class ChampionRecommendationServiceImpl implements ChampionRecommendation
 
         // mostDatas
         ArrayList<MostData> mostDatas = new ArrayList<>();
-        for (String championName : players.get(playerInfo.getPuuid()).keySet()) {
+        for (String championName : player.keySet()) {
             MostData mostData = new MostData();
 
             // champion
             mostData.setChampion(championName);
 
             // game
-            int win = players.get(playerInfo.getPuuid()).get(championName).getWin();
-            int lose = players.get(playerInfo.getPuuid()).get(championName).getLose();
+            int win = player.get(championName).getWin();
+            int lose = player.get(championName).getLose();
             int percentage = win * 100 / (win + lose);
             String game = "";
             if (win != 0)
@@ -268,6 +274,8 @@ public class ChampionRecommendationServiceImpl implements ChampionRecommendation
         playerMost.setMostDatas(mostDatas);
 
         playerMostRepository.save(playerMost);
+
+        return playerMost;
     }
 
     @NoArgsConstructor
