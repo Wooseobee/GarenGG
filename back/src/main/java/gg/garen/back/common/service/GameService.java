@@ -34,7 +34,7 @@ public class GameService {
     }
 
     public List<RankResponseDto> getRank(Game game) {
-        List<Ranking> topRankings = rankingRepository.findTop10ByGameId(game.getId());
+        List<Ranking> topRankings = rankingRepository.findTop10ByGameIdOrderByScoreDesc(game.getId());
         List<RankResponseDto> result = new ArrayList<>();
 
         for (Ranking ranking : topRankings) {
