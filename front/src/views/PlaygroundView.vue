@@ -10,7 +10,6 @@
             <p>누가 이겼는지 맞춰보세요~2</p>
           </div>
         </RouterLink>
-        <Card :champname="'Garen'" />
       </div>
     </div>
   </div>

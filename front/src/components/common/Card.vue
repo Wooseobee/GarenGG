@@ -1,13 +1,13 @@
 <template>
   <div
     class="card"
-    :class="{ flipped: isFlipped, shaking: isShaking, lightburst: isLight }"
+    :class="{ flipped: isFlipped, effecting: isEffect && !isFlipped }"
     @click="toggleCard"
   >
     <div
       class="face face-front"
-      @mouseenter="startShaking"
-      @mouseleave="stopShaking"
+      @mouseenter="startEffect"
+      @mouseleave="stopEffect"
     >
       <!-- card content -->
 
@@ -34,9 +34,19 @@ const props = defineProps({
   },
 });
 // 카드 뒤집기
-const isLight = ref(false);
 const isFlipped = ref(false);
 const toggleCard = () => {
+  isEffect.value = false;
+  if (!isFlipped.value) {
+    setTimeout(() => {
+      isFlipped.value = !isFlipped.value;
+    }, 500);
+  } else {
+    router.push({
+      name: "champ-detail",
+      params: { champname: props.champname },
+    });
+  }
   // if (!isFlipped.value) {
   // isFlipped.value = true;
   // } else {
@@ -45,21 +55,16 @@ const toggleCard = () => {
   //     params: { champname: props.champname },
   //   });
   // }
-  isLight.value = true;
-  setTimeout(() => {
-    isFlipped.value = !isFlipped.value;
-    isLight.value = false;
-  }, 300);
 };
 
-// 카드 흔들기
-const isShaking = ref(false);
-const startShaking = () => {
-  isShaking.value = true;
+// 마우스오버 효과
+const isEffect = ref(false);
+const startEffect = () => {
+  isEffect.value = true;
 };
 
-const stopShaking = () => {
-  isShaking.value = false;
+const stopEffect = () => {
+  isEffect.value = false;
 };
 const champImageUrl = `https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${props.champname}_0.jpg`;
 </script>
@@ -69,8 +74,8 @@ const champImageUrl = `https://ddragon.leagueoflegends.com/cdn/img/champion/load
   padding: 20px;
 }
 .card {
-  width: 200px;
-  height: 300px;
+  width: 308px;
+  height: 560px;
   margin-left: 15px;
   margin-right: 15px;
   position: relative;
@@ -81,47 +86,35 @@ const champImageUrl = `https://ddragon.leagueoflegends.com/cdn/img/champion/load
   /* background-color: #091428; */
   background-color: #fff;
   /* test */
-  border: 4px solid transparent; /* 테두리 초기값 설정 */
-  animation: goldGlow 2s infinite alternate; /* 황금빛 효과 애니메이션 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
   /* test end */
 }
-/* test */
-.card::before {
-  content: ""; /* 가상 요소에 내용 없음 */
-  position: absolute; /* 절대적 위치 설정 */
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: radial-gradient(
-    circle,
-    rgba(255, 255, 255, 0) 0%,
-    rgba(255, 255, 255, 0.5) 25%,
-    rgba(255, 255, 255, 0.8) 50%,
-    rgba(255, 255, 255, 0.5) 75%,
-    rgba(255, 255, 255, 0) 100%
-  ); /* 빛 무리 효과 설정 */
-  animation: lightBurst 0.5s ease-out forwards; /* 애니메이션 설정 */
-  opacity: 0; /* 초기 투명도 설정 */
-  pointer-events: none; /* 이벤트 허용하지 않음 */
+.effecting {
+  animation: goldGlow 2s infinite alternate,
+    bounce 3s ease-in-out infinite alternate; /* 황금빛 효과 애니메이션 */
 }
-/* test end */
+
 @keyframes goldGlow {
   0% {
-    border-color: #c8aa6e; /* 황금빛으로 설정 */
-    box-shadow: 0 0 10px 0 #c8aa6e; /* 황금빛 그림자 추가 */
+    border-color: #c8aa6e;
+    box-shadow: 0 0 20px 0 rgba(200, 170, 110, 0.7),
+      0 0 30px 0 rgba(200, 170, 110, 0.5), 0 0 40px 0 rgba(200, 170, 110, 0.3);
   }
   50% {
     border-color: #c89b3c;
-    box-shadow: 0 0 10px 0 #c89b3c;
+    box-shadow: 0 0 20px 0 rgba(200, 155, 60, 0.7),
+      0 0 30px 0 rgba(200, 155, 60, 0.5), 0 0 40px 0 rgba(200, 155, 60, 0.3);
   }
   100% {
-    border-color: #785a28; /* 황금빛 강조 */
-    box-shadow: 0 0 20px 0 #785a28; /* 강조된 황금빛 그림자 */
+    border-color: #785a28;
+    box-shadow: 0 0 20px 0 rgba(120, 90, 40, 0.7),
+      0 0 30px 0 rgba(120, 90, 40, 0.5), 0 0 40px 0 rgba(120, 90, 40, 0.3);
   }
 }
-/* 카드 흔들기 */
-@keyframes shake {
+/* 카드 바운스 */
+@keyframes bounce {
   0% {
     transform: scale(1);
     opacity: 1;
@@ -136,39 +129,8 @@ const champImageUrl = `https://ddragon.leagueoflegends.com/cdn/img/champion/load
   }
 }
 
-.shaking {
-  animation: shake 3s ease-in-out infinite alternate;
-}
-/* 카드 흔들기 끝 */
+/* 카드 바운스 끝 */
 
-/* 카드 빛무리 */
-@keyframes lightBurst {
-  0% {
-    transform: scale(0);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(2);
-    opacity: 0;
-  }
-}
-.lightburst {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  background: radial-gradient(
-    circle,
-    rgba(255, 255, 255, 0) 0%,
-    rgba(255, 255, 255, 0.5) 25%,
-    rgba(255, 255, 255, 0.8) 50%,
-    rgba(255, 255, 255, 0.5) 75%,
-    rgba(255, 255, 255, 0) 100%
-  );
-  animation: lightBurst 0.5s ease-out forwards;
-  opacity: 0;
-  pointer-events: none;
-}
-/* 카드 빛무리 끝 */
 .card .face {
   /* test */
 
@@ -176,18 +138,21 @@ const champImageUrl = `https://ddragon.leagueoflegends.com/cdn/img/champion/load
   width: 100%;
   height: 100%;
   /* border: 0px solid #091428; */
-  border-radius: 10px;
+  /* border-radius: 10px; */
   display: flex;
   justify-content: center;
   align-items: center;
   transition: 1s;
   position: absolute;
   backface-visibility: hidden; /*1_로고의 뒷면이나, 뒷카드의 앞면 둘다 숨겨져 있어야 함.*/
+  /* background-color: red; */
   background-color: #091428;
 }
 .card .face-front {
   transform: rotateY(0deg);
 }
+/* test */
+
 .flipped {
   transform: rotateY(180deg);
 }
@@ -197,17 +162,16 @@ const champImageUrl = `https://ddragon.leagueoflegends.com/cdn/img/champion/load
   ); /*2_뒷카드는 뒤집혀있어야 하므로 Y축으로 180도 돌려서 안보이게 처리*/
 }
 .image-container {
-  width: calc(100% - 20px); /* Adjust as needed */
-  height: 100%;
-  padding: 0 10px; /* Adjust padding as needed */
+  max-width: 100%; /* Adjust as needed */
+  max-height: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 .card .face-back img,
 .card .face-front img {
-  width: 100%;
-  height: 100%;
+  width: 308px;
+  height: 560px;
   object-fit: cover;
   /* filter: grayscale(); */
   /* opacity: 0.7; */
