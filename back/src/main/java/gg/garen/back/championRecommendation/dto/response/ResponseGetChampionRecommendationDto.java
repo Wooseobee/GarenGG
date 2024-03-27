@@ -11,6 +11,7 @@ import java.util.List;
 @Setter
 public class ResponseGetChampionRecommendationDto {
 
+    private String errorMessage;
     private List<ChampionRecommendationData> championRecommendationDatas;
 
     @Builder
