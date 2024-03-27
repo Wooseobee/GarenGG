@@ -27,13 +27,14 @@ public class MatchPredictionService {
         for (Participant p : matchInfo.getInfo().getParticipants()) {
             participants.add(
                     ParticipantDto.builder()
-                            .assistMePings(p.getAssistMePings())
+                            .enemyMissingPings(p.getEnemyMissingPings())
                             .championName(p.getChampionName())
                             .individualPosition(p.getIndividualPosition())
                             .summonerName(p.getSummonerName())
                             .riotIdTagline(p.getRiotIdTagline())
                             .kills(p.getKills())
                             .deaths(p.getDeaths())
+                            .firstBloodKill(p.isFirstBloodKill())
                             .win(p.isWin())
                             .build());
         }

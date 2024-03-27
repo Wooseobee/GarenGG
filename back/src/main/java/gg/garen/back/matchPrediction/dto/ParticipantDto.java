@@ -8,12 +8,13 @@ import lombok.Setter;
 @Setter
 @Builder
 public class ParticipantDto {
-    private int assistMePings;
+    private int enemyMissingPings;
     private String championName;
     private String individualPosition;
     private String summonerName;
     private String riotIdTagline;
     private int kills;
     private int deaths;
+    private boolean firstBloodKill;
     private boolean win;
 }
