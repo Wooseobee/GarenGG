@@ -46,7 +46,7 @@ for (let i = 0; i < championKeys.length; i++) {
   champinfo[championIds[i]] = championKeys[i];
 }
 const champkey = champinfo[props.champname];
-// 소리임
+// 소리
 const audiolink = ref(
   `https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/ko_kr/v1/champion-choose-vo/${champkey}.ogg`
 );
