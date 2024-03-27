@@ -1,153 +1,236 @@
 <template>
   <div class="app-container">
     <Header />
-    <div class="round">{{ currentRound }}/{{ totalRounds }}</div>
-    <div class="matchTime">경기시간</div>
     <!-- 노란색 네모에 해당하는 버튼 -->
     <div class="game-container">
       <div class="match-prediction">
         <!-- 좌측 팀 리스트 -->
-        <div class="team-button" @click="selectTeam('teamOne')">
-          <TeamList :players="teamOnePlayers" :isRightTeam="false" />
+        <div class="team-button" @click="selectTeam(teamOnePlayers)">
+          <TeamList
+            :players="teamOnePlayers"
+            :isRightTeam="false"
+            :currentHint="currentHint"
+          />
         </div>
-        <!-- 중앙 VS -->
-        <div class="vs">VS</div>
+        <div class="match-info">
+          <div v-if="currentHint >= 3" class="matchTime">{{ matchTime }}</div>
+          <div class="round">{{ currentRound }}/{{ totalRounds }}</div>
+          <div class="vs">VS</div>
+          <div class="hint" @click="showHint">
+            <span>{{ currentHint }}/{{ totalHints }}</span> 힌트보기
+          </div>
+        </div>
         <!-- 우측 팀 리스트 -->
-        <div class="team-button" @click="selectTeam('teamTwo')">
-          <TeamList :players="teamTwoPlayers" :isRightTeam="true" />
+        <div class="team-button" @click="selectTeam(teamTwoPlayers)">
+          <TeamList
+            :players="teamTwoPlayers"
+            :isRightTeam="true"
+            :currentHint="currentHint"
+          />
         </div>
-        <div class="betting-button" @click="showHint()">
-          <span> {{ currentHint }}/{{ totalHints }} </span>
-          힌트보기
-        </div>
-        <!-- 파란색 네모에 해당하는 버튼 -->
       </div>
     </div>
     <!-- 모달 창 구현 -->
     <div v-if="showRankModal" class="rank-modal">
       <div class="rank-modal-content">
         <span class="close" @click="closeModal">&times;</span>
-        <RankView :nickname="nickname" :rankData="rankData" />
+        <RankView
+          :score="score"
+          :nickname="nickname"
+          :rank="rank"
+          :uuid="uuid"
+        />
       </div>
+    </div>
+
+    <!-- 닉네임 입력 창 구현 -->
+    <div v-if="showNicknameModal" class="nickname-modal">
+      <div class="nickname-modal-content">
+        <h3>ENTER YOUR NICKNAME!</h3>
+        <input
+          ref="nicknameInput"
+          type="text"
+          v-model="nickname"
+          placeholder="Your nickname"
+          maxlength="10"
+          @keyup.enter="submitNickname"
+        />
+        <button @click="submitNickname">Submit</button>
+        <button @click="goBack">return</button>
+      </div>
+    </div>
+    <div
+      v-if="showAnswerFeedback"
+      class="answer-feedback"
+      :class="{ correct: correctAnswer, wrong: !correctAnswer }"
+    >
+      <span>{{ correctAnswer ? "O" : "X" }}</span>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 import Header from "@/components/common/Header.vue";
 import TeamList from "@/views/TeamList.vue";
 import RankView from "@/components/common/RankView.vue";
+import { randomMatch, playGame } from "@/api/randomMatch.js";
+import { useChampionStore } from "@/stores/championStore";
+import { v4 as uuidv4 } from "uuid";
+import { useRouter } from "vue-router";
 
+const router = useRouter();
 const currentRound = ref(1);
 const totalRounds = 10;
-const currentHint = ref(1);
+const currentHint = ref(0);
 const totalHints = 4;
 const showRankModal = ref(false);
+const matchData = ref(null);
+const teamOnePlayers = ref([]);
+const teamTwoPlayers = ref([]);
+const championStore = useChampionStore();
+const score = ref(100);
+const usedHints = ref(0);
+const showNicknameModal = ref(true);
+const nickname = ref("");
+const rank = ref([]);
+const uuid = ref("");
+const correctAnswer = ref(false); // 정답 여부
+const showAnswerFeedback = ref(false); // 정답 피드백 표시 여부
+const matchTime = ref("0");
+const nicknameInput = ref(null);
 
-const showHint = () => {
-  if (currentHint.value < totalHints) {
-    currentHint.value++;
+const calculateGameTime = (seconds) => {
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = Math.floor(seconds % 60);
+
+  return `${minutes}분 ${remainingSeconds}초`;
+};
+
+const submitNickname = () => {
+  if (nickname.value.trim().length) {
+    showNicknameModal.value = false;
   } else {
-    // 모든 라운드가 완료된 경우, 필요한 로직을 여기에 추가
-    console.log("All rounds completed");
+    alert("Please enter a nickname.");
   }
 };
 
-const selectTeam = (team) => {
+const goBack = () => {
+  router.push("/playground");
+};
+
+const fetchMatchData = async () => {
+  try {
+    currentHint.value = 0;
+    const response = await randomMatch();
+    matchData.value = response.data;
+    matchTime.value = calculateGameTime(response.data.gameDuration);
+
+    // 승리 팀과 패배 팀을 분류하기 위한 임시 배열
+    const winTeam = [];
+    const loseTeam = [];
+
+    // API 응답에서 각 참가자를 순회하며 승리 여부에 따라 분류
+    response.data.participants.forEach((participant) => {
+      let idx = 0;
+      for (let index = 0; index < championStore.championIds.length; index++) {
+        if (participant.championName === championStore.championIds[index]) {
+          idx = index;
+          break;
+        }
+      }
+      if (participant.win) {
+        winTeam.push({
+          enemyMissingPings: participant.enemyMissingPings,
+          championId: participant.championName,
+          championName: championStore.championNames[idx],
+          imgUrl: championStore.championSquareImgUrls[idx],
+          individualPosition: participant.individualPosition,
+          summonerName: participant.summonerName,
+          riotIdTagline: participant.riotIdTagline,
+          kills: participant.kills,
+          deaths: participant.deaths,
+          firstBloodKill: participant.firstBloodKill,
+          win: participant.win,
+        });
+      } else {
+        loseTeam.push({
+          enemyMissingPings: participant.enemyMissingPings,
+          championId: participant.championName,
+          championName: championStore.championNames[idx],
+          imgUrl: championStore.championSquareImgUrls[idx],
+          individualPosition: participant.individualPosition,
+          summonerName: participant.summonerName,
+          riotIdTagline: participant.riotIdTagline,
+          kills: participant.kills,
+          deaths: participant.deaths,
+          firstBloodKill: participant.firstBloodKill,
+          win: participant.win,
+        });
+      }
+    });
+
+    if (Math.random() < 0.5) {
+      teamOnePlayers.value = winTeam; // 승리 팀을 teamOnePlayers에 할당
+      teamTwoPlayers.value = loseTeam; // 패배 팀을 teamTwoPlayers에 할당
+    } else {
+      teamOnePlayers.value = loseTeam; // 패배 팀을 teamOnePlayers에 할당
+      teamTwoPlayers.value = winTeam; // 승리 팀을 teamTwoPlayers에 할당
+    }
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+onMounted(() => {
+  nicknameInput.value.focus();
+  fetchMatchData();
+});
+
+const showHint = () => {
+  if (showAnswerFeedback.value) return;
+  if (currentHint.value < totalHints) {
+    currentHint.value++;
+    usedHints.value++;
+  }
+};
+
+const selectTeam = async (team) => {
+  if (showAnswerFeedback.value) return;
+  correctAnswer.value = team[0].win; // 승리 팀을 선택했는지 여부
+  showAnswerFeedback.value = true; // 정답 피드백을 보여주기
+
+  currentHint.value = 4;
+  await new Promise((resolve) => setTimeout(resolve, 5000));
+
+  showAnswerFeedback.value = false; // 피드백 숨김
+
+  if (team[0].win) {
+    score.value -= usedHints.value * 2;
+  } else {
+    score.value -= 10;
+  }
   if (currentRound.value < totalRounds) {
     currentRound.value++;
+    fetchMatchData();
   } else {
-    // 모든 라운드가 완료된 경우, 필요한 로직을 여기에 추가
+    uuid.value = uuidv4();
+    const response = await playGame({
+      gameId: 1,
+      nickname: nickname.value,
+      score: score.value,
+      uuid: uuid.value,
+    });
     showRankModal.value = true;
-    console.log("All hints completed");
+    rank.value = response.data;
   }
+  usedHints.value = 0;
+  currentHint.value = 0;
 };
 
 const closeModal = () => {
-  // 모달을 숨김
-  showRankModal.value = false;
-  // 라운드와 힌트를 초기 값으로 리셋
-  // currentRound.value = 1;
-  // currentHint.value = 1;
-  // 추가적으로 게임을 재시작하는 로직을 여기에 포함할 수 있음
-  // 예를 들어, 게임 데이터를 초기화하거나, 새 게임을 시작하기 위한 API 호출 등
+  window.location.reload();
 };
-
-const teamOnePlayers = [
-  {
-    id: 1,
-    name: "아트록스",
-    individualPosition: "Top",
-    image: "Position_Diamond-Top.png",
-    status: "Destiny fan",
-  },
-  {
-    id: 1,
-    name: "아트록스",
-    individualPosition: "Jungle",
-    image: "logo2.png",
-    status: "Destiny fan",
-  },
-  {
-    id: 1,
-    name: "아트록스",
-    individualPosition: "Mid",
-    image: "atrox.png",
-    status: "Destiny fan",
-  },
-  {
-    id: 1,
-    name: "아트록스",
-    individualPosition: "Bot",
-    image: "atrox.png",
-    status: "Destiny fan",
-  },
-  {
-    id: 1,
-    name: "아트록스",
-    individualPosition: "Support",
-    image: "atrox.png",
-    status: "Destiny fan",
-  },
-];
-const teamTwoPlayers = [
-  {
-    id: 1,
-    name: "아트록스",
-    individualPosition: "Top",
-    image: "Position_Diamond-Top.png",
-    status: "Destiny fan",
-  },
-  {
-    id: 1,
-    name: "아트록스",
-    individualPosition: "Jungle",
-    image: "logo2.png",
-    status: "Destiny fan",
-  },
-  {
-    id: 1,
-    name: "아트록스",
-    individualPosition: "Mid",
-    image: "atrox.png",
-    status: "Destiny fan",
-  },
-  {
-    id: 1,
-    name: "아트록스",
-    individualPosition: "Bot",
-    image: "atrox.png",
-    status: "Destiny fan",
-  },
-  {
-    id: 1,
-    name: "아트록스",
-    individualPosition: "Support",
-    image: "atrox.png",
-    status: "Destiny fan",
-  },
-];
 </script>
 
 <style scoped>
@@ -158,10 +241,6 @@ const teamTwoPlayers = [
 }
 
 .round {
-  position: absolute;
-  left: 50%; /* 화면의 중앙 */
-  transform: translateX(-50%); /* 정확한 중앙 정렬을 위해 */
-  top: 120px;
   text-align: center;
   font-size: 1.5rem;
   color: #ffffff;
@@ -198,7 +277,6 @@ const teamTwoPlayers = [
 }
 
 .vs {
-  margin: 0 20px;
   font-size: 3rem; /* 크기 증가 */
   color: #d00;
   text-shadow: 0 0 10px #d00; /* 텍스트 네온 효과 */
@@ -217,15 +295,14 @@ const teamTwoPlayers = [
   left: 50%; /* 화면의 중앙 */
   transform: translateX(-50%); /* 정확한 중앙 정렬을 위해 */
   padding: 10px;
-  background-color: #ffcc00; /* 노란색 배경 */
-  color: #000; /* 텍스트 색상 */
+  background-color: #00ffea; /* 노란색 배경 */
+  color: black; /* 텍스트 색상 */
   cursor: pointer; /* 클릭 가능한 요소로 표시 */
-  visibility: hidden;
 }
 
-.betting-button {
+.hint {
   position: absolute;
-  bottom: 120px; /* 위치 조정 */
+  bottom: 20px; /* 위치 조정 */
   left: 50%; /* 화면의 중앙 */
   transform: translateX(-50%); /* 정확한 중앙 정렬을 위해 */
   padding: 10px 20px;
@@ -282,5 +359,54 @@ const teamTwoPlayers = [
   font-size: 25px;
   cursor: pointer;
   color: black;
+}
+
+.nickname-modal {
+  /* 모달 위치 및 스타일링 설정 */
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000; /* z-index를 높여 다른 요소들 위에 오도록 설정 */
+}
+
+.nickname-modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  color: black;
+}
+
+.answer-feedback {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 20rem;
+  animation: fadeInOut 5s ease-in-out;
+}
+
+.correct {
+  color: green;
+}
+
+.wrong {
+  color: #d00;
+}
+
+@keyframes fadeInOut {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 </style>

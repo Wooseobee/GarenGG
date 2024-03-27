@@ -18,6 +18,7 @@
 <script setup>
 import Header from "@/components/common/Header.vue";
 import GameCardView from "@/components/common/GameCardView.vue";
+import Card from "@/components/common/Card.vue";
 import { RouterLink } from "vue-router";
 </script>
 

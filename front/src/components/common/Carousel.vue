@@ -94,7 +94,7 @@ for (let i = 0; i < props.skins.length; i += 5) {
 <style scoped>
 .carousel-image {
   max-width: 100%; /* 이미지가 부모 요소의 너비를 넘지 않도록 설정 */
-  max-height: 400px; /* 이미지의 최대 높이를 설정 */
+  max-height: 660px; /* 이미지의 최대 높이를 설정 */
   margin: auto;
 }
 .carousel-item-container {
