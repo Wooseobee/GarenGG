@@ -48,10 +48,12 @@
       <div class="nickname-modal-content">
         <h3>ENTER YOUR NICKNAME!</h3>
         <input
+          ref="nicknameInput"
           type="text"
           v-model="nickname"
           placeholder="Your nickname"
           maxlength="10"
+          @keyup.enter="submitNickname"
         />
         <button @click="submitNickname">Submit</button>
         <button @click="goBack">return</button>
@@ -80,7 +82,7 @@ import { useRouter } from "vue-router";
 const router = useRouter();
 const currentRound = ref(1);
 const totalRounds = 10;
-const currentHint = ref(1);
+const currentHint = ref(0);
 const totalHints = 4;
 const showRankModal = ref(false);
 const matchData = ref(null);
@@ -96,6 +98,7 @@ const uuid = ref("");
 const correctAnswer = ref(false); // 정답 여부
 const showAnswerFeedback = ref(false); // 정답 피드백 표시 여부
 const matchTime = ref("0");
+const nicknameInput = ref(null);
 
 const calculateGameTime = (seconds) => {
   const minutes = Math.floor(seconds / 60);
@@ -180,6 +183,7 @@ const fetchMatchData = async () => {
 };
 
 onMounted(() => {
+  nicknameInput.value.focus();
   fetchMatchData();
 });
 
@@ -187,30 +191,27 @@ const showHint = () => {
   if (showAnswerFeedback.value) return;
   if (currentHint.value < totalHints) {
     currentHint.value++;
-  } else {
-    // 모든 라운드가 완료된 경우, 필요한 로직을 여기에 추가
-    console.log("All rounds completed");
+    usedHints.value++;
   }
 };
-
-const waitForFeedbackToEnd = () =>
-  new Promise((resolve) => setTimeout(resolve, 3000));
 
 const selectTeam = async (team) => {
   if (showAnswerFeedback.value) return;
   correctAnswer.value = team[0].win; // 승리 팀을 선택했는지 여부
   showAnswerFeedback.value = true; // 정답 피드백을 보여주기
 
-  await waitForFeedbackToEnd();
+  currentHint.value = 4;
+  await new Promise((resolve) => setTimeout(resolve, 5000));
+
   showAnswerFeedback.value = false; // 피드백 숨김
 
+  if (team[0].win) {
+    score.value -= usedHints.value * 2;
+  } else {
+    score.value -= 10;
+  }
   if (currentRound.value < totalRounds) {
     currentRound.value++;
-    if (team[0].win) {
-      score.value -= usedHints.value * 2;
-    } else {
-      score.value -= 10;
-    }
     fetchMatchData();
   } else {
     uuid.value = uuidv4();
@@ -222,8 +223,9 @@ const selectTeam = async (team) => {
     });
     showRankModal.value = true;
     rank.value = response.data;
-    console.log("All hints completed");
   }
+  usedHints.value = 0;
+  currentHint.value = 0;
 };
 
 const closeModal = () => {
@@ -387,7 +389,7 @@ const closeModal = () => {
   left: 50%;
   transform: translate(-50%, -50%);
   font-size: 20rem;
-  animation: fadeInOut 3s ease-in-out;
+  animation: fadeInOut 5s ease-in-out;
 }
 
 .correct {
