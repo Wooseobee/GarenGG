@@ -11,7 +11,8 @@
     >
       <!-- card content -->
       <audio hidden="true" ref="audio">
-        <source :src="`@/assets/pick-voice/${champkey}.ogg`" type="audio/ogg" />
+        <source :src="audiopath" type="audio/ogg" />
+        <!-- <source src="@/assets/pick-voice/1.ogg" type="audio/ogg" /> -->
       </audio>
       <div class="image-container">
         <img src="@/assets/cardback.jpg" alt="heropy" />
@@ -26,7 +27,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { useChampionStore } from "@/stores/championStore.js";
 const championStore = useChampionStore();
@@ -36,18 +37,28 @@ const props = defineProps({
     type: String,
     required: true,
   },
-  champkey: {
-    type: String,
-    required: true,
-  },
 });
+const { championKeys, championIds } = championStore;
 
-const audio = ref(null);
+// champinfo 객체 생성
+const champinfo = {};
+
+for (let i = 0; i < championKeys.length; i++) {
+  champinfo[championIds[i]] = championKeys[i];
+}
+const champkey = champinfo[props.champname].toString();
 // 소리
-const playFlipSound = () => {
-  audio.value?.play();
+const audio = ref(null);
+const audiopath = ref(`@/assets/pick-voice/${champkey}.ogg`);
+const playFlipSound = async () => {
+  try {
+    console.log(champkey);
+    console.log(audio.value);
+    audio.value?.play();
+  } catch (error) {
+    console.error("에러 발생:", error);
+  }
 };
-
 // 카드 뒤집기
 const isFlipped = ref(false);
 const toggleCard = () => {
