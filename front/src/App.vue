@@ -6,12 +6,14 @@
       data-bs-target="#navmenu"
     >
       <RouterView />
+      <ChatVue/>
     </body>
   </div>
 </template>
 
 <script setup>
 import { RouterView } from "vue-router";
+import ChatVue from "@/components/chat/Chat.vue";
 </script>
 
 <style>
