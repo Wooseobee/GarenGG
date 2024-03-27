@@ -8,5 +8,6 @@ import lombok.Setter;
 public class UserScoreRequestDto {
     private Long gameId;
     private String nickname;
+    private String uuid;
     private int score;
 }

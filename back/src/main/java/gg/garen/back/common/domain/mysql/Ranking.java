@@ -19,5 +19,7 @@ public class Ranking extends Auditable {
 
     private String nickname;
 
+    private String uuid;
+
     private int score;
 }

@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 public class RankResponseDto {
     private String gameName;
     private String nickname;
+    private String uuid;
     private int Score;
     private LocalDateTime createdAt;
 }
