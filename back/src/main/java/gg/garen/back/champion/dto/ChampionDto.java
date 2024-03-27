@@ -11,4 +11,5 @@ import lombok.Setter;
 public class ChampionDto {
     String id;
     String name;
+    Long championKey;
 }
