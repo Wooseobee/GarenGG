@@ -1,5 +1,9 @@
 <template>
-  <div class="background">
+  <div>
+    <Header />
+    <section id="hero" class="hero">
+      <img src="@/assets/garen-background.gif" alt="" data-aos="fade-in" />
+  <!-- <div class="background"> -->
     <!-- Team Section - Home Page -->
     <section id="team" class="team">
       <!--  Section Title -->
@@ -89,12 +93,15 @@
       </div>
     </section>
     <!-- End Team Section -->
+  <!-- </div> -->
+      </section>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import { useRouter, RouterLink } from "vue-router";
+import Header from "@/components/common/Header.vue";
 
 const router = useRouter();
 </script>
@@ -193,5 +200,102 @@ const router = useRouter();
   padding-bottom: 0;
   visibility: visible;
   opacity: 1;
+}
+
+.hero {
+  --default-color: #ffffff;
+  --default-color-rgb: 255, 255, 255;
+  --background-color: #000000;
+  --background-color-rgb: 0, 0, 0;
+  width: 100%;
+  min-height: 100vh;
+  position: relative;
+  padding: 160px 0 80px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero img {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  -o-object-fit: cover;
+  object-fit: cover;
+  z-index: 1;
+}
+
+.hero:before {
+  content: "";
+  background: rgba(var(--background-color-rgb), 0.5);
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+}
+
+.hero .container {
+  position: relative;
+  margin-left: 150px;
+  z-index: 3;
+}
+
+.hero h2 {
+  color: white;
+  margin: 0;
+  font-size: 58px;
+  font-weight: 700;
+}
+
+.hero p {
+  color: white;
+  margin: 5px 0 0 0;
+  font-size: 25px;
+}
+
+.hero .btn {
+  width: 66px;
+  background-color: #005a82;
+}
+
+.hero .sign-up-form {
+  width: 110%;
+  height: 80px;
+  margin-top: 20px;
+  padding: 10px;
+  border-radius: 7px;
+  background: #fff;
+  box-shadow: 0 15px 30px 0 rgba(0, 0, 0, 0.1);
+}
+
+.hero .sign-up-form .form-control {
+  height: 100%;
+  border: none;
+}
+
+.hero .sign-up-form .form-control:active,
+.hero .sign-up-form .form-control:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.hero .sign-up-form input[type="submit"] {
+  box-shadow: 0 15px 30px 0 rgba(0, 0, 0, 0.2);
+  background-color: var(#87ceeb);
+  border-color: var(#87ceeb);
+  padding: 8px 20px 10px 20px;
+  border-radius: 7px;
+  color: var(--contrast-color);
+}
+
+@media (max-width: 768px) {
+  .hero h2 {
+    font-size: 32px;
+  }
+
+  .hero p {
+    font-size: 18px;
+  }
 }
 </style>

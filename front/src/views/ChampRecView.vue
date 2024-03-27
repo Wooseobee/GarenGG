@@ -1,14 +1,15 @@
 <template>
   <div>
+    <Header />
     <section id="hero" class="hero">
       <img src="@/assets/garen-background.gif" alt="" data-aos="fade-in" />
 
       <div class="container">
         <div class="row">
           <div class="col-lg-10">
-            <h2 data-aos="fade-up" data-aos-delay="100">가렌.GG</h2>
+            <h2 data-aos="fade-up" data-aos-delay="100">GAREN.GG</h2>
             <p data-aos="fade-up" data-aos-delay="200">
-              나에게 딱 맞는 새로운 주챔을 추천 받으세요
+              나에게 맞는 새로운 챔피언을 추천 받으세요
             </p>
           </div>
           <div class="col-lg-5">
@@ -22,10 +23,10 @@
                 class="form-control"
                 @keyup.enter="searchMyChamp"
                 v-model="word"
-                placeholder="플레이어 이름#KR1"
+                placeholder="소환사명#태그"
               />
               <button class="btn btn-primary" @click="searchMyChamp">
-                가렌
+                검색
               </button>
             </div>
           </div>
@@ -38,21 +39,23 @@
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
+import Header from "@/components/common/Header.vue";
 
 const router = useRouter();
-
 const word = ref("");
+
 const searchMyChamp = function () {
   if (word.value.length < 1) {
-    alert("소환사명을 입력해 주세요")
+    alert("소환사명#태그를 입력해 주세요")
   } else {
     const [summonerName, tagLine] = word.value.split('#')
 
     // 유효성 검사: 소환사 이름과 태그명이 모두 존재하는지 확인
     if (!summonerName || !tagLine) {
-      alert("소환사명과 태그명을 올바르게 입력해 주세요. 예: 소환사명#태그명")
+      alert("소환사명#태그를 올바르게 입력해 주세요. 예: 누가날막지#KR1")
       return // 조기 반환을 통해 함수 실행 종료
     }
+
     router.push({ name: "detail", query: { summonerName: summonerName, tagLine: tagLine } })
   }
 };
