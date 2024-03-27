@@ -2,6 +2,7 @@ package com.example.riotApiCrawling.userCrawl.controller;
 
 import com.example.riotApiCrawling.userCrawl.dto.RequestDto;
 import com.example.riotApiCrawling.userCrawl.service.UserRiotApiService;
+import com.example.riotApiCrawling.userCrawl.service.UserRiotApiServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,21 +13,22 @@ import org.springframework.web.bind.annotation.RestController;
 //유저정보 가져오게하기
 @RestController("/")
 public class UserRiotApiController {
-    private final UserRiotApiService userRiotApiService;
+    private final UserRiotApiServiceImpl userRiotApiService;
 
 
-    UserRiotApiController(UserRiotApiService userRiotApiService){
+    UserRiotApiController(UserRiotApiServiceImpl userRiotApiService){
         this.userRiotApiService = userRiotApiService;
     }
-    @PostMapping
-    ResponseEntity<Void> crawlUser(@RequestBody RequestDto requestDto) throws Exception{
-        userRiotApiService.crawlUser(requestDto);
+    @PostMapping("users")
+    ResponseEntity<Void> crawlUser() throws Exception{
+//        userRiotApiService.crawlUser(requestDto);
 
+        userRiotApiService.setUsers();
         return ResponseEntity.ok().build();
     }
 
     //healthcheck
-    @GetMapping
+    @GetMapping("healthCheck")
     String healthcheck(){
         return "hello";
     }

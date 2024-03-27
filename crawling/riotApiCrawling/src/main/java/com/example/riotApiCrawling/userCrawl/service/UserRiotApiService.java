@@ -27,19 +27,26 @@ public class UserRiotApiService {
     private final UserRiotApiRepository userRiotApiRepository;
     @Value("${riot.apiKeys}")
     List<String> apiKeys;
-    Map<String, Integer> apiKeysId;
+    Map<String, Long> apiKeysId;
     public String[] rank = {"", "I", "II", "III", "IV"};
 
     UserRiotApiService(UserRiotApiRepository userRiotApiRepository){
         this.userRiotApiRepository = userRiotApiRepository;
     }
-
+//    public void test(){
+//        System.out.println("test시작.");
+//        List<PlayerInfo> list = new ArrayList<>();
+//        list = userRiotApiRepository.findByTierAndRank("PLATINUM","IV");
+//        list = userRiotApiRepository.findByTier("PLATINUM");
+//        System.out.println("한번에 가져올 수 있는 사이즈 : "+list.size()+"개");
+//    }
     @PostConstruct
     public  void init() {
-        apiKeysId = new HashMap<String, Integer>();
+        apiKeysId = new HashMap<String, Long>();
         for(int i= 0; i < 13; i++){
-            apiKeysId.put(apiKeys.get(i), i);
+            apiKeysId.put(apiKeys.get(i), (long)i);
         }
+//        test();
     }
 
     public void crawlUser(RequestDto requestDto) throws IOException, InterruptedException {
