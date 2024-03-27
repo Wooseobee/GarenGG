@@ -10,7 +10,9 @@
       @mouseleave="stopEffect"
     >
       <!-- card content -->
-
+      <audio hidden="true" ref="audio">
+        <source :src="`@/assets/pick-voice/${champkey}.ogg`" type="audio/ogg" />
+      </audio>
       <div class="image-container">
         <img src="@/assets/cardback.jpg" alt="heropy" />
       </div>
@@ -24,15 +26,28 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
+import { useChampionStore } from "@/stores/championStore.js";
+const championStore = useChampionStore();
 const router = useRouter();
 const props = defineProps({
   champname: {
     type: String,
     required: true,
   },
+  champkey: {
+    type: String,
+    required: true,
+  },
 });
+
+const audio = ref(null);
+// 소리
+const playFlipSound = () => {
+  audio.value?.play();
+};
+
 // 카드 뒤집기
 const isFlipped = ref(false);
 const toggleCard = () => {
@@ -41,20 +56,13 @@ const toggleCard = () => {
     setTimeout(() => {
       isFlipped.value = !isFlipped.value;
     }, 500);
+    playFlipSound();
   } else {
     router.push({
       name: "champ-detail",
       params: { champname: props.champname },
     });
   }
-  // if (!isFlipped.value) {
-  // isFlipped.value = true;
-  // } else {
-  //   router.push({
-  //     name: "champ-detail",
-  //     params: { champname: props.champname },
-  //   });
-  // }
 };
 
 // 마우스오버 효과
@@ -83,17 +91,14 @@ const champImageUrl = `https://ddragon.leagueoflegends.com/cdn/img/champion/load
   perspective: 600px; /*3_카드가 돌아갈때 원근법을 주기 위해-앞 뒷면 돌아가는 걸 보기 위해 부모에게 적용*/
   transform-style: preserve-3d;
   transition: transform 0.5s;
-  /* background-color: #091428; */
-  background-color: #fff;
-  /* test */
+  background-color: #091428;
   display: flex;
   justify-content: center;
   align-items: center;
-  /* test end */
 }
 .effecting {
   animation: goldGlow 2s infinite alternate,
-    bounce 3s ease-in-out infinite alternate; /* 황금빛 효과 애니메이션 */
+    bounce 3s ease-in-out infinite alternate;
 }
 
 @keyframes goldGlow {
@@ -102,7 +107,7 @@ const champImageUrl = `https://ddragon.leagueoflegends.com/cdn/img/champion/load
     box-shadow: 0 0 20px 0 rgba(200, 170, 110, 0.7),
       0 0 30px 0 rgba(200, 170, 110, 0.5), 0 0 40px 0 rgba(200, 170, 110, 0.3);
   }
-  50% {
+  40% {
     border-color: #c89b3c;
     box-shadow: 0 0 20px 0 rgba(200, 155, 60, 0.7),
       0 0 30px 0 rgba(200, 155, 60, 0.5), 0 0 40px 0 rgba(200, 155, 60, 0.3);
