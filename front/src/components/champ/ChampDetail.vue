@@ -76,10 +76,13 @@
       </ul>
     </div>
   </div>
+  <!-- 유튜브 -->
+  <h1>챔피언 플레이 가이드</h1>
   <div>
     <Youtube :searchResults="searchResults" />
   </div>
   <!-- 스킨 -->
+  <h1>스킨</h1>
   <div v-if="champData.skins">
     <Carousel
       :skins="champData.skins.slice(1).reverse()"
@@ -202,11 +205,11 @@ const getChampData = async (champname) => {
     passiveName.value = champData.value.passive.name;
     passiveDescription.value = champData.value.passive.description;
 
-    const twoMonthAgo = new Date();
-    twoMonthAgo.setMonth(twoMonthAgo.getMonth() - 2);
+    const MonthAgo = new Date();
+    MonthAgo.setMonth(MonthAgo.getMonth() - 3);
     await searchYouTube(
       `롤 ${champData.value.name} 강의`,
-      twoMonthAgo.toISOString()
+      MonthAgo.toISOString()
     );
   } catch (err) {
     console.log(err);

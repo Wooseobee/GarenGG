@@ -17,44 +17,22 @@
 <script setup>
 import Card from "../common/Card.vue";
 import Youtube from "../common/Youtube.vue";
-import {computed, ref } from "vue"
+import { computed, ref } from "vue";
 
 const props = defineProps({
-  champions: Array
+  champions: Array,
 });
 
-const imageURLPrefix = "https://ddragon.leagueoflegends.com/cdn/img/champion/loading";
+const imageURLPrefix =
+  "https://ddragon.leagueoflegends.com/cdn/img/champion/loading";
 
 // 받은 champions 배열을 가공하여 새로운 배열을 생성합니다.
 const transformedChampions = computed(() => {
-  return props.champions.map(champ => ({
+  return props.champions.map((champ) => ({
     image: `${imageURLPrefix}/${champ.id}_0.jpg`,
     name: champ.id,
-    q: `${champ.name} 강의`
   }));
 });
-
-const searchYouTube = async () => {
-  try {
-    const response = await axios.get(
-      "https://www.googleapis.com/youtube/v3/search",
-      {
-        params: {
-          q: query,
-          part: "snippet",
-          type: "video",
-          key: "AIzaSyC7dCyrkYg_AJKe-MuFmA9D0KzMZcoS6eM", // Your YouTube Data API key here
-        },
-      }
-    );
-    searchResults.value = response.data.items.map((item) => ({
-      id: item.id.videoId,
-      title: item.snippet.title,
-    }));
-  } catch (error) {
-    console.error("Error fetching YouTube search results:", error);
-  }
-};
 </script>
 
 <style scoped>
