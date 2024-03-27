@@ -5,6 +5,7 @@
       :key="player.id"
       :player="player"
       :isRightTeam="isRightTeam"
+      :currentHint="currentHint"
     />
   </div>
 </template>
@@ -14,6 +15,7 @@ import PlayerCard from "@/views/PlayerCard.vue";
 const props = defineProps({
   players: Array,
   isRightTeam: Boolean, // 각 팀이 오른쪽 팀인지 결정
+  currentHint: Number,
 });
 </script>
 
