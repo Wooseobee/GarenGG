@@ -1,7 +1,7 @@
 package gg.garen.back.championRecommendation.service;
 
-import gg.garen.back.championRecommendation.dto.response.ResponseGetChampionRecommendationDto;
+import org.springframework.http.ResponseEntity;
 
 public interface ChampionRecommendationService {
-    ResponseGetChampionRecommendationDto getChampionRecommendation(String summonerName, String tagLine);
+    ResponseEntity<?> getChampionRecommendation(String summonerName, String tagLine);
 }
