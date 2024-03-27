@@ -20,7 +20,6 @@ public class GameService {
     private final RankingRepository rankingRepository;
     private final GameRepository gameRepository;
 
-
     @Transactional
     public List<RankResponseDto> playGame(UserScoreRequestDto requestDto) {
         Game game = gameRepository.findById(requestDto.getGameId()).orElseThrow(() -> new RuntimeException("Game not found with id: " + requestDto.getGameId()));
@@ -28,6 +27,7 @@ public class GameService {
         Ranking newRanking = new Ranking();
         newRanking.setGame(game);
         newRanking.setNickname(requestDto.getNickname());
+        newRanking.setUuid(requestDto.getUuid());
         newRanking.setScore(requestDto.getScore());
         rankingRepository.save(newRanking);
         return getRank(game);
@@ -42,6 +42,7 @@ public class GameService {
                 RankResponseDto rank = RankResponseDto.builder()
                         .gameName(game.getName())
                         .nickname(ranking.getNickname())
+                        .uuid(ranking.getUuid())
                         .Score(ranking.getScore())
                         .createdAt(ranking.getCreatedAt())
                         .build();
