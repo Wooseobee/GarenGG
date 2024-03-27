@@ -20,6 +20,8 @@ public class CustomMatchInfoRepositoryImpl implements CustomMatchInfoRepository 
 
         update.set("metadata", matchInfo.getMetadata());
         update.set("info", matchInfo.getInfo());
+        update.set("tier", matchInfo.getTier());
+        update.set("rank", matchInfo.getRank());
 
         mongoTemplate.upsert(query, update, MatchInfo.class);
     }
