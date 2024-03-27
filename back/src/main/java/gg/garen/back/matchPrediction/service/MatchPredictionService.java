@@ -34,7 +34,8 @@ public class MatchPredictionService {
                             .riotIdTagline(p.getRiotIdTagline())
                             .kills(p.getKills())
                             .deaths(p.getDeaths())
-                            .win(p.getWin())
+                            .firstBloodKill(p.isFirstBloodKill())
+                            .win(p.isWin())
                             .build());
         }
 
