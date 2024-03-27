@@ -18,7 +18,6 @@
         <span class="score">{{ entry.score }}</span>
         <span class="time">{{ entry.time }}</span>
       </li>
-      <!--여기에 게임을 한 유저의 등수와 닉네임, 점수, 게임 종료 시간을 보여주고 싶어 어떻게 하면 좋을까?-->
     </ul>
     <button @click="startNewGame" class="new-game-button">
       새로운 게임 시작하기
@@ -53,11 +52,11 @@ const rankEntries = ref([]);
 
 watchEffect(() => {
   if (props.rank && props.rank.length > 0) {
+    const userInRank = props.rank.find((entry) => entry.uuid === props.uuid);
     rankEntries.value = props.rank.map((entry, index) => {
       const dateOnly = entry.createdAt.split("T")[0];
       const rankIndex = index + 1;
       const rankSuffix = getRankSuffix(rankIndex);
-      console.log(props.uuid);
 
       return {
         rank: `${rankIndex}${rankSuffix}`,
@@ -67,8 +66,27 @@ watchEffect(() => {
         uuid: entry.uuid,
       };
     });
+    if (!userInRank) {
+      const currentUserEntry = {
+        rank: "N/A", // 랭킹에 없음을 나타냄
+        nickname: props.nickname,
+        score: props.score.toString(),
+        time: getCurrentDateTime(),
+        uuid: props.uuid,
+      };
+      rankEntries.value.push(currentUserEntry);
+    }
   }
 });
+
+function getCurrentDateTime() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = (now.getMonth() + 1).toString().padStart(2, "0");
+  const day = now.getDate().toString().padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
 
 function getRankSuffix(index) {
   const j = index % 10,
