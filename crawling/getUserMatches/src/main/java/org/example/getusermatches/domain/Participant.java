@@ -6,6 +6,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class Participant {
+    private int assists;
     private int assistMePings;
     private int championId;
     private String championName;
