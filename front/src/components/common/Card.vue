@@ -10,10 +10,9 @@
       @mouseleave="stopEffect"
     >
       <!-- card content -->
-      <audio hidden="true" ref="audio">
+      <!-- <audio hidden="true" ref="audio">
         <source :src="audiopath" type="audio/ogg" />
-        <!-- <source src="@/assets/pick-voice/1.ogg" type="audio/ogg" /> -->
-      </audio>
+      </audio> -->
       <div class="image-container">
         <img src="@/assets/cardback.jpg" alt="heropy" />
       </div>
@@ -46,19 +45,29 @@ const champinfo = {};
 for (let i = 0; i < championKeys.length; i++) {
   champinfo[championIds[i]] = championKeys[i];
 }
-const champkey = champinfo[props.champname].toString();
+const champkey = champinfo[props.champname];
 // 소리
-const audio = ref(null);
-const audiopath = ref(`@/assets/pick-voice/${champkey}.ogg`);
-const playFlipSound = async () => {
-  try {
-    console.log(champkey);
-    console.log(audio.value);
-    audio.value?.play();
-  } catch (error) {
-    console.error("에러 발생:", error);
+const audiolink = ref(
+  `https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/ko_kr/v1/champion-choose-vo/${champkey}.ogg`
+);
+const playSound = (sound) => {
+  if (sound) {
+    const audio = new Audio(sound);
+    audio.play();
   }
 };
+// 쓰레기 코드
+// const audio = ref(null);
+// const playFlipSound = async () => {
+//   try {
+//     console.log(champkey);
+//     console.log(audio.value);
+//     audio.value?.play();
+//   } catch (error) {
+//     console.error('에러 발생:', error);
+//   }
+// };
+//
 // 카드 뒤집기
 const isFlipped = ref(false);
 const toggleCard = () => {
@@ -67,7 +76,7 @@ const toggleCard = () => {
     setTimeout(() => {
       isFlipped.value = !isFlipped.value;
     }, 500);
-    playFlipSound();
+    playSound(audiolink.value);
   } else {
     router.push({
       name: "champ-detail",
