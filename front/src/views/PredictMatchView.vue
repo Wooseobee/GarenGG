@@ -6,9 +6,14 @@
       <div class="match-prediction">
         <!-- 좌측 팀 리스트 -->
         <div class="team-button" @click="selectTeam(teamOnePlayers)">
-          <TeamList :players="teamOnePlayers" :isRightTeam="false" />
+          <TeamList
+            :players="teamOnePlayers"
+            :isRightTeam="false"
+            :currentHint="currentHint"
+          />
         </div>
         <div class="match-info">
+          <div v-if="currentHint >= 3" class="matchTime">{{ matchTime }}</div>
           <div class="round">{{ currentRound }}/{{ totalRounds }}</div>
           <div class="vs">VS</div>
           <div class="hint" @click="showHint">
@@ -17,7 +22,11 @@
         </div>
         <!-- 우측 팀 리스트 -->
         <div class="team-button" @click="selectTeam(teamTwoPlayers)">
-          <TeamList :players="teamTwoPlayers" :isRightTeam="true" />
+          <TeamList
+            :players="teamTwoPlayers"
+            :isRightTeam="true"
+            :currentHint="currentHint"
+          />
         </div>
       </div>
     </div>
@@ -25,7 +34,12 @@
     <div v-if="showRankModal" class="rank-modal">
       <div class="rank-modal-content">
         <span class="close" @click="closeModal">&times;</span>
-        <RankView :score="score" :nickname="nickname" />
+        <RankView
+          :score="score"
+          :nickname="nickname"
+          :rank="rank"
+          :uuid="uuid"
+        />
       </div>
     </div>
 
@@ -40,7 +54,15 @@
           maxlength="10"
         />
         <button @click="submitNickname">Submit</button>
+        <button @click="goBack">return</button>
       </div>
+    </div>
+    <div
+      v-if="showAnswerFeedback"
+      class="answer-feedback"
+      :class="{ correct: correctAnswer, wrong: !correctAnswer }"
+    >
+      <span>{{ correctAnswer ? "O" : "X" }}</span>
     </div>
   </div>
 </template>
@@ -52,7 +74,10 @@ import TeamList from "@/views/TeamList.vue";
 import RankView from "@/components/common/RankView.vue";
 import { randomMatch, playGame } from "@/api/randomMatch.js";
 import { useChampionStore } from "@/stores/championStore";
+import { v4 as uuidv4 } from "uuid";
+import { useRouter } from "vue-router";
 
+const router = useRouter();
 const currentRound = ref(1);
 const totalRounds = 10;
 const currentHint = ref(1);
@@ -66,6 +91,18 @@ const score = ref(100);
 const usedHints = ref(0);
 const showNicknameModal = ref(true);
 const nickname = ref("");
+const rank = ref([]);
+const uuid = ref("");
+const correctAnswer = ref(false); // 정답 여부
+const showAnswerFeedback = ref(false); // 정답 피드백 표시 여부
+const matchTime = ref("0");
+
+const calculateGameTime = (seconds) => {
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = Math.floor(seconds % 60);
+
+  return `${minutes}분 ${remainingSeconds}초`;
+};
 
 const submitNickname = () => {
   if (nickname.value.trim().length) {
@@ -75,10 +112,16 @@ const submitNickname = () => {
   }
 };
 
+const goBack = () => {
+  router.push("/playground");
+};
+
 const fetchMatchData = async () => {
   try {
+    currentHint.value = 0;
     const response = await randomMatch();
     matchData.value = response.data;
+    matchTime.value = calculateGameTime(response.data.gameDuration);
 
     // 승리 팀과 패배 팀을 분류하기 위한 임시 배열
     const winTeam = [];
@@ -95,7 +138,7 @@ const fetchMatchData = async () => {
       }
       if (participant.win) {
         winTeam.push({
-          assistMePings: participant.assistMePings,
+          enemyMissingPings: participant.enemyMissingPings,
           championId: participant.championName,
           championName: championStore.championNames[idx],
           imgUrl: championStore.championSquareImgUrls[idx],
@@ -104,11 +147,12 @@ const fetchMatchData = async () => {
           riotIdTagline: participant.riotIdTagline,
           kills: participant.kills,
           deaths: participant.deaths,
+          firstBloodKill: participant.firstBloodKill,
           win: participant.win,
         });
       } else {
         loseTeam.push({
-          assistMePings: participant.assistMePings,
+          enemyMissingPings: participant.enemyMissingPings,
           championId: participant.championName,
           championName: championStore.championNames[idx],
           imgUrl: championStore.championSquareImgUrls[idx],
@@ -117,6 +161,7 @@ const fetchMatchData = async () => {
           riotIdTagline: participant.riotIdTagline,
           kills: participant.kills,
           deaths: participant.deaths,
+          firstBloodKill: participant.firstBloodKill,
           win: participant.win,
         });
       }
@@ -138,11 +183,8 @@ onMounted(() => {
   fetchMatchData();
 });
 
-const clearName = () => {
-  userName.value = "";
-};
-
 const showHint = () => {
+  if (showAnswerFeedback.value) return;
   if (currentHint.value < totalHints) {
     currentHint.value++;
   } else {
@@ -151,7 +193,17 @@ const showHint = () => {
   }
 };
 
+const waitForFeedbackToEnd = () =>
+  new Promise((resolve) => setTimeout(resolve, 3000));
+
 const selectTeam = async (team) => {
+  if (showAnswerFeedback.value) return;
+  correctAnswer.value = team[0].win; // 승리 팀을 선택했는지 여부
+  showAnswerFeedback.value = true; // 정답 피드백을 보여주기
+
+  await waitForFeedbackToEnd();
+  showAnswerFeedback.value = false; // 피드백 숨김
+
   if (currentRound.value < totalRounds) {
     currentRound.value++;
     if (team[0].win) {
@@ -161,26 +213,21 @@ const selectTeam = async (team) => {
     }
     fetchMatchData();
   } else {
-    // 모든 라운드가 완료된 경우, 필요한 로직을 여기에 추가
-    // 라운드가 종료되면 score를 RankView로 전달하고 서버에 요청을 보내고 싶어 코드를 어떻게 작성하면 좋을까?
+    uuid.value = uuidv4();
     const response = await playGame({
       gameId: 1,
       nickname: nickname.value,
       score: score.value,
+      uuid: uuid.value,
     });
     showRankModal.value = true;
+    rank.value = response.data;
     console.log("All hints completed");
   }
 };
 
 const closeModal = () => {
-  // 모달을 숨김
-  showRankModal.value = false;
-  // 라운드와 힌트를 초기 값으로 리셋
-  // currentRound.value = 1;
-  // currentHint.value = 1;
-  // 추가적으로 게임을 재시작하는 로직을 여기에 포함할 수 있음
-  // 예를 들어, 게임 데이터를 초기화하거나, 새 게임을 시작하기 위한 API 호출 등
+  window.location.reload();
 };
 </script>
 
@@ -246,10 +293,9 @@ const closeModal = () => {
   left: 50%; /* 화면의 중앙 */
   transform: translateX(-50%); /* 정확한 중앙 정렬을 위해 */
   padding: 10px;
-  background-color: #ffcc00; /* 노란색 배경 */
-  color: #000; /* 텍스트 색상 */
+  background-color: #00ffea; /* 노란색 배경 */
+  color: black; /* 텍스트 색상 */
   cursor: pointer; /* 클릭 가능한 요소로 표시 */
-  visibility: hidden;
 }
 
 .hint {
@@ -333,5 +379,32 @@ const closeModal = () => {
   border-radius: 10px;
   text-align: center;
   color: black;
+}
+
+.answer-feedback {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 20rem;
+  animation: fadeInOut 3s ease-in-out;
+}
+
+.correct {
+  color: green;
+}
+
+.wrong {
+  color: #d00;
+}
+
+@keyframes fadeInOut {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 </style>

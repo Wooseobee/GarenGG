@@ -16,9 +16,17 @@
       <h5>{{ player.championName }}</h5>
       <p>{{ player.summonerName }} #{{ player.riotIdTagline }}</p>
     </div>
-    <div class="status-div">?</div>
-    <div class="isFirstKill">?</div>
-    <div class="kd">K/D/A</div>
+    <div class="player-stats">
+      <div v-if="currentHint >= 2 && player.firstBloodKill" class="firstBlood">
+        !FirstBlood!
+      </div>
+      <div v-if="currentHint >= 1" class="assist">
+        미아핑 : {{ player.enemyMissingPings }}
+      </div>
+      <div v-if="currentHint >= 4" class="kd">
+        K/D : {{ player.kills }} / {{ player.deaths }}
+      </div>
+    </div>
   </div>
 </template>
 
@@ -28,6 +36,7 @@ import { defineProps } from "vue";
 const props = defineProps({
   player: Object,
   isRightTeam: Boolean, // 오른쪽 팀 여부를 결정하는 새로운 prop
+  currentHint: Number,
 });
 
 // 이미지 경로를 처리하는 메서드
@@ -63,13 +72,19 @@ const getPositionImage = (path) => {
   margin-bottom: 10px; /* 카드 간격 */
 }
 
-.isFirstKill {
-  /* visibility: hidden; */
-  margin: 5px;
+.player-stats {
+  display: flex;
+  flex-direction: column;
+  margin: 10px;
 }
 
+.assist {
+  color: #00ffea;
+}
+
+.firstBlood,
 .kd {
-  /* visibility: hidden; */
+  color: #ff0000;
 }
 .status-div {
   padding: 5px 10px;
