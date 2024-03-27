@@ -186,7 +186,7 @@ public class ChampionRecommendationServiceImpl implements ChampionRecommendation
 
                     if (!player.containsKey(participant.getChampionName()))
                         player.put(participant.getChampionName(), new WinLose());
-                    if (participant.getWin())
+                    if (participant.isWin())
                         player.get(participant.getChampionName()).setWin(player.get(participant.getChampionName()).getWin() + 1);
                     else
                         player.get(participant.getChampionName()).setLose(player.get(participant.getChampionName()).getLose() + 1);

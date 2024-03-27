@@ -12,6 +12,7 @@ public class ParticipantDto {
     private String championName;
     private String individualPosition;
     private String summonerName;
+    private String riotIdGameName;
     private String riotIdTagline;
     private int kills;
     private int deaths;
