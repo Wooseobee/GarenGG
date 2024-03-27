@@ -16,7 +16,6 @@
 
 <script setup>
 import Card from "../common/Card.vue";
-import Youtube from "../common/Youtube.vue";
 import { computed, ref } from "vue";
 
 const props = defineProps({
