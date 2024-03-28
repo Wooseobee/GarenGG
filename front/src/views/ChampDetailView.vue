@@ -1,5 +1,6 @@
 <template>
-  <div>
+  <Header :backButton="true" />
+  <div class="container">
     <ChampDetail :champname="champname" />
   </div>
 </template>
@@ -10,9 +11,17 @@ import { useRoute } from "vue-router";
 const route = useRoute();
 import axios from "axios";
 import ChampDetail from "@/components/champ/ChampDetail.vue";
+import Header from "@/components/common/Header.vue";
+import router from "@/router";
 const champname = ref(route.params.champname);
-
+const goBack = () => {
+  router.go(-1);
+};
 onMounted(() => {});
 </script>
 
-<style scoped></style>
+<style scoped>
+.container {
+  margin-top: 160px;
+}
+</style>
