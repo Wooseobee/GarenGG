@@ -144,21 +144,32 @@ async function importKey(arrayBuffer) {
   );
 }
 
+const decryptData = async (data) => {
+  return decoder.decode(
+    await decryptMessage(
+      Uint8Array.from(atob(data), (c) => c.charCodeAt(0)).buffer
+    )
+  );
+};
+
 const fetchMatchData = async () => {
   try {
     currentHint.value = 0;
     const response = await randomMatch();
     matchData.value = response.data;
-    matchTime.value = calculateGameTime(response.data.gameDuration);
-    const importedKey = await importKey(
-      Uint8Array.from(atob(response.data.secretKey), (c) => c.charCodeAt(0))
-        .buffer
-    );
+
+    const secretKeyBuffer = Uint8Array.from(
+      atob(response.data.secretKey),
+      (c) => c.charCodeAt(0)
+    ).buffer;
+    const importedKey = await importKey(secretKeyBuffer);
     key.value = importedKey;
     iv.value = Uint8Array.from(atob(response.data.iv), (c) =>
       c.charCodeAt(0)
     ).buffer;
 
+    const time = parseInt(await decryptData(response.data.gameDuration));
+    matchTime.value = calculateGameTime(time);
     // 승리 팀과 패배 팀을 분류하기 위한 임시 배열
     const winTeam = [];
     const loseTeam = [];
@@ -166,103 +177,49 @@ const fetchMatchData = async () => {
     // API 응답에서 각 참가자를 순회하며 승리 여부에 따라 분류
     for (const participant of response.data.participants) {
       let idx = 0;
+
+      const championId = await decryptData(participant.championName);
+
       for (let index = 0; index < championStore.championIds.length; index++) {
-        if (participant.championName === championStore.championIds[index]) {
+        if (championId === championStore.championIds[index]) {
           idx = index;
           break;
         }
       }
 
-      const enemyMissingPings = decoder.decode(
-        await decryptMessage(
-          Uint8Array.from(atob(participant.enemyMissingPings), (c) =>
-            c.charCodeAt(0)
-          ).buffer
-        )
+      const enemyMissingPings = await decryptData(
+        participant.enemyMissingPings
       );
+      const individualPosition = await decryptData(
+        participant.individualPosition
+      );
+      const summonerName = await decryptData(participant.summonerName);
+      const riotIdTagline = await decryptData(participant.riotIdTagline);
+      const kills = await decryptData(participant.kills);
+      const deaths = await decryptData(participant.deaths);
+      const firstBloodKill = JSON.parse(
+        await decryptData(participant.firstBloodKill)
+      );
+      const win = JSON.parse(await decryptData(participant.win));
 
-      const championId = decoder.decode(
-        await decryptMessage(
-          Uint8Array.from(atob(participant.championName), (c) =>
-            c.charCodeAt(0)
-          ).buffer
-        )
-      );
+      const participantData = {
+        enemyMissingPings,
+        championId,
+        championName: championStore.championNames[idx],
+        imgUrl: championStore.championSquareImgUrls[idx],
+        individualPosition,
+        summonerName,
+        riotIdTagline,
+        kills,
+        deaths,
+        firstBloodKill,
+        win,
+      };
 
-      const individualPosition = decoder.decode(
-        await decryptMessage(
-          Uint8Array.from(atob(participant.individualPosition), (c) =>
-            c.charCodeAt(0)
-          ).buffer
-        )
-      );
-
-      const summonerName = decoder.decode(
-        await decryptMessage(
-          Uint8Array.from(atob(participant.summonerName), (c) =>
-            c.charCodeAt(0)
-          ).buffer
-        )
-      );
-      const riotIdTagline = decoder.decode(
-        await decryptMessage(
-          Uint8Array.from(atob(participant.riotIdTagline), (c) =>
-            c.charCodeAt(0)
-          ).buffer
-        )
-      );
-      const kills = decoder.decode(
-        await decryptMessage(
-          Uint8Array.from(atob(participant.kills), (c) => c.charCodeAt(0))
-            .buffer
-        )
-      );
-      const deaths = decoder.decode(
-        await decryptMessage(
-          Uint8Array.from(atob(participant.deaths), (c) => c.charCodeAt(0))
-            .buffer
-        )
-      );
-      const firstBloodKill = decoder.decode(
-        await decryptMessage(
-          Uint8Array.from(atob(participant.firstBloodKill), (c) =>
-            c.charCodeAt(0)
-          ).buffer
-        )
-      );
-      const win = decoder.decode(
-        await decryptMessage(
-          Uint8Array.from(atob(participant.win), (c) => c.charCodeAt(0)).buffer
-        )
-      );
       if (win) {
-        winTeam.push({
-          enemyMissingPings,
-          championId,
-          championName: championStore.championNames[idx],
-          imgUrl: championStore.championSquareImgUrls[idx],
-          individualPosition,
-          summonerName,
-          riotIdTagline,
-          kills,
-          deaths,
-          firstBloodKill,
-          win,
-        });
+        winTeam.push(participantData);
       } else {
-        loseTeam.push({
-          enemyMissingPings,
-          championId,
-          championName: championStore.championNames[idx],
-          imgUrl: championStore.championSquareImgUrls[idx],
-          individualPosition,
-          summonerName,
-          riotIdTagline,
-          kills,
-          deaths,
-          firstBloodKill,
-          win,
-        });
+        loseTeam.push(participantData);
       }
     }
 
