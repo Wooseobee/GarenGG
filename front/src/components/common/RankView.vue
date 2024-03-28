@@ -168,8 +168,18 @@ const startNewGame = () => {
 }
 
 .my-game-entry {
-  border: 2px solid #d0d0d0; /* 네모 박스의 테두리 설정 */
-  border-radius: 5px; /* 테두리의 모서리를 둥글게 처리 */
-  font-weight: bold; /* 텍스트 굵기 강조 */
+  animation: blink 2s infinite; /* 2초마다 무한 반복 */
+  border: 2px solid transparent; /* 기본 테두리 색상은 투명 */
+  border-radius: 5px;
+  font-weight: bold;
+}
+@keyframes blink {
+  0%,
+  100% {
+    border-color: transparent;
+  }
+  50% {
+    border-color: #d0d0d0;
+  }
 }
 </style>

@@ -1,36 +1,36 @@
 <template>
-  <div class="member" data-aos="fade-up" data-aos-delay="200">
-    <div class="member-img">
-      <img src="@/assets/garen.avif" class="img-fluid" alt="" />
-    </div>
+  <div class="member-img">
+    <img src="@/assets/garen.avif" class="img-fluid" alt="" />
   </div>
 </template>
 
 <script setup></script>
 
 <style scoped>
-.member {
-  width: 100%; /* 전체 폭을 사용합니다. */
-  max-width: 300px; /* 최대 너비 제한 */
-  margin: auto; /* 자동 마진으로 중앙 정렬 */
-}
-
 .member-img {
   position: relative;
+  border: 4px solid #c89b3c;
+  box-shadow: 0 15px 35px -10px rgba(0, 0, 0, 0.2);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  max-width: 250px; /* 컨테이너의 최대 너비를 설정 */
+  margin: auto; /* 컨테이너를 중앙에 배치 */
 }
 
 .member-img img {
-  width: 100%; /* 이미지가 member-img 컨테이너를 꽉 채우도록 */
-  display: block; /* 이미지가 div 안에서 꽉 차도록 */
-  margin-bottom: 20px;
+  max-width: 100%; /* 이미지의 최대 너비를 컨테이너 너비에 맞춤 */
+  height: auto; /* 이미지의 높이를 자동으로 조절하여 비율을 유지 */
+  transition: transform 0.3s ease-in-out, filter 0.3s ease-in-out;
 }
 
-.member-info h4,
-.member-info p {
-  margin-bottom: 10px; /* 제목과 문단 사이의 마진 */
+.member-img:hover img {
+  filter: brightness(0.4); /* 이미지 밝기를 줄여 흐려지게 표현 */
 }
-
-.text-center {
-  text-align: center; /* 텍스트 중앙 정렬 */
+@media (max-width: 1024px) {
+  .member-img {
+    margin: 0 auto; /* 모바일 화면에서도 중앙 정렬 */
+    max-width: 200px; /* 모바일 화면에서의 컨테이너 최대 너비 조정 */
+  }
 }
 </style>
