@@ -193,7 +193,7 @@ const fetchMatchData = async () => {
       const individualPosition = await decryptData(
         participant.individualPosition
       );
-      const summonerName = await decryptData(participant.summonerName);
+      const nickName = await decryptData(participant.nickName);
       const riotIdTagline = await decryptData(participant.riotIdTagline);
       const kills = await decryptData(participant.kills);
       const deaths = await decryptData(participant.deaths);
@@ -208,7 +208,7 @@ const fetchMatchData = async () => {
         championName: championStore.championNames[idx],
         imgUrl: championStore.championSquareImgUrls[idx],
         individualPosition,
-        summonerName,
+        nickName,
         riotIdTagline,
         kills,
         deaths,
