@@ -36,7 +36,7 @@ import { RouterLink } from "vue-router";
   justify-content: center; /* 가로 중앙 정렬 */
   flex-wrap: wrap; /* 카드들이 넘칠 경우 다음 줄로 */
   gap: 20px; /* 카드 간격 */
-  padding-top: 10%; /* 헤더와의 여백 */
+  /* padding-top: 10%; 헤더와의 여백 */
 }
 
 .row {
@@ -97,7 +97,6 @@ import { RouterLink } from "vue-router";
 
 .hero .container {
   position: relative;
-  margin-left: 150px;
   z-index: 3;
 }
 
