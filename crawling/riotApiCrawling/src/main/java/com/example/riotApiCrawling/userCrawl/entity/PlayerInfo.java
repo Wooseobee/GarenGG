@@ -173,7 +173,7 @@ public class PlayerInfo extends Auditable {
     @Override
     public String toString() {
         return "PlayerInfo{" +
-                "playerId='" + playerId + '\'' +
+                "playerId=" + playerId +
                 ", puuid='" + puuid + '\'' +
                 ", tagLine='" + tagLine + '\'' +
                 ", leagueId='" + leagueId + '\'' +
@@ -185,6 +185,7 @@ public class PlayerInfo extends Auditable {
                 ", leaguePoints=" + leaguePoints +
                 ", wins=" + wins +
                 ", losses=" + losses +
+                ", apiKeyId=" + apiKeyId +
                 ", veteran=" + veteran +
                 ", inactive=" + inactive +
                 ", freshBlood=" + freshBlood +

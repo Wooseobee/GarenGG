@@ -23,7 +23,7 @@ class RiotApiCrawlingApplicationTests {
 		LinkedList<PlayerInfo> list = userRiotApiRepository.findByTierAndRank("CHALLENGER", "I");
 		PlayerInfo pi = list.poll();
 
-		userRiotApiService.fetchPuuid(pi);
+//		userRiotApiService.fetchPuuid(pi);
 	}
 
 }
