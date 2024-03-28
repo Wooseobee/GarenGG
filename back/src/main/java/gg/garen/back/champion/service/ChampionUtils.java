@@ -20,7 +20,7 @@ public class ChampionUtils {
 
     public List<ChampionDto> championInfo(){
         return getChampions().stream()
-                .map((champion -> new ChampionDto(champion.getId(), champion.getName())))
+                .map((champion -> new ChampionDto(champion.getKey(),champion.getId(), champion.getName())))
                 .collect(Collectors.toList());
     }
 

@@ -9,6 +9,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 public class ChampionDto {
+    Long championKey;
     String id;
     String name;
 }
