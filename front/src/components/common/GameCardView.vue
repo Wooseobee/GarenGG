@@ -14,13 +14,13 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  max-width: 250px; /* 컨테이너의 최대 너비를 설정 */
+  max-width: 308px; /* 컨테이너의 최대 너비를 설정 */
   margin: auto; /* 컨테이너를 중앙에 배치 */
 }
 
 .member-img img {
   max-width: 100%; /* 이미지의 최대 너비를 컨테이너 너비에 맞춤 */
-  height: auto; /* 이미지의 높이를 자동으로 조절하여 비율을 유지 */
+  height: 560px; /* 이미지의 높이를 자동으로 조절하여 비율을 유지 */
   transition: transform 0.3s ease-in-out, filter 0.3s ease-in-out;
 }
 
