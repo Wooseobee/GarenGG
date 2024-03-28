@@ -1,33 +1,26 @@
 <template>
   <div class="app-container">
     <Header />
-    <!-- 노란색 네모에 해당하는 버튼 -->
+
+    <!-- 노란색 네모에 해당하는 버튼 -->z
     <div class="game-container">
-      <div class="match-prediction">
-        <!-- 좌측 팀 리스트 -->
-        <div class="team-button" @click="selectTeam(teamOnePlayers)">
-          <TeamList
-            :players="teamOnePlayers"
-            :isRightTeam="false"
-            :currentHint="currentHint"
-          />
-        </div>
-        <div class="match-info">
-          <div v-if="currentHint >= 3" class="matchTime">{{ matchTime }}</div>
-          <div class="round">{{ currentRound }}/{{ totalRounds }}</div>
-          <div class="vs">VS</div>
-          <div class="hint" @click="showHint">
-            <span>{{ currentHint }}/{{ totalHints }}</span> 힌트보기
-          </div>
-        </div>
-        <!-- 우측 팀 리스트 -->
-        <div class="team-button" @click="selectTeam(teamTwoPlayers)">
-          <TeamList
-            :players="teamTwoPlayers"
-            :isRightTeam="true"
-            :currentHint="currentHint"
-          />
-        </div>
+      <!-- champion-prediction 내부 -->
+      <div class="champion-prediction">
+        <audio ref="audioPlayer" :src="audioSrc"></audio>
+        <button @click="playSound">Play Sound</button>
+      </div>
+
+      {{ championStore.championNames[0] }}
+
+      <div class="champion-options">
+        <button
+          v-for="(option, index) in answerOptions"
+          :key="index"
+          @click="userAnswer = option"
+          class="option-button"
+        >
+          {{ championStore.championNames[option] }}
+        </button>
       </div>
     </div>
     <!-- 모달 창 구현 -->
@@ -70,42 +63,84 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from "vue";
-import Header from "@/components/common/Header.vue";
-import TeamList from "@/views/TeamList.vue";
 import RankView from "@/components/common/RankView.vue";
-import { randomMatch, playGame } from "@/api/randomMatch.js";
-import { useChampionStore } from "@/stores/championStore";
 import { v4 as uuidv4 } from "uuid";
-import { useRouter } from "vue-router";
 
-const router = useRouter();
-const currentRound = ref(1);
-const totalRounds = 5;
-const currentHint = ref(0);
-const totalHints = 4;
+//////////////////////////////////////////////////////////////////
+
+import { onMounted, ref, computed } from "vue";
+import { useRouter } from "vue-router";
+import Header from "@/components/common/Header.vue";
+import { useChampionStore } from "@/stores/championStore";
+
 const showRankModal = ref(false);
-const matchData = ref(null);
-const teamOnePlayers = ref([]);
-const teamTwoPlayers = ref([]);
-const championStore = useChampionStore();
-const score = ref(100);
-const usedHints = ref(0);
-const showNicknameModal = ref(true);
-const nickname = ref("");
 const rank = ref([]);
 const uuid = ref("");
 const correctAnswer = ref(false); // 정답 여부
 const showAnswerFeedback = ref(false); // 정답 피드백 표시 여부
-const matchTime = ref("0");
+const userAnswer = ref("");
+
+/////////////////////////////////////////////////////////
+
 const nicknameInput = ref(null);
+const shuffledIndexes = ref([]);
+const currentRound = ref(0);
+const championStore = useChampionStore();
+const nickname = ref("");
+const showNicknameModal = ref(true);
+const router = useRouter();
+const audioPlayer = ref(null);
+const answerOptions = ref([]);
 
-const calculateGameTime = (seconds) => {
-  const minutes = Math.floor(seconds / 60);
-  const remainingSeconds = Math.floor(seconds % 60);
+/////////////////////////////////////////////////////////
 
-  return `${minutes}분 ${remainingSeconds}초`;
-};
+onMounted(() => {
+  nicknameInput.value.focus();
+
+  console.log(championStore.championKeys);
+
+  // 인덱스 배열을 생성합니다. 예: [0, 1, 2, ..., length-1]
+  const indexes = Array.from(
+    { length: championStore.championKeys.length },
+    (_, i) => i
+  );
+  // Fisher-Yates 셔플 알고리즘을 이용해 배열을 섞습니다.
+  shuffledIndexes.value = shuffleArray(indexes);
+
+  console.log(shuffledIndexes.value);
+
+  // 정답 옵션을 설정합니다.
+  setAnswerOptions();
+});
+
+function setAnswerOptions() {
+  const correctKey =
+    championStore.championKeys[shuffledIndexes.value[currentRound.value]];
+  const otherKeys = championStore.championKeys.filter((k) => k !== correctKey);
+
+  // Fisher-Yates 셔플 알고리즘을 다시 사용하여 다른 키를 섞습니다.
+  const shuffledOtherKeys = shuffleArray(otherKeys).slice(0, 4);
+
+  // 정답과 무작위로 선택된 다른 옵션을 결합합니다.
+  answerOptions.value = shuffleArray([correctKey, ...shuffledOtherKeys]);
+  console.log(answerOptions.value);
+}
+
+// Fisher-Yates 셔플 알고리즘을 이용한 배열 섞기
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]]; // 배열 요소 교환
+  }
+  return array;
+}
+
+const audioSrc = computed(() => {
+  const key =
+    championStore.championKeys[shuffledIndexes.value[currentRound.value]];
+  console.log("key = " + key);
+  return `src/assets/pick-voice/${key}.ogg`;
+});
 
 const submitNickname = () => {
   if (nickname.value.trim().length) {
@@ -119,117 +154,25 @@ const goBack = () => {
   router.push("/playground");
 };
 
-const fetchMatchData = async () => {
-  try {
-    currentHint.value = 0;
-    const response = await randomMatch();
-    matchData.value = response.data;
-    matchTime.value = calculateGameTime(response.data.gameDuration);
-
-    // 승리 팀과 패배 팀을 분류하기 위한 임시 배열
-    const winTeam = [];
-    const loseTeam = [];
-
-    // API 응답에서 각 참가자를 순회하며 승리 여부에 따라 분류
-    response.data.participants.forEach((participant) => {
-      let idx = 0;
-      for (let index = 0; index < championStore.championIds.length; index++) {
-        if (participant.championName === championStore.championIds[index]) {
-          idx = index;
-          break;
-        }
-      }
-      if (participant.win) {
-        winTeam.push({
-          enemyMissingPings: participant.enemyMissingPings,
-          championId: participant.championName,
-          championName: championStore.championNames[idx],
-          imgUrl: championStore.championSquareImgUrls[idx],
-          individualPosition: participant.individualPosition,
-          summonerName: participant.summonerName,
-          riotIdTagline: participant.riotIdTagline,
-          kills: participant.kills,
-          deaths: participant.deaths,
-          firstBloodKill: participant.firstBloodKill,
-          win: participant.win,
-        });
-      } else {
-        loseTeam.push({
-          enemyMissingPings: participant.enemyMissingPings,
-          championId: participant.championName,
-          championName: championStore.championNames[idx],
-          imgUrl: championStore.championSquareImgUrls[idx],
-          individualPosition: participant.individualPosition,
-          summonerName: participant.summonerName,
-          riotIdTagline: participant.riotIdTagline,
-          kills: participant.kills,
-          deaths: participant.deaths,
-          firstBloodKill: participant.firstBloodKill,
-          win: participant.win,
-        });
-      }
-    });
-
-    if (Math.random() < 0.5) {
-      teamOnePlayers.value = winTeam; // 승리 팀을 teamOnePlayers에 할당
-      teamTwoPlayers.value = loseTeam; // 패배 팀을 teamTwoPlayers에 할당
-    } else {
-      teamOnePlayers.value = loseTeam; // 패배 팀을 teamOnePlayers에 할당
-      teamTwoPlayers.value = winTeam; // 승리 팀을 teamTwoPlayers에 할당
-    }
-  } catch (error) {
-    console.error(error);
-  }
-};
-
-onMounted(() => {
-  nicknameInput.value.focus();
-  fetchMatchData();
-});
-
-const showHint = () => {
-  if (showAnswerFeedback.value) return;
-  if (currentHint.value < totalHints) {
-    currentHint.value++;
-    usedHints.value++;
-  }
-};
-
-const selectTeam = async (team) => {
-  if (showAnswerFeedback.value) return;
-  correctAnswer.value = team[0].win; // 승리 팀을 선택했는지 여부
-  showAnswerFeedback.value = true; // 정답 피드백을 보여주기
-
-  currentHint.value = 4;
-  await new Promise((resolve) => setTimeout(resolve, 5000));
-
-  showAnswerFeedback.value = false; // 피드백 숨김
-
-  if (team[0].win) {
-    score.value -= usedHints.value * 4;
-  } else {
-    score.value -= 20;
-  }
-  if (currentRound.value < totalRounds) {
-    currentRound.value++;
-    fetchMatchData();
-  } else {
-    uuid.value = uuidv4();
-    const response = await playGame({
-      gameId: 1,
-      nickname: nickname.value,
-      score: score.value,
-      uuid: uuid.value,
-    });
-    showRankModal.value = true;
-    rank.value = response.data;
-  }
-  usedHints.value = 0;
-  currentHint.value = 0;
-};
-
 const closeModal = () => {
   window.location.reload();
+};
+
+const playSound = () => {
+  audioPlayer.value.play();
+};
+
+////////////////////////////////////////////////////////////
+
+const checkAnswer = () => {
+  if (userAnswer.value === "아리") {
+    alert("정답입니다!");
+    correctAnswer.value = true; // 정답 여부 업데이트
+  } else {
+    alert("틀렸습니다.");
+    correctAnswer.value = false; // 정답 여부 업데이트
+  }
+  showAnswerFeedback.value = true; // 정답 피드백 보여주기
 };
 </script>
 
@@ -283,12 +226,6 @@ const closeModal = () => {
   font-family: "Press Start 2P", cursive; /* 레트로 폰트 */
 }
 
-/* .upcoming-match-header {
-  text-align: center;
-  font-size: 1.5rem;
-  color: #ffffff;
-  padding: 20px 0;
-} */
 .matchTime {
   position: absolute;
   top: 120px; /* 위치 조정 */
