@@ -18,15 +18,17 @@ public class ChampionUtils {
 
     List<Champion> champions;
 
-    public List<ChampionDto> championInfo(){
+    public List<ChampionDto> championInfo() {
         return getChampions().stream()
+
                 .map((champion -> new ChampionDto(champion.getId(), champion.getName(), champion.getKey())))
+
                 .collect(Collectors.toList());
     }
 
     //챔피언 엔티티반환.
-    public List<Champion> getChampions(){
-        if(champions == null) champions = championRepository.findAll();
+    public List<Champion> getChampions() {
+        if (champions == null) champions = championRepository.findAll();
         return champions;
     }
 }
