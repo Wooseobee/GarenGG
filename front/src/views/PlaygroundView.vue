@@ -3,16 +3,21 @@
     <Header />
     <section id="hero" class="hero">
       <img src="@/assets/garen-background.gif" alt="" data-aos="fade-in" />
-
       <div class="container">
         <div class="row">
-          <RouterLink :to="{ name: 'predictmatch' }" class="link-wrapper">
-            <GameCardView />
-            <div class="member-info text-center">
-              <h4>경기 승패 맞추기2</h4>
-              <p>누가 이겼는지 맞춰보세요~2</p>
-            </div>
-          </RouterLink>
+          <div
+            class="col-lg-4 col-md-6 member"
+            data-aos="fade-up"
+            data-aos-delay="100"
+          >
+            <RouterLink :to="{ name: 'predictmatch' }" class="link-wrapper">
+              <GameCardView />
+              <div class="member-info text-center">
+                <h4>경기 승패 맞추기</h4>
+                <p>어느 팀이 이겼는지 맞춰보세요!</p>
+              </div>
+            </RouterLink>
+          </div>
         </div>
       </div>
     </section>
@@ -22,7 +27,6 @@
 <script setup>
 import Header from "@/components/common/Header.vue";
 import GameCardView from "@/components/common/GameCardView.vue";
-import Card from "@/components/common/Card.vue";
 import { RouterLink } from "vue-router";
 </script>
 
@@ -41,6 +45,7 @@ import { RouterLink } from "vue-router";
   justify-content: center; /* 모든 카드들을 중앙 정렬 */
   align-items: flex-start; /* 세로 방향 시작점 정렬 */
   flex-wrap: wrap; /* 줄바꿈을 허용 */
+  color: #c89b3c;
 }
 
 .link-wrapper {
@@ -152,5 +157,23 @@ import { RouterLink } from "vue-router";
   .hero p {
     font-size: 18px;
   }
+}
+
+.member-info {
+  margin-top: 30px;
+  text-align: center;
+}
+
+.member-info h4 {
+  font-weight: 700;
+  margin-bottom: 6px;
+  font-size: 18px;
+  color: #c89b3c;
+}
+
+.member-info p {
+  margin-bottom: 0;
+  font-size: 14px;
+  color: rgba(var(--default-color-rgb), 0.6);
 }
 </style>
