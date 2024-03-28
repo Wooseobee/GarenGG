@@ -14,4 +14,6 @@ public class RandomMatchResponseDto {
     List<ParticipantDto> participants;
     private Long gameDuration;
     private String gameVersion;
+    private byte[] secretKey;
+    private byte[] iv;
 }

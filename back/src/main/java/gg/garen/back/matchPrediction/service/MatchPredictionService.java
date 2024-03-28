@@ -9,6 +9,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.crypto.*;
+import javax.crypto.spec.GCMParameterSpec;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,23 +22,27 @@ public class MatchPredictionService {
     private final UserMatchRepository userMatchRepository;
 
     @Transactional
-    public RandomMatchResponseDto getRandomMatch() {
+    public RandomMatchResponseDto getRandomMatch(SecretKey secretKey) throws Exception {
         MatchInfo matchInfo = userMatchRepository.findRandomMatchInfo().get(0);
 
         List<ParticipantDto> participants = new ArrayList<>();
 
+        byte[] iv = new byte[12];
+        SecureRandom random = new SecureRandom();
+        random.nextBytes(iv);
+
         for (Participant p : matchInfo.getInfo().getParticipants()) {
             participants.add(
                     ParticipantDto.builder()
-                            .enemyMissingPings(p.getEnemyMissingPings())
-                            .championName(p.getChampionName())
-                            .individualPosition(p.getIndividualPosition())
-                            .summonerName(p.getSummonerName())
-                            .riotIdTagline(p.getRiotIdTagline())
-                            .kills(p.getKills())
-                            .deaths(p.getDeaths())
-                            .firstBloodKill(p.isFirstBloodKill())
-                            .win(p.isWin())
+                            .enemyMissingPings(encryptData(secretKey, p.getEnemyMissingPings(), iv))
+                            .championName(encryptData(secretKey, p.getChampionName(), iv))
+                            .individualPosition(encryptData(secretKey, p.getIndividualPosition(), iv))
+                            .summonerName(encryptData(secretKey, p.getSummonerName(),iv))
+                            .riotIdTagline(encryptData(secretKey, p.getRiotIdTagline(),iv))
+                            .kills(encryptData(secretKey, p.getKills(), iv))
+                            .deaths(encryptData(secretKey, p.getDeaths(),iv))
+                            .firstBloodKill(encryptData(secretKey, p.isFirstBloodKill(),iv))
+                            .win(encryptData(secretKey, p.isWin(),iv))
                             .build());
         }
 
@@ -44,6 +51,32 @@ public class MatchPredictionService {
                 .gameDuration(matchInfo.getInfo().getGameDuration())
                 .gameVersion(matchInfo.getInfo().getGameVersion())
                 .participants(participants)
+                .secretKey(secretKey.getEncoded())
+                .iv(iv)
                 .build();
+    }
+
+    private byte[] encryptData(SecretKey secretKey, String data, byte[] iv) throws Exception {
+        byte[] inputData = data.getBytes();
+        Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
+        GCMParameterSpec spec = new GCMParameterSpec(128, iv);
+        cipher.init(Cipher.ENCRYPT_MODE, secretKey, spec);
+        return cipher.doFinal(inputData);
+    }
+
+    private byte[] encryptData(SecretKey secretKey, int data, byte[] iv) throws Exception {
+        byte[] inputData = Integer.toString(data).getBytes();
+        Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
+        GCMParameterSpec spec = new GCMParameterSpec(128, iv);
+        cipher.init(Cipher.ENCRYPT_MODE, secretKey, spec);
+        return cipher.doFinal(inputData);
+    }
+
+    private byte[] encryptData(SecretKey secretKey, boolean data, byte[] iv) throws Exception {
+        byte[] inputData = String.valueOf(data).getBytes();
+        Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
+        GCMParameterSpec spec = new GCMParameterSpec(128, iv);
+        cipher.init(Cipher.ENCRYPT_MODE, secretKey, spec);
+        return cipher.doFinal(inputData);
     }
 }
