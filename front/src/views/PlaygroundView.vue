@@ -20,6 +20,23 @@
           </div>
         </div>
       </div>
+      <div class="container">
+        <div class="row">
+          <div
+            class="col-lg-4 col-md-6 member"
+            data-aos="fade-up"
+            data-aos-delay="100"
+          >
+            <RouterLink :to="{ name: 'predictChampion' }" class="link-wrapper">
+              <GameCardView />
+              <div class="member-info text-center">
+                <h4>소리 듣고 챔피언 맞추기</h4>
+                <p>무슨 챔피언인지 맞춰보세요!</p>
+              </div>
+            </RouterLink>
+          </div>
+        </div>
+      </div>
     </section>
   </div>
 </template>
