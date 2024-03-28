@@ -1,96 +1,100 @@
 <template>
-  <div class="champion-info">
-    <div class="champion-portrait">
-      <!-- 초상화 -->
-      <img
-        :src="`https://ddragon.leagueoflegends.com/cdn/14.6.1/img/champion/${champname}.png`"
-        alt=""
+  <div>
+    <div class="champion-info">
+      <div class="champion-portrait">
+        <!-- 초상화 -->
+        <img
+          :src="`https://ddragon.leagueoflegends.com/cdn/14.6.1/img/champion/${champname}.png`"
+          alt=""
+        />
+      </div>
+      <div>
+        <div style="color: #f0e6d2">
+          <h2>
+            {{ champData.name }}
+          </h2>
+          <!-- <p>{{ champData.title }}</p> -->
+        </div>
+
+        <!-- 패시브 -->
+        <div class="skills-container">
+          <div class="skill">
+            <img
+              v-if="champData.passive && champData.passive.image"
+              :src="`https://ddragon.leagueoflegends.com/cdn/14.6.1/img/passive/${champData.passive.image.full}`"
+              alt=""
+              @mouseover="showModal('passive')"
+              @mouseleave="closeModal"
+            />
+            <SkillModal
+              :name="passiveName"
+              :description="removeHTMLTags(passiveDescription)"
+              v-if="activeSpell === 'passive' && modalVisible"
+            />
+          </div>
+          <!-- 패시브 끝 -->
+          <!-- 스킬 -->
+          <div v-if="champData.spells">
+            <img
+              v-for="(spell, index) in champData.spells"
+              :key="index"
+              :src="getSpellImageURL(spell.id)"
+              alt=""
+              @mouseover="showModal('spell', spell)"
+              @mouseleave="closeModal"
+              :style="{
+                marginRight: index < champData.spells.length - 1 ? '20px' : '0',
+              }"
+            />
+
+            <SkillModal
+              :name="activeSpellData.name"
+              :tooltip="`${removeHTMLTags(activeSpellData.tooltip)}`"
+              :description="activeSpellData.description"
+              :cooldownBurn="`재사용대기시간: ${activeSpellData.cooldownBurn} 초`"
+              :costBurn="`소모: ${getCostBurnDisplay(
+                activeSpellData.costBurn
+              )}`"
+              :rangeBurn="`범위: ${activeSpellData.rangeBurn}`"
+              v-if="activeSpell === 'spell' && modalVisible"
+            />
+          </div>
+          <!-- 스킬 끝 -->
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="box">
+        <h2>설정</h2>
+        <p>{{ champData.lore }}</p>
+      </div>
+
+      <div class="box">
+        <h2>플레이 팁</h2>
+        <ul>
+          <li v-for="(tip, index) in champData.allytips" :key="index">
+            {{ tip }}
+          </li>
+        </ul>
+      </div>
+    </div>
+    <!-- 유튜브 -->
+    <h1>챔피언 플레이 가이드</h1>
+    <div>
+      <Youtube :searchResults="searchResults" />
+    </div>
+    <!-- 스킨 -->
+    <h1>스킨</h1>
+    <div v-if="champData.skins">
+      <Carousel
+        :skins="champData.skins.slice(1).reverse()"
+        :getSkinImageURL="getSkinImageURL"
       />
     </div>
-    <div>
-      <div style="color: #f0e6d2">
-        <h2>
-          {{ champData.name }}
-        </h2>
-        <!-- <p>{{ champData.title }}</p> -->
-      </div>
 
-      <!-- 패시브 -->
-      <div class="skills-container">
-        <div class="skill">
-          <img
-            v-if="champData.passive && champData.passive.image"
-            :src="`https://ddragon.leagueoflegends.com/cdn/14.6.1/img/passive/${champData.passive.image.full}`"
-            alt=""
-            @mouseover="showModal('passive')"
-            @mouseleave="closeModal"
-          />
-          <SkillModal
-            :name="passiveName"
-            :description="removeHTMLTags(passiveDescription)"
-            v-if="activeSpell === 'passive' && modalVisible"
-          />
-        </div>
-        <!-- 패시브 끝 -->
-        <!-- 스킬 -->
-        <div v-if="champData.spells">
-          <img
-            v-for="(spell, index) in champData.spells"
-            :key="index"
-            :src="getSpellImageURL(spell.id)"
-            alt=""
-            @mouseover="showModal('spell', spell)"
-            @mouseleave="closeModal"
-            :style="{
-              marginRight: index < champData.spells.length - 1 ? '20px' : '0',
-            }"
-          />
-
-          <SkillModal
-            :name="activeSpellData.name"
-            :tooltip="`${removeHTMLTags(activeSpellData.tooltip)}`"
-            :description="activeSpellData.description"
-            :cooldownBurn="`재사용대기시간: ${activeSpellData.cooldownBurn} 초`"
-            :costBurn="`소모: ${getCostBurnDisplay(activeSpellData.costBurn)}`"
-            :rangeBurn="`범위: ${activeSpellData.rangeBurn}`"
-            v-if="activeSpell === 'spell' && modalVisible"
-          />
-        </div>
-        <!-- 스킬 끝 -->
-      </div>
-    </div>
+    <!-- 스킨 끝 -->
   </div>
-
-  <div>
-    <div class="box">
-      <h2>설정</h2>
-      <p>{{ champData.lore }}</p>
-    </div>
-
-    <div class="box">
-      <h2>플레이 팁</h2>
-      <ul>
-        <li v-for="(tip, index) in champData.allytips" :key="index">
-          {{ tip }}
-        </li>
-      </ul>
-    </div>
-  </div>
-  <!-- 유튜브 -->
-  <h1>챔피언 플레이 가이드</h1>
-  <div>
-    <Youtube :searchResults="searchResults" />
-  </div>
-  <!-- 스킨 -->
-  <h1>스킨</h1>
-  <div v-if="champData.skins">
-    <Carousel
-      :skins="champData.skins.slice(1).reverse()"
-      :getSkinImageURL="getSkinImageURL"
-    />
-  </div>
-
-  <!-- 스킨 끝 -->
   <div>
     {{ latestPatch }}
   </div>
@@ -103,6 +107,7 @@ import Youtube from "../common/Youtube.vue";
 import SkillModal from "@/components/common/SkillModal.vue";
 import axios from "axios";
 import Carousel from "@/components/common/Carousel.vue";
+import Header from "../common/Header.vue";
 const champData = ref([]);
 
 const { champname } = defineProps({

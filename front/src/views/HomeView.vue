@@ -3,98 +3,68 @@
     <Header />
     <section id="hero" class="hero">
       <img src="@/assets/garen-background.gif" alt="" data-aos="fade-in" />
-  <!-- <div class="background"> -->
-    <!-- Team Section - Home Page -->
-    <section id="team" class="team">
-      <!--  Section Title -->
-      <!-- <div class="container section-title" data-aos="fade-up">
-        <h2>Team</h2>
-        <p>
-          Necessitatibus eius consequatur ex aliquid fuga eum quidem sint
-          consectetur velit
-        </p>
-      </div> -->
-      <!-- End Section Title -->
 
-      <div class="container">
-        <div class="row gy-5">
-          <div
-            class="col-lg-4 col-md-6 member"
-            data-aos="fade-up"
-            data-aos-delay="100"
-          >
-            <RouterLink :to="{ name: 'champ-rec' }">
-              <div class="member-img">
-                <img src="@/assets/garen.avif" class="img-fluid" alt="" />
-                <div class="social">
-                  <!-- <a href="#"><i class="bi bi-twitter"></i></a>
-                    <a href="#"><i class="bi bi-facebook"></i></a>
-                    <a href="#"><i class="bi bi-instagram"></i></a>
-                    <a href="#"><i class="bi bi-linkedin"></i></a> -->
+      <section id="team" class="team">
+        <div class="container justify-content-center">
+          <div class="row gy-5">
+            <div
+              class="col-lg-4 col-md-6 member align-content-center"
+              data-aos="fade-up"
+              data-aos-delay="100"
+            >
+              <RouterLink :to="{ name: 'champ-rec' }">
+                <GameCardView />
+                <!-- <div class="member-img">
+                  <img src="@/assets/garen.avif" class="img-fluid" alt="" />
+                  <div class="social">
+                  </div>
+                </div> -->
+                <div class="member-info text-center">
+                  <h4>챔피언 추천</h4>
+                  <p>승리하기 위한 새로운 챔피언을 찾아보세요</p>
                 </div>
-              </div>
-              <div class="member-info text-center">
-                <h4>챔피언 추천</h4>
+              </RouterLink>
+            </div>
 
-                <p>승리하기 위한 새로운 챔피언을 찾아보세요</p>
-              </div>
-            </RouterLink>
-          </div>
-          <!-- End Team Member -->
-
-          <div
-            class="col-lg-4 col-md-6 member"
-            data-aos="fade-up"
-            data-aos-delay="200"
-          >
-            <RouterLink :to="{ name: 'DuoRecommendation' }">
-              <div class="member-img">
-                <img src="@/assets/garen.avif" class="img-fluid" alt="" />
-                <div class="social">
-                  <a href="#"><i class="bi bi-twitter"></i></a>
-                  <a href="#"><i class="bi bi-facebook"></i></a>
-                  <a href="#"><i class="bi bi-instagram"></i></a>
-                  <a href="#"><i class="bi bi-linkedin"></i></a>
+            <div
+              class="col-lg-4 col-md-6 member"
+              data-aos="fade-up"
+              data-aos-delay="200"
+            >
+              <RouterLink :to="{ name: 'DuoRecommendation' }">
+                <GameCardView />
+                <!-- <div class="member-img">
+                  <img src="@/assets/garen.avif" class="img-fluid" alt="" />
+                  <div class="social"></div>
+                </div> -->
+                <div class="member-info text-center">
+                  <h4>듀오 추천</h4>
+                  <p>어떤 챔피언과 함께 하면 좋을지 알아보세요</p>
                 </div>
-              </div>
-              <div class="member-info text-center">
-                <h4>듀오 추천</h4>
+              </RouterLink>
+            </div>
 
-                <p>어떤 챔피언과 함께 하면 좋을지 알아보세요</p>
-              </div>
-            </RouterLink>
-          </div>
-          <!-- End Team Member -->
-
-          <div
-            class="col-lg-4 col-md-6 member"
-            data-aos="fade-up"
-            data-aos-delay="300"
-          >
-            <RouterLink :to="{ name: 'playground' }">
-              <div class="member-img">
-                <img src="@/assets/garen.avif" class="img-fluid" alt="" />
-                <div class="social">
-                  <a href="#"><i class="bi bi-twitter"></i></a>
-                  <a href="#"><i class="bi bi-facebook"></i></a>
-                  <a href="#"><i class="bi bi-instagram"></i></a>
-                  <a href="#"><i class="bi bi-linkedin"></i></a>
+            <div
+              class="col-lg-4 col-md-6 member"
+              data-aos="fade-up"
+              data-aos-delay="300"
+            >
+              <RouterLink :to="{ name: 'playground' }">
+                <GameCardView />
+                <!-- <div class="member-img">
+                  <img src="@/assets/garen.avif" class="img-fluid" alt="" />
+                  <div class="social"></div>
+                </div> -->
+                <div class="member-info text-center">
+                  <h4>놀이터</h4>
+                  <p>큐잡을때 심심할 때</p>
                 </div>
-              </div>
-              <div class="member-info text-center">
-                <h4>놀이터</h4>
-                <!-- <span>CTO</span> -->
-                <p>큐잡을때 심심할 때</p>
-              </div>
-            </RouterLink>
+              </RouterLink>
+            </div>
           </div>
-          <!-- End Team Member -->
         </div>
-      </div>
-    </section>
-    <!-- End Team Section -->
-  <!-- </div> -->
       </section>
+    </section>
   </div>
 </template>
 
@@ -102,32 +72,26 @@
 import { ref, computed, onMounted } from "vue";
 import { useRouter, RouterLink } from "vue-router";
 import Header from "@/components/common/Header.vue";
+import GameCardView from "@/components/common/GameCardView.vue";
 
 const router = useRouter();
 </script>
 
 <style scoped>
-/*--------------------------------------------------------------
-# General
---------------------------------------------------------------*/
-.background {
-  background-color: #091428;
-  height: 100vh;
-}
-
 /* Team Section - Home Page
 ------------------------------*/
 .team {
   --background-color: #c89b3c;
-  padding-top: 100px;
+  /* padding-top: 100px; */
 }
 
 .team .member {
   position: relative;
+  display: flex;
 }
 
 .team .member .member-img {
-  margin: 0 80px;
+  margin: 0 40px;
   /* border-radius: 50%; */
   overflow: hidden;
   position: relative;
@@ -141,10 +105,12 @@ const router = useRouter();
   }
 }
 
-.team .member .member-img img {
+/* .team .member .member-img img {
+  width: 308px;
+  height: 560px;
   position: relative;
   z-index: 1;
-}
+} */
 
 .team .member .member-img .social {
   position: absolute;
@@ -237,7 +203,7 @@ const router = useRouter();
 
 .hero .container {
   position: relative;
-  margin-left: 150px;
+  /* margin-left: 150px; */
   z-index: 3;
 }
 

@@ -2,6 +2,14 @@
   <header id="header" class="header fixed-top d-flex align-items-center">
     <div class="container-fluid d-flex align-items-center">
       <div class="logo d-flex align-items-center me-auto me-xl-0">
+        <!-- 뒤로가기 버튼 -->
+        <router-link v-if="backButton" to="#" @click="goBack"
+          ><img
+            src="@/assets/goback.png"
+            alt=""
+            style="width: 20px; height: auto"
+          />
+        </router-link>
         <RouterLink to="/">
           <img src="@/assets/logo2.png" />
         </RouterLink>
@@ -15,9 +23,17 @@
 import { ref, computed, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 
+const props = defineProps({
+  backButton: {
+    type: Boolean,
+  },
+});
+const backButton = props.backButton;
 const router = useRouter();
 const route = useRoute();
-
+const goBack = () => {
+  router.go(-1);
+};
 // const headerClass = computed(() => {
 //   if (route.path === "/detail") {
 //     return "scrolled";
