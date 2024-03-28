@@ -11,8 +11,8 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Document(collection = "player_most")
-public class PlayerMost {
+@Document(collection = "past_season_player_most")
+public class PastSeasonPlayerMost {
     @Id
     private Integer playerId;
 
