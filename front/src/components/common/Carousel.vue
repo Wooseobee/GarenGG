@@ -96,16 +96,18 @@ for (let i = 0; i < props.skins.length; i += 5) {
   max-width: 100%; /* 이미지가 부모 요소의 너비를 넘지 않도록 설정 */
   max-height: 660px; /* 이미지의 최대 높이를 설정 */
   margin: auto;
+  padding: 0 10px;
 }
 .carousel-item-container {
   position: relative; /* 상대 위치 설정 */
+  max-width: 260px;
 }
 .carousel-caption {
   position: absolute; /* 절대 위치 설정 */
   bottom: 10; /* 아래로부터의 거리 */
   left: 0; /* 왼쪽으로부터의 거리 */
   right: 0; /* 오른쪽으로부터의 거리 */
-  /* background-color: rgba(0, 0, 0, 0.5); 배경색 및 투명도 설정 */
+  /* background-color: rgba(0, 0, 0, 0.5); */
   color: white; /* 글자색 설정 */
   padding: 10px; /* 여백 설정 */
   word-wrap: break-word; /* 긴 단어가 캡션을 넘어가지 않도록 줄 바꿈 */

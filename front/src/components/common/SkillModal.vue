@@ -69,6 +69,7 @@ window.addEventListener("mousemove", (event) => {
   display: flex;
   justify-content: center;
   align-items: center;
+  max-width: 500px;
 }
 
 .modal-content {

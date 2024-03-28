@@ -14,14 +14,11 @@ import ChampDetail from "@/components/champ/ChampDetail.vue";
 import Header from "@/components/common/Header.vue";
 import router from "@/router";
 const champname = ref(route.params.champname);
-const goBack = () => {
-  router.go(-1);
-};
 onMounted(() => {});
 </script>
 
 <style scoped>
 .container {
-  margin-top: 160px;
+  margin-top: 5%;
 }
 </style>
