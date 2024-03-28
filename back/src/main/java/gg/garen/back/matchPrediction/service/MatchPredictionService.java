@@ -32,12 +32,18 @@ public class MatchPredictionService {
         random.nextBytes(iv);
 
         for (Participant p : matchInfo.getInfo().getParticipants()) {
+            String nickName;
+            if (p.getRiotIdGameName() == null) {
+                nickName = p.getSummonerName();
+            } else {
+                nickName = p.getRiotIdGameName();
+            }
             participants.add(
                     ParticipantDto.builder()
                             .enemyMissingPings(encryptData(secretKey, String.valueOf(p.getEnemyMissingPings()), iv))
                             .championName(encryptData(secretKey, p.getChampionName(), iv))
                             .individualPosition(encryptData(secretKey, p.getIndividualPosition(), iv))
-                            .summonerName(encryptData(secretKey, p.getSummonerName(), iv))
+                            .nickName(encryptData(secretKey, nickName, iv))
                             .riotIdTagline(encryptData(secretKey, p.getRiotIdTagline(), iv))
                             .kills(encryptData(secretKey, String.valueOf(p.getKills()), iv))
                             .deaths(encryptData(secretKey, String.valueOf(p.getDeaths()), iv))

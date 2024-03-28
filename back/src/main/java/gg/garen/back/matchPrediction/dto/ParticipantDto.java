@@ -11,7 +11,7 @@ public class ParticipantDto {
     private byte[] enemyMissingPings;
     private byte[] championName;
     private byte[] individualPosition;
-    private byte[] summonerName;
+    private byte[] nickName;
     private byte[] riotIdTagline;
     private byte[] kills;
     private byte[] deaths;
