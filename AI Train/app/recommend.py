@@ -9,7 +9,7 @@ from train import load_data, preprocess_data
 
 
 # 추천 함수
-def recommend_champs(df_svd_preds, user_id, champ_data, score_data, num_recommendations, user_index, tier):
+def recommend_champs(df_svd_preds, user_id, champ_data, score_data, user_index, tier):
     
     # index와 user_id를 맞추는 부분. 현재는 index와 user_id 둘 다 0부터 시작하므로 변화 x.
     user_row_number = user_index
@@ -90,7 +90,7 @@ def recommend_champs(df_svd_preds, user_id, champ_data, score_data, num_recommen
     recommendations['Predictions'] = np.select(conditions, values, default=default)
     recommendations = recommendations.sort_values('Predictions', ascending = False).iloc[:3, :]
 
-    return user_history, recommendations
+    return recommendations
 
 
 def find_userId(player):
@@ -165,5 +165,5 @@ with open('models/user_champ_score.pkl', 'rb') as f:
     user_champ_score = pickle.load(f)
 
 def get_recommendations(user_id, user_index, tier):
-    already_rated, predictions = recommend_champs(df_svd_preds, user_id, champ_data, score_data, 5, user_index, tier)
+    predictions = recommend_champs(df_svd_preds, user_id, champ_data, score_data, user_index, tier)
     return predictions
