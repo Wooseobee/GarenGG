@@ -7,6 +7,7 @@ import com.example.riotApiCrawling.userCrawl.entity.PlayerInfo;
 import com.example.riotApiCrawling.userCrawl.repository.UserRiotApiRepository;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import jdk.swing.interop.SwingInterOpUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -29,17 +30,19 @@ public class UserRiotApiServiceImpl {
 
     private final AsyncUserService asyncUserService;
 
-    public void setUsers(int sign) throws InterruptedException{
+    public void setUsers(int sign, String tier, int rank) throws InterruptedException{
         long startTime = System.currentTimeMillis();
         int startkeyIdx = 0;
         for(int tierIdx = 0; tierIdx < tiers.length; tierIdx++){
             int rankLength = ranks.length - 1;
             if (tierIdx <= 2) rankLength = 1;
             for(int rankIdx = 1; rankIdx <= rankLength; rankIdx++){
-                if(sign == 1) {
+                if(sign == 1 && tiers[tierIdx].equals(tier) && rankIdx == rank) {
                     asyncUserService.setAllSummonerId(tiers[tierIdx], ranks[rankIdx], startkeyIdx);
-                    startkeyIdx += 161;
+
                 }
+                startkeyIdx += 161;
+                System.out.println("startKeyIdx : "+startkeyIdx);
 //                else if(sign == 2){
 //                    asyncUserService.setAllPuuid(tiers[tierIdx],ranks[rankIdx]);
 //                }

@@ -10,6 +10,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
@@ -29,7 +30,7 @@ public class AsyncUserService {
 
     private final ApiKeyRepository apiKeyRepository;
     private final UserRiotApiRepository userRiotApiRepository;
-    @Async
+//    @Async
     public void setAllSummonerId(String tier, String rank, int startKeyIdx) throws InterruptedException{
         log.info("{} {} setAllSummonerId start key start : {}", tier, rank, startKeyIdx);
         LinkedList<PlayerInfo> playerInfosCache = new LinkedList<>();
@@ -264,7 +265,13 @@ public class AsyncUserService {
         }
 
         long startTime = System.currentTimeMillis();
-        userRiotApiRepository.saveAll(resultSet);
+        for (PlayerInfo playerInfo : resultSet) {
+            try {
+                userRiotApiRepository.save(playerInfo);
+            } catch (DataIntegrityViolationException e) {
+                log.error("중복된 엔트리로 인해 저장에 실패했습니다. 누락된 엔트리: {}", playerInfo, e);
+            }
+        }
         long endTime = System.currentTimeMillis();
         long elapsedTime = endTime - startTime;
         System.out.println("데이터 저장 "+ elapsedTime/1000 +"초 걸림");

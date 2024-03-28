@@ -17,10 +17,10 @@ public class UserRiotApiController {
         this.userRiotApiService = userRiotApiService;
     }
     @GetMapping("users")
-    ResponseEntity<Void> crawlUser(@RequestParam Integer sign) throws Exception{
+    ResponseEntity<Void> crawlUser(@RequestParam Integer sign, @RequestParam String tier, @RequestParam int rank) throws Exception{
 //        userRiotApiService.crawlUser(requestDto);
 
-        userRiotApiService.setUsers(sign);
+        userRiotApiService.setUsers(sign, tier, rank);
         return ResponseEntity.ok().build();
     }
 
