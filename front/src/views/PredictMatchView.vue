@@ -81,7 +81,7 @@ import { useRouter } from "vue-router";
 
 const router = useRouter();
 const currentRound = ref(1);
-const totalRounds = 10;
+const totalRounds = 5;
 const currentHint = ref(0);
 const totalHints = 4;
 const showRankModal = ref(false);
@@ -206,9 +206,9 @@ const selectTeam = async (team) => {
   showAnswerFeedback.value = false; // 피드백 숨김
 
   if (team[0].win) {
-    score.value -= usedHints.value * 2;
+    score.value -= usedHints.value * 4;
   } else {
-    score.value -= 10;
+    score.value -= 20;
   }
   if (currentRound.value < totalRounds) {
     currentRound.value++;

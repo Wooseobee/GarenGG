@@ -82,9 +82,12 @@ const getPositionImage = (path) => {
   color: #00ffea;
 }
 
-.firstBlood,
-.kd {
+.firstBlood {
   color: #ff0000;
+}
+
+.kd {
+  color: #c8aa6e;
 }
 .status-div {
   padding: 5px 10px;
