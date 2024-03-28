@@ -39,7 +39,7 @@ const router = createRouter({
       path: "/duoRecommendation",
       name: "DuoRecommendation",
       component: DuoRecommendationView,
-      // redirect : {name : "DuoRecommmendationSearch"}, //View.vue가 가진 routerview에 뿌려줌.
+      redirect : {name : "DuoRecommendationSearch"}, //View.vue가 가진 routerview에 뿌려줌.
       children : [
         {
           path : "DuoRecommendataionSearch",
