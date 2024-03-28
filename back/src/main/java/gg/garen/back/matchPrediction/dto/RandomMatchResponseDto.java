@@ -12,6 +12,8 @@ import java.util.List;
 public class RandomMatchResponseDto {
     private String matchId;
     List<ParticipantDto> participants;
-    private Long gameDuration;
+    private byte[] gameDuration;
     private String gameVersion;
+    private byte[] secretKey;
+    private byte[] iv;
 }

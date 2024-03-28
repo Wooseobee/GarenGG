@@ -8,6 +8,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
@@ -17,7 +20,11 @@ public class MatchPredictionController {
     private final MatchPredictionService matchPredictionService;
 
     @GetMapping("/randomMatch")
-    public RandomMatchResponseDto getRandomMatch() {
-        return matchPredictionService.getRandomMatch();
+    public RandomMatchResponseDto getRandomMatch() throws Exception {
+        KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
+        keyGenerator.init(256);
+        SecretKey secretKey = keyGenerator.generateKey();
+
+        return matchPredictionService.getRandomMatch(secretKey);
     }
 }
