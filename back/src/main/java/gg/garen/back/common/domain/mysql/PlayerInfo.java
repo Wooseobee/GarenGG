@@ -26,13 +26,13 @@ public class PlayerInfo extends Auditable {
     int leaguePoints;
     int wins;
     int losses;
-    int apiKeyId;
+    Long apiKeyId;
 
-    public int getApiKeyId() {
+    public Long getApiKeyId() {
         return apiKeyId;
     }
 
-    public void setApiKeyId(int apiKeyId) {
+    public void setApiKeyId(Long apiKeyId) {
         this.apiKeyId = apiKeyId;
     }
 
