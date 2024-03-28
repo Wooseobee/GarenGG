@@ -18,6 +18,7 @@ public class Participant {
     private String lane;
     private int participantId;
     private String puuid;
+    private String riotIdGameName;
     private String riotIdTagline;
     private String role;
     private String summonerId;
