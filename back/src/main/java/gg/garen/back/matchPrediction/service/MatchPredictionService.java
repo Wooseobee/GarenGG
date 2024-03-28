@@ -34,21 +34,21 @@ public class MatchPredictionService {
         for (Participant p : matchInfo.getInfo().getParticipants()) {
             participants.add(
                     ParticipantDto.builder()
-                            .enemyMissingPings(encryptData(secretKey, p.getEnemyMissingPings(), iv))
+                            .enemyMissingPings(encryptData(secretKey, String.valueOf(p.getEnemyMissingPings()), iv))
                             .championName(encryptData(secretKey, p.getChampionName(), iv))
                             .individualPosition(encryptData(secretKey, p.getIndividualPosition(), iv))
-                            .summonerName(encryptData(secretKey, p.getSummonerName(),iv))
-                            .riotIdTagline(encryptData(secretKey, p.getRiotIdTagline(),iv))
-                            .kills(encryptData(secretKey, p.getKills(), iv))
-                            .deaths(encryptData(secretKey, p.getDeaths(),iv))
-                            .firstBloodKill(encryptData(secretKey, p.isFirstBloodKill(),iv))
-                            .win(encryptData(secretKey, p.isWin(),iv))
+                            .summonerName(encryptData(secretKey, p.getSummonerName(), iv))
+                            .riotIdTagline(encryptData(secretKey, p.getRiotIdTagline(), iv))
+                            .kills(encryptData(secretKey, String.valueOf(p.getKills()), iv))
+                            .deaths(encryptData(secretKey, String.valueOf(p.getDeaths()), iv))
+                            .firstBloodKill(encryptData(secretKey, String.valueOf(p.isFirstBloodKill()), iv))
+                            .win(encryptData(secretKey, String.valueOf(p.isWin()), iv))
                             .build());
         }
 
         return RandomMatchResponseDto.builder()
                 .matchId(matchInfo.getMatchId())
-                .gameDuration(matchInfo.getInfo().getGameDuration())
+                .gameDuration(encryptData(secretKey, String.valueOf(matchInfo.getInfo().getGameDuration()), iv))
                 .gameVersion(matchInfo.getInfo().getGameVersion())
                 .participants(participants)
                 .secretKey(secretKey.getEncoded())
@@ -57,26 +57,9 @@ public class MatchPredictionService {
     }
 
     private byte[] encryptData(SecretKey secretKey, String data, byte[] iv) throws Exception {
-        byte[] inputData = data.getBytes();
         Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
         GCMParameterSpec spec = new GCMParameterSpec(128, iv);
         cipher.init(Cipher.ENCRYPT_MODE, secretKey, spec);
-        return cipher.doFinal(inputData);
-    }
-
-    private byte[] encryptData(SecretKey secretKey, int data, byte[] iv) throws Exception {
-        byte[] inputData = Integer.toString(data).getBytes();
-        Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
-        GCMParameterSpec spec = new GCMParameterSpec(128, iv);
-        cipher.init(Cipher.ENCRYPT_MODE, secretKey, spec);
-        return cipher.doFinal(inputData);
-    }
-
-    private byte[] encryptData(SecretKey secretKey, boolean data, byte[] iv) throws Exception {
-        byte[] inputData = String.valueOf(data).getBytes();
-        Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
-        GCMParameterSpec spec = new GCMParameterSpec(128, iv);
-        cipher.init(Cipher.ENCRYPT_MODE, secretKey, spec);
-        return cipher.doFinal(inputData);
+        return cipher.doFinal(data.getBytes());
     }
 }
