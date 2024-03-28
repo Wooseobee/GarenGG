@@ -98,7 +98,7 @@ def find_userId(player):
     if not player.mostDatas:
         return "데이터가 존재하지 않습니다"
 
-    new_df = pd.DataFrame(0, index=[player.id], columns=df_svd_preds.columns)
+    new_df = pd.DataFrame(0, index=[player.playerId], columns=df_svd_preds.columns)
 
     for champion_data in player.mostDatas:
         
@@ -108,7 +108,7 @@ def find_userId(player):
         # 게임 데이터에서 총 게임 수와 승리율 추출
         game_data = champion_data.game
         total_games, win_rate = process_game_data(game_data)
-        new_df.at[player.id, champion_data.champion] = total_games * win_rate / 100
+        new_df.at[player.playerId, champion_data.champion] = total_games * win_rate / 100
 
     new_user_matrix = new_df.values[0]
 
