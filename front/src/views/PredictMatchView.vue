@@ -271,8 +271,8 @@ const closeModal = () => {
     rgba(0, 0, 0, 1) 100%
   );
   background-size: cover;
-  box-shadow: 0 0 10px 10px rgba(0, 255, 255, 0.75); /* 네온 효과 */
-  border: 1px solid #00ffea; /* 네온 테두리 */
+  box-shadow: 0 0 10px 10px #005a82; /* 네온 효과 */
+  border: 1px solid #005a82; /* 네온 테두리 */
   border-radius: 15px; /* 둥근 모서리 */
 }
 
@@ -295,8 +295,8 @@ const closeModal = () => {
   left: 50%; /* 화면의 중앙 */
   transform: translateX(-50%); /* 정확한 중앙 정렬을 위해 */
   padding: 10px;
-  background-color: #00ffea; /* 노란색 배경 */
-  color: black; /* 텍스트 색상 */
+  background-color: #005a82; /* 노란색 배경 */
+  color: white; /* 텍스트 색상 */
   cursor: pointer; /* 클릭 가능한 요소로 표시 */
 }
 
@@ -306,7 +306,7 @@ const closeModal = () => {
   left: 50%; /* 화면의 중앙 */
   transform: translateX(-50%); /* 정확한 중앙 정렬을 위해 */
   padding: 10px 20px;
-  background-color: #0000ff; /* 파란색 배경 */
+  background-color: #005a82; /* 파란색 배경 */
   color: #fff; /* 텍스트 색상 */
   border-radius: 5px; /* 약간 둥근 모서리 */
   cursor: pointer; /* 클릭 가능한 요소로 표시 */

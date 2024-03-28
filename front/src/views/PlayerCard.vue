@@ -20,7 +20,7 @@
       <div v-if="currentHint >= 2 && player.firstBloodKill" class="firstBlood">
         !FirstBlood!
       </div>
-      <div v-if="currentHint >= 1" class="assist">
+      <div v-if="currentHint >= 1" class="enemyMissingPings">
         미아핑 : {{ player.enemyMissingPings }}
       </div>
       <div v-if="currentHint >= 4" class="kd">
@@ -78,8 +78,8 @@ const getPositionImage = (path) => {
   margin: 10px;
 }
 
-.assist {
-  color: #00ffea;
+.enemyMissingPings {
+  color: #0ac8b9;
 }
 
 .firstBlood {
@@ -115,6 +115,7 @@ const getPositionImage = (path) => {
 
 .player-info h5 {
   margin: 0;
+  color: #f0e6d2;
 }
 
 .player-info p {
