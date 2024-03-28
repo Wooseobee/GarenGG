@@ -11,7 +11,7 @@ import java.io.Serializable;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class CombinationMatchKey implements Serializable {
-    private Long combinationId;
+public class DuoRecordMatchKey implements Serializable {
+    private Long duoRecordId;
     private String matchId;
 }

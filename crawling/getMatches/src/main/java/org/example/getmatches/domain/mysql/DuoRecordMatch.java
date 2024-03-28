@@ -9,16 +9,16 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
-@Table(name = "combination_match_id")
+@Table(name = "duo_record_match_id")
 @NoArgsConstructor
 @AllArgsConstructor
-public class CombinationMatch {
+public class DuoRecordMatch {
 
     @EmbeddedId
-    private CombinationMatchKey id;
+    private DuoRecordMatchKey id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("combinationId")
-    @JoinColumn(name = "combination_id", nullable = false)
-    private Combination combination;
+    @MapsId("duoRecordId")
+    @JoinColumn(name = "duo_record_id", nullable = false)
+    private DuoRecord duoRecord;
 }
