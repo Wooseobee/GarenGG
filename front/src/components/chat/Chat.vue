@@ -105,7 +105,7 @@ onMounted(() => {
   }
 
   client.value = new Client({
-    brokerURL: "ws://localhost:8080/ws-stomp",
+    brokerURL: "ws://j10a605.p.ssafy.io/ws-stomp",
     connectHeaders: {},
     onConnect: () => {
       client.value.subscribe("/sub/chat/room/" + 1, (message) =>
