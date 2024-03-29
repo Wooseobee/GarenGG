@@ -2,7 +2,7 @@
   <div>
       <div class="content" >
         <!-- 기존 내용 -->
-        <Header />
+        <!-- <Header /> -->
           <div>
             <RouterView></RouterView>
           </div>
