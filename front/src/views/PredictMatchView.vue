@@ -99,6 +99,9 @@ const correctAnswer = ref(false); // 정답 여부
 const showAnswerFeedback = ref(false); // 정답 피드백 표시 여부
 const matchTime = ref("0");
 const nicknameInput = ref(null);
+const key = ref();
+const iv = ref();
+const decoder = new TextDecoder();
 
 const calculateGameTime = (seconds) => {
   const minutes = Math.floor(seconds / 60);
@@ -119,56 +122,106 @@ const goBack = () => {
   router.push("/playground");
 };
 
+async function decryptMessage(ciphertext) {
+  const decryptedCiphertext = await window.crypto.subtle.decrypt(
+    { name: "AES-GCM", iv: iv.value },
+    key.value,
+    ciphertext
+  );
+  return decryptedCiphertext;
+}
+
+async function importKey(arrayBuffer) {
+  return window.crypto.subtle.importKey(
+    "raw", // 키의 형식
+    arrayBuffer, // 키 데이터
+    {
+      // 사용할 알고리즘 정보
+      name: "AES-GCM",
+    },
+    false, // 키를 내보낼 수 있는지 여부
+    ["decrypt"] // 키 사용 목적
+  );
+}
+
+const decryptData = async (data) => {
+  return decoder.decode(
+    await decryptMessage(
+      Uint8Array.from(atob(data), (c) => c.charCodeAt(0)).buffer
+    )
+  );
+};
+
 const fetchMatchData = async () => {
   try {
     currentHint.value = 0;
     const response = await randomMatch();
     matchData.value = response.data;
-    matchTime.value = calculateGameTime(response.data.gameDuration);
 
+    const secretKeyBuffer = Uint8Array.from(
+      atob(response.data.secretKey),
+      (c) => c.charCodeAt(0)
+    ).buffer;
+    const importedKey = await importKey(secretKeyBuffer);
+    key.value = importedKey;
+    iv.value = Uint8Array.from(atob(response.data.iv), (c) =>
+      c.charCodeAt(0)
+    ).buffer;
+
+    const time = parseInt(await decryptData(response.data.gameDuration));
+    matchTime.value = calculateGameTime(time);
     // 승리 팀과 패배 팀을 분류하기 위한 임시 배열
     const winTeam = [];
     const loseTeam = [];
 
     // API 응답에서 각 참가자를 순회하며 승리 여부에 따라 분류
-    response.data.participants.forEach((participant) => {
+    for (const participant of response.data.participants) {
       let idx = 0;
+
+      const championId = await decryptData(participant.championName);
+
       for (let index = 0; index < championStore.championIds.length; index++) {
-        if (participant.championName === championStore.championIds[index]) {
+        if (championId === championStore.championIds[index]) {
           idx = index;
           break;
         }
       }
-      if (participant.win) {
-        winTeam.push({
-          enemyMissingPings: participant.enemyMissingPings,
-          championId: participant.championName,
-          championName: championStore.championNames[idx],
-          imgUrl: championStore.championSquareImgUrls[idx],
-          individualPosition: participant.individualPosition,
-          summonerName: participant.summonerName,
-          riotIdTagline: participant.riotIdTagline,
-          kills: participant.kills,
-          deaths: participant.deaths,
-          firstBloodKill: participant.firstBloodKill,
-          win: participant.win,
-        });
+
+      const enemyMissingPings = await decryptData(
+        participant.enemyMissingPings
+      );
+      const individualPosition = await decryptData(
+        participant.individualPosition
+      );
+      const nickName = await decryptData(participant.nickName);
+      const riotIdTagline = await decryptData(participant.riotIdTagline);
+      const kills = await decryptData(participant.kills);
+      const deaths = await decryptData(participant.deaths);
+      const firstBloodKill = JSON.parse(
+        await decryptData(participant.firstBloodKill)
+      );
+      const win = JSON.parse(await decryptData(participant.win));
+
+      const participantData = {
+        enemyMissingPings,
+        championId,
+        championName: championStore.championNames[idx],
+        imgUrl: championStore.championSquareImgUrls[idx],
+        individualPosition,
+        nickName,
+        riotIdTagline,
+        kills,
+        deaths,
+        firstBloodKill,
+        win,
+      };
+
+      if (win) {
+        winTeam.push(participantData);
       } else {
-        loseTeam.push({
-          enemyMissingPings: participant.enemyMissingPings,
-          championId: participant.championName,
-          championName: championStore.championNames[idx],
-          imgUrl: championStore.championSquareImgUrls[idx],
-          individualPosition: participant.individualPosition,
-          summonerName: participant.summonerName,
-          riotIdTagline: participant.riotIdTagline,
-          kills: participant.kills,
-          deaths: participant.deaths,
-          firstBloodKill: participant.firstBloodKill,
-          win: participant.win,
-        });
+        loseTeam.push(participantData);
       }
-    });
+    }
 
     if (Math.random() < 0.5) {
       teamOnePlayers.value = winTeam; // 승리 팀을 teamOnePlayers에 할당
