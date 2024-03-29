@@ -34,13 +34,13 @@ public class AsyncUserService {
     public void setAllSummonerId(String tier, String rank, int startKeyIdx) throws InterruptedException{
         log.info("{} {} setAllSummonerId start key start : {}", tier, rank, startKeyIdx);
         LinkedList<PlayerInfo> playerInfosCache = new LinkedList<>();
+//        데이터 키별로 리스트 생성
+        LinkedList<LinkedList<PlayerInfo>> playerInfosPerKey = new LinkedList<>();
         int page = 1;
         int keyIdx = startKeyIdx;
         while (true) {
             ApiKey apiKey = getKey(keyIdx);
             int responseCode = 0;
-            //요청보내기
-//            System.out.println("[getSummonerID] "+tier+rank+" "+ page + "start. keyIdx :" + keyIdx+"시작. ");
             try {
                 URL url = new URL("https://kr.api.riotgames.com/lol/league-exp/v4/entries/RANKED_SOLO_5x5/" + tier + "/" + rank + "?page=" + page + "&api_key=" + apiKey.getApiKey());
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -66,6 +66,7 @@ public class AsyncUserService {
                 connection.disconnect();
 
                 //플레이어 정보 담기
+
                 List<PlayerInfoDto> infos =  parseJsonResponseToPlayerInfoList(response.toString());
 
                 if (infos.size() == 0){
@@ -74,18 +75,19 @@ public class AsyncUserService {
 
                 //잘 가져왔을경우 캐시에 저장.
                 LinkedList<PlayerInfo> playerInfos = playerInfoDtoListToPlayerInfoList(infos, apiKey.getId());
-                playerInfosCache.addAll(playerInfos);
+//                여기에 키별 리스트로 담기
+                playerInfosPerKey.add(playerInfos);
+//                playerInfosCache.addAll(playerInfos);
 
             } catch (IOException e) {
                 //키막혔을경우
                 if (responseCode == 429) {
-                    System.out.println("[getSummonerID] apiKey request limit. nextKey during " + tier + rank + " page : " + page + ", key : " + keyIdx);
+                    log.error("[getSummonerID] {} {}  page : {}, keyIndex : {} request limit"+ tier, rank, page, keyIdx);
                     Thread.sleep(100);
                     page--;
                 }
                 else{
-                    System.out.println("[getSummonerId] UnCatchable error! reponseCode : " + responseCode);
-                    System.out.println("[getSummonerId] error during " + tier + rank + " page : " + page + ", key : " + keyIdx);
+                    log.error("[getSummonerID] {} {} UnCatchable error! reponseCode : {} ,  page : {}, keyIndex : {} request error", tier, rank, responseCode, page, keyIdx);
                 }
             }
 
@@ -97,6 +99,24 @@ public class AsyncUserService {
             page++;
         }
 
+        //여기서 키별리스트를 그냥 리스트에 담는작업 진행한다.
+        int size = playerInfosPerKey.size();
+        boolean dataRemain = true;
+        while(dataRemain) {
+            dataRemain = false;
+            for (int i = 0; i < size; i++) {
+                LinkedList<PlayerInfo> curPlayerInfos = playerInfosPerKey.get(i);
+                if (!curPlayerInfos.isEmpty()) {
+                    dataRemain = true;
+                    PlayerInfo pi = curPlayerInfos.poll();
+                    playerInfosCache.add(pi);
+                }
+            }
+        }
+
+//        그리고 기존 데이터 할당 해제해서 가비지 콜렉팅되게한다.
+        playerInfosPerKey = null;
+
 
 //        //한티어, 랭크에대한 작업이 끝나면, db에 저장한다.
 //        long startTime = System.currentTimeMillis();
@@ -105,16 +125,15 @@ public class AsyncUserService {
 //        long endTime = System.currentTimeMillis();
 //        long elapsedTime = endTime - startTime;
 //        System.out.println("[getSummonerId]  "+tier+" "+rank+"데이터 저장 "+ elapsedTime/1000 +"초 걸림");
-        System.out.println("[getSummonerId]  "+tier+" "+rank+" done. call setAllPuuid");
-
+        log.info("[getSummonerId]  {} {} done. call setAllPuuid", tier, rank);
 
         setAllPuuid(tier, rank, playerInfosCache);
     }
 
 //    @Async
     public void setAllPuuid(String tier, String rank, LinkedList<PlayerInfo> playerInfos) throws InterruptedException{
-
-        System.out.println(tier + rank + " setAllPuuid start");
+        long startTime = System.currentTimeMillis();
+       log.info("{} {} setAllPuuid start", tier, rank);
 
 //        LinkedList<PlayerInfo> playerInfos = userRiotApiRepository.findByTierAndRank(tier, rank);
         LinkedList<PlayerInfo> resultList = new LinkedList<>();
@@ -163,9 +182,9 @@ public class AsyncUserService {
                 }
                 //429가 뜰경우, 해당유저를 다시 큐에넣는다.
                 else if(responseCode == 429) {
-//                    System.out.println("[getPuuid] apiKey request limit"+ tier + rank+", key : "+pi.getApiKeyId());
-                    Thread.sleep(100);
+                    log.info("[getPuuid] apiKey request limit {} {} key {}", tier, rank, pi.getApiKeyId());
                     playerInfos.add(pi);
+                    Thread.sleep(1000);
                 }
                 //그외의 경우, 확인해본다.
                 else{
@@ -175,17 +194,19 @@ public class AsyncUserService {
 
             }
         }
-        System.out.println("[getPuuid] "+tier+" "+rank+" done. call setAllNameAndTag");
-
         playerInfos = resultList;
+
+        long endTime = System.currentTimeMillis();
+        long elapsedTime = endTime - startTime;
+        log.info("[getPuuid] {} {} done. elpasedTime : {}s", tier, rank, elapsedTime/1000);
 
         setAllNameAndTag(tier, rank, playerInfos);
     }
 
 //    @Async
     public void setAllNameAndTag(String tier, String rank, LinkedList<PlayerInfo> playerInfos) throws InterruptedException{
-        System.out.println(tier + rank + " setAllNameAndTag start");
-//        LinkedList<PlayerInfo> playerInfos = userRiotApiRepository.findByTierAndRank(tier, rank);
+        long startTime = System.currentTimeMillis();
+        log.info("{} {} setAllNameAndTag start", tier, rank);
 
         //db에 저장할 유저 셋 메모리에 모아놓는다.
         LinkedList<PlayerInfo> resultSet = new LinkedList<>();
@@ -232,52 +253,48 @@ public class AsyncUserService {
             } catch (IOException e) {
                 //not found가 뜰경우, 해당 유저는 저장하지 않는다.
                 if(responseCode == 404){
-                    System.out.println("[getNameAndTag] " + tier + rank+"해당 puuid "+pi.getPuuid()+"에 해당하는 name이랑 tag가 없어요.");
+                    log.info("[getNameAndTag] {} {} 해당 puuid {}에 해당하는 name이랑 tag가 없어요", tier, rank, pi.getPuuid());
                 }
                 //429가 뜰경우, 해당유저를 다시 큐에넣는다.
                 else if(responseCode == 429) {
-//                    System.out.println("[getNameAndTag] apiKey request limit" + tier + rank+", key : "+pi.getApiKeyId());
-                    Thread.sleep(100);
+                    log.info("[getNameAndTag] {} {} apiKey request limit key {}", tier, rank, pi.getApiKeyId());
+                    Thread.sleep(1000);
                     playerInfos.add(pi);
                 }
                 //그 외의 경우, 확인해본다.
                 else{
                     e.printStackTrace();
-                    System.out.println("[getNameAndTag] error during " + tier + rank+". response code : "+responseCode);
+                    log.info("[getNameAndTag] error during {} {}. response code : {}", tier, rank, responseCode);
                 }
 
             }
 
         }
 
-        //한티어, 랭크에대한 작업이 끝나면, db에 저장한다.
-        for (PlayerInfo entity : resultSet) {
-            if(entity.getTagLine() == null || entity.getSummonerName() == null) continue;
-
-            PlayerInfo existingEntity = (PlayerInfo) userRiotApiRepository.findBySummonerNameAndTagLine(entity.getSummonerName(), entity.getTagLine()).orElse(null);
-
-            if (existingEntity != null) {
-                // 이미 존재하는 경우, ID를 설정하여 업데이트를 활성화
-                System.out.println("이미 존재하는 player : " + existingEntity);
-                System.out.println("갱신정보 : "+ entity);
-                entity.setPlayerId(existingEntity.getPlayerId());
-            }
-        }
-
-        long startTime = System.currentTimeMillis();
-        for (PlayerInfo playerInfo : resultSet) {
-            try {
-                userRiotApiRepository.save(playerInfo);
-            } catch (DataIntegrityViolationException e) {
-                log.error("중복된 엔트리로 인해 저장에 실패했습니다. 누락된 엔트리: {}", playerInfo, e);
-            }
-        }
         long endTime = System.currentTimeMillis();
         long elapsedTime = endTime - startTime;
-        System.out.println("데이터 저장 "+ elapsedTime/1000 +"초 걸림");
-        System.out.println("[getNameAndTag]  "+tier+" "+rank+" done");
+        log.info("[getNameAndTag] {} {} done. elapsedTime : {}s. Database Save Start", tier, rank, elapsedTime/1000);
+        //한티어, 랭크에대한 작업이 끝나면, db에 저장한다.
+        startTime = System.currentTimeMillis();
+        for (PlayerInfo playerInfo : resultSet) {
+            if(playerInfo.getTagLine() == null || playerInfo.getSummonerName() == null) continue;
+            try {
+                PlayerInfo existingEntity = (PlayerInfo) userRiotApiRepository.findBySummonerNameAndTagLine(playerInfo.getSummonerName(), playerInfo.getTagLine()).orElse(null);
+                if (existingEntity != null) {
+                    playerInfo.setPlayerId(existingEntity.getPlayerId());
+                    System.out.println("이미 존재하는 player : " + existingEntity);
+                    System.out.println("갱신정보 : "+ playerInfo);
+                }
+                userRiotApiRepository.save(playerInfo);
+            } catch (DataIntegrityViolationException e) {
+                log.error("중복된 엔트리로 인해 저장에 실패했습니다. 누락된 엔트리: {}", playerInfo);
+            }
+        }
+        endTime = System.currentTimeMillis();
+        elapsedTime = endTime - startTime;
+        log.info("{} {} Data Save elapsed time : {}s",tier,rank,elapsedTime/1000);
+        log.info("[getNameAndTag] {} {} done ",tier, rank);
     }
-
 
     LinkedList<PlayerInfo> playerInfoDtoListToPlayerInfoList(List<PlayerInfoDto> list, long apiKeyId) {
         List<PlayerInfo> tempList = list.stream()
