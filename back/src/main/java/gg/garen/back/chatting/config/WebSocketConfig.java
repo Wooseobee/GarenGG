@@ -33,7 +33,6 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Bean
     public ServletServerContainerFactoryBean createServletServerContainerFactoryBean() {
         ServletServerContainerFactoryBean container = new ServletServerContainerFactoryBean();
-        log.info("Websocket factory returned");
         return container;
     }
 
