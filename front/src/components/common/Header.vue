@@ -1,28 +1,19 @@
 <template>
-  <header
-    id="header"
-    class="header fixed-top d-flex align-items-center"
-    :class="headerClass"
-  >
+  <header id="header" class="header fixed-top d-flex align-items-center">
     <div class="container-fluid d-flex align-items-center">
       <div class="logo d-flex align-items-center me-auto me-xl-0">
+        <!-- 뒤로가기 버튼 -->
+        <router-link v-if="backButton" to="#" @click="goBack"
+          ><img
+            src="@/assets/goback.png"
+            alt=""
+            style="width: 20px; height: auto"
+          />
+        </router-link>
         <RouterLink to="/">
           <img src="@/assets/logo2.png" />
         </RouterLink>
       </div>
-
-      <!-- Nav Menu -->
-      <nav id="navmenu" class="navmenu" style="margin-left: 400px">
-        <ul>
-          <li><RouterLink to="/detail">롤챔추</RouterLink></li>
-          <li><RouterLink to="/detail">조합추</RouterLink></li>
-          <li><RouterLink to="/">승부 예측 게임</RouterLink></li>
-          <li><RouterLink to="/">챔피언 맞추기</RouterLink></li>
-        </ul>
-
-        <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
-      </nav>
-      <!-- End Nav Menu -->
     </div>
   </header>
   <!-- End Header -->
@@ -32,20 +23,26 @@
 import { ref, computed, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 
+const props = defineProps({
+  backButton: {
+    type: Boolean,
+  },
+});
+const backButton = props.backButton;
 const router = useRouter();
 const route = useRoute();
-
-const headerClass = computed(() => {
-  if (route.path === "/detail") {
-    return "scrolled";
-  } else if (route.path === "/home") {
-    return "home-view";
-  } else {
-    return "";
-  }
-});
-
-console.log(headerClass);
+const goBack = () => {
+  router.go(-1);
+};
+// const headerClass = computed(() => {
+//   if (route.path === "/detail") {
+//     return "scrolled";
+//   } else if (route.path === "/home") {
+//     return "home-view";
+//   } else {
+//     return "";
+//   }
+// });
 </script>
 
 <style scoped>
@@ -144,7 +141,7 @@ section {
 /* Home Page Custom Header on page scroll
 ------------------------------*/
 .scrolled {
-  background-color: #0d6efd;
+  /* background-color: #0d6efd; */
   --background-color: #ffffff;
   --heading-color: #444444;
   --nav-color: #444444;

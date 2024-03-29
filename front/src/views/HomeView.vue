@@ -1,47 +1,172 @@
 <template>
   <div>
+    <Header />
     <section id="hero" class="hero">
+      <img src="@/assets/garen-background.gif" alt="" data-aos="fade-in" />
 
-      <img src="@/assets/garen-background.gif" alt="" data-aos="fade-in">
+      <section id="team" class="team">
+        <div class="container justify-content-center">
+          <div class="row gy-5">
+            <div
+              class="col-lg-4 col-md-6 member align-content-center"
+              data-aos="fade-up"
+              data-aos-delay="100"
+            >
+              <RouterLink :to="{ name: 'champ-rec' }">
+                <GameCardView />
+                <!-- <div class="member-img">
+                  <img src="@/assets/garen.avif" class="img-fluid" alt="" />
+                  <div class="social">
+                  </div>
+                </div> -->
+                <div class="member-info text-center">
+                  <h4>챔피언 추천</h4>
+                  <p>승리하기 위한 새로운 챔피언을 찾아보세요</p>
+                </div>
+              </RouterLink>
+            </div>
 
-      <div class="container">
-        <div class="row">
-          <div class="col-lg-10">
-            <h2 data-aos="fade-up" data-aos-delay="100">가렌.GG</h2>
-            <p data-aos="fade-up" data-aos-delay="200">나에게 딱 맞는 새로운 주챔을 추천 받으세요</p>
-          </div>
-          <div class="col-lg-5">
-            <div class="sign-up-form d-flex" data-aos="fade-up" data-aos-delay="300">
-              <input type="text" class="form-control" @keyup.enter="searchMyChamp" v-model="word" placeholder="플레이어 이름#KR1">
-              <button class="btn btn-primary" @click="searchMyChamp">가렌</button>
+            <div
+              class="col-lg-4 col-md-6 member"
+              data-aos="fade-up"
+              data-aos-delay="200"
+            >
+              <RouterLink :to="{ name: 'DuoRecommendation' }">
+                <GameCardView />
+                <!-- <div class="member-img">
+                  <img src="@/assets/garen.avif" class="img-fluid" alt="" />
+                  <div class="social"></div>
+                </div> -->
+                <div class="member-info text-center">
+                  <h4>듀오 추천</h4>
+                  <p>어떤 챔피언과 함께 하면 좋을지 알아보세요</p>
+                </div>
+              </RouterLink>
+            </div>
+
+            <div
+              class="col-lg-4 col-md-6 member"
+              data-aos="fade-up"
+              data-aos-delay="300"
+            >
+              <RouterLink :to="{ name: 'playground' }">
+                <GameCardView />
+                <!-- <div class="member-img">
+                  <img src="@/assets/garen.avif" class="img-fluid" alt="" />
+                  <div class="social"></div>
+                </div> -->
+                <div class="member-info text-center">
+                  <h4>놀이터</h4>
+                  <p>큐잡을때 심심할 때</p>
+                </div>
+              </RouterLink>
             </div>
           </div>
         </div>
-      </div>
-
+      </section>
     </section>
   </div>
 </template>
 
 <script setup>
-
 import { ref, computed, onMounted } from "vue";
-import { useRouter } from "vue-router";
+import { useRouter, RouterLink } from "vue-router";
+import Header from "@/components/common/Header.vue";
+import GameCardView from "@/components/common/GameCardView.vue";
 
 const router = useRouter();
-
-const word = ref("");
-const searchMyChamp = function () {
-  if (word.value.length < 1) {
-    alert("소환사명을 입력해 주세요");
-  } else {
-    router.push({ name: "detail", query: { word: word.value } });
-  }
-};
-
 </script>
 
 <style scoped>
+/* Team Section - Home Page
+------------------------------*/
+.team {
+  --background-color: #c89b3c;
+  /* padding-top: 100px; */
+}
+
+.team .member {
+  position: relative;
+  display: flex;
+}
+
+.team .member .member-img {
+  margin: 0 40px;
+  /* border-radius: 50%; */
+  overflow: hidden;
+  position: relative;
+  border: 4px solid var(--background-color);
+  box-shadow: 0 15px 35px -10px rgba(0, 0, 0, 0.2);
+}
+
+@media (max-width: 1024px) {
+  .team .member .member-img {
+    margin: 0 60px;
+  }
+}
+
+/* .team .member .member-img img {
+  width: 308px;
+  height: 560px;
+  position: relative;
+  z-index: 1;
+} */
+
+.team .member .member-img .social {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2;
+  padding-bottom: 20px;
+  transition: 0.3s;
+  visibility: hidden;
+  opacity: 0;
+}
+
+.team .member .member-img .social a {
+  transition: 0.3s;
+  color: var(--contrast-color);
+  font-size: 20px;
+  margin: 0 8px;
+}
+
+.team .member .member-img .social a:hover {
+  color: var(--accent-color);
+}
+
+.team .member .member-info {
+  margin-top: 30px;
+}
+
+.team .member .member-info h4 {
+  font-weight: 700;
+  margin-bottom: 6px;
+  font-size: 18px;
+  color: #c89b3c;
+}
+
+.team .member .member-info span {
+  font-style: italic;
+  display: block;
+  font-size: 15px;
+  color: rgba(var(--default-color-rgb), 0.6);
+  margin-bottom: 10px;
+}
+
+.team .member .member-info p {
+  margin-bottom: 0;
+  font-size: 14px;
+  color: rgba(var(--default-color-rgb), 0.6);
+}
+
+.team .member:hover .member-img .social {
+  padding-bottom: 0;
+  visibility: visible;
+  opacity: 1;
+}
 
 .hero {
   --default-color: #ffffff;
@@ -78,7 +203,7 @@ const searchMyChamp = function () {
 
 .hero .container {
   position: relative;
-  margin-left: 150px;
+  /* margin-left: 150px; */
   z-index: 3;
 }
 
@@ -97,6 +222,7 @@ const searchMyChamp = function () {
 
 .hero .btn {
   width: 66px;
+  background-color: #005a82;
 }
 
 .hero .sign-up-form {
@@ -120,15 +246,14 @@ const searchMyChamp = function () {
   box-shadow: none;
 }
 
-.hero .sign-up-form input[type=submit] {
+.hero .sign-up-form input[type="submit"] {
   box-shadow: 0 15px 30px 0 rgba(0, 0, 0, 0.2);
-  background-color: var(#87CEEB);
-  border-color: var(#87CEEB);
+  background-color: var(#87ceeb);
+  border-color: var(#87ceeb);
   padding: 8px 20px 10px 20px;
   border-radius: 7px;
   color: var(--contrast-color);
 }
-
 
 @media (max-width: 768px) {
   .hero h2 {
