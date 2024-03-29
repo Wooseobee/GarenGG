@@ -176,20 +176,16 @@ public class PlayerInfo extends Auditable {
                 "playerId=" + playerId +
                 ", puuid='" + puuid + '\'' +
                 ", tagLine='" + tagLine + '\'' +
-                ", leagueId='" + leagueId + '\'' +
-                ", queueType='" + queueType + '\'' +
                 ", tier='" + tier + '\'' +
                 ", rank='" + rank + '\'' +
+                ", apiKeyId=" + apiKeyId + '\'' +
+                ", leagueId='" + leagueId + '\'' +
+                ", queueType='" + queueType + '\'' +
                 ", summonerId='" + summonerId + '\'' +
                 ", summonerName='" + summonerName + '\'' +
                 ", leaguePoints=" + leaguePoints +
                 ", wins=" + wins +
                 ", losses=" + losses +
-                ", apiKeyId=" + apiKeyId +
-                ", veteran=" + veteran +
-                ", inactive=" + inactive +
-                ", freshBlood=" + freshBlood +
-                ", hotStreak=" + hotStreak +
                 '}';
     }
 
