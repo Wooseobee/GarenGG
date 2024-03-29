@@ -24,7 +24,7 @@
           type="text"
           v-model="nickname"
           placeholder="Your nickname"
-          maxlength="15"
+          maxlength="10"
           @keyup.enter="submitNickname"
         />
         <button @click="submitNickname">Submit</button>
@@ -55,9 +55,6 @@
               alt=""
             />
           </button>
-          <div>
-            {{ rounds[currentRound].answerChampion.id }}
-          </div>
         </div>
       </div>
 
@@ -144,10 +141,21 @@ const closeModal = () => {
   window.location.reload();
 };
 
+// const audioSrc = computed(() => {
+//   if (rounds.value.length > 0 && rounds.value[currentRound.value]) {
+//     const key = rounds.value[currentRound.value].answerChampion.championKey;
+//     return `/src/assets/pick-voice/${key}.ogg`;
+//   }
+//   return "";
+// });
+
 const audioSrc = computed(() => {
   if (rounds.value.length > 0 && rounds.value[currentRound.value]) {
     const key = rounds.value[currentRound.value].answerChampion.championKey;
-    return `/src/assets/pick-voice/${key}.ogg`;
+    // Webpack 환경에서 require 사용
+    // return require(`/src/assets/pick-voice/${key}.ogg`);
+    // Vite 환경에서 import.meta.url 사용
+    return new URL(`/src/assets/pick-voice/${key}.ogg`, import.meta.url).href;
   }
   return "";
 });
