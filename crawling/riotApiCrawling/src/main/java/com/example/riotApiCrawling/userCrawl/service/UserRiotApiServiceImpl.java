@@ -31,31 +31,23 @@ public class UserRiotApiServiceImpl {
     private final AsyncUserService asyncUserService;
 
     public void setUsers(int sign, String tier, int rank) throws InterruptedException{
-        long startTime = System.currentTimeMillis();
         int startkeyIdx = 0;
         for(int tierIdx = 0; tierIdx < tiers.length; tierIdx++){
             int rankLength = ranks.length - 1;
             if (tierIdx <= 2) rankLength = 1;
             for(int rankIdx = 1; rankIdx <= rankLength; rankIdx++){
                 if(sign == 1 && tiers[tierIdx].equals(tier) && rankIdx == rank) {
+                    long startTime = System.currentTimeMillis();
                     asyncUserService.setAllSummonerId(tiers[tierIdx], ranks[rankIdx], startkeyIdx);
-
+                    long endTime = System.currentTimeMillis();
+                    long elapsedTime = endTime - startTime;
+                    log.info("{} {} 유저 쌓기 끝. 걸린 시간 : {}초", tiers[tierIdx], ranks[rankIdx], elapsedTime/1000);
                 }
                 startkeyIdx += 161;
-                System.out.println("startKeyIdx : "+startkeyIdx);
-//                else if(sign == 2){
-//                    asyncUserService.setAllPuuid(tiers[tierIdx],ranks[rankIdx]);
-//                }
-//                else if(sign == 3 ){
-//                    asyncUserService.setAllNameAndTag(tiers[tierIdx],ranks[rankIdx]);
-//                }
             }
         }
 
-        long endTime = System.currentTimeMillis();
-        long elapsedTime = endTime - startTime;
 
-        System.out.println("유저 쌓기 끝: " + elapsedTime/1000 + " 초 걸림.");
     }
 
 
