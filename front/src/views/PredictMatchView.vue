@@ -14,9 +14,9 @@
         </div>
         <div class="match-info">
           <div v-if="currentHints >= 3" class="matchTime">{{ matchTime }}</div>
-          <div class="usedHints">{{ usedHints }}/{{ maxHints }}</div>
           <div class="round">{{ currentRound }}/{{ totalRounds }}</div>
           <div class="vs">VS</div>
+          <div class="usedHints">{{ usedHints }}/{{ maxHints }}</div>
           <div class="hint" @click="showHint">
             <span>{{ currentHints }}/{{ totalHints }}</span> 힌트보기
           </div>
@@ -358,10 +358,6 @@ const closeModal = () => {
 }
 
 .matchTime {
-  position: absolute;
-  top: 120px; /* 위치 조정 */
-  left: 50%; /* 화면의 중앙 */
-  transform: translateX(-50%); /* 정확한 중앙 정렬을 위해 */
   padding: 10px;
   background-color: #005a82; /* 노란색 배경 */
   color: white; /* 텍스트 색상 */
@@ -377,23 +373,16 @@ const closeModal = () => {
   flex-direction: column;
 }
 
-.usedHints {
-  position: absolute;
-  top: 200px; /* 위치 조정 */
-  left: 50%; /* 화면의 중앙 */
-  transform: translateX(-50%); /* 정확한 중앙 정렬을 위해 */
-}
-
 .hint {
-  position: absolute;
-  bottom: 20px; /* 위치 조정 */
-  left: 50%; /* 화면의 중앙 */
-  transform: translateX(-50%); /* 정확한 중앙 정렬을 위해 */
   padding: 10px 20px;
   background-color: #005a82; /* 파란색 배경 */
   color: #fff; /* 텍스트 색상 */
   border-radius: 5px; /* 약간 둥근 모서리 */
   cursor: pointer; /* 클릭 가능한 요소로 표시 */
+}
+
+.usedHints {
+  margin-top: 150px;
 }
 .team-selection {
   display: flex;
