@@ -1,5 +1,4 @@
 <template>
-    
     <div class="container">
         <transition name="fade">
         <div v-show="showIntro" class="intro-container section-title">
@@ -164,7 +163,7 @@ onMounted(() => {
 setTimeout(() => {
   showIntro.value = false;
 
-}, 1000); // 3초 후 로고 숨김
+}, 100); // 3초 후 로고 숨김
 
 </script>
 
