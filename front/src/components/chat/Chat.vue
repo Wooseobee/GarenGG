@@ -36,6 +36,7 @@
 
 <script setup>
 import { ref, onMounted, onUpdated } from "vue";
+import { localAxios } from "@/utils/http-commons";
 import { Client } from "@stomp/stompjs";
 
 const messagesContainer = ref(null);
@@ -72,9 +73,12 @@ const adjectives = [
   "사랑스러운",
 ];
 
-const champions = ["가렌", "애니", "애쉬", "아리", "야스오"];
-const minimized = ref(true);
+const champions = ["가렌", "갈리오", "갱플랭크", "그라가스", "그레이브즈", "나르", "나미", "나서스", "니달리", "녹턴", "다리우스", "드레이븐", "라이즈", "럭스", "람머스", "럼블", "레오나", "렝가", "루시안",
+"룰루", "리븐", "말자하", "말파이트", "밀리오", "미스포츈", "바드", "바루스", "베이가", "바이", "베이가", "베인", "벡스", "벨베스", "벨코즈", "브라움", "브라이어", "브랜드", "뽀삐", "사미라", "사이온", "샤코", "세라핀", "세트", "소나", "소라카", "쉔",
+"쉬바나", "스몰더", "스웨인", "스카너", "시비르", "아무무", "아리", "쓰레쉬", "아트록스", "애쉬", "애니", "오공", "야스오", "올라프", "워윅", "유미", "잔나", "초가스", "징크스", "카직스", "케일", "타릭", "트런들", "티모", "피오라", "피즈", "판테온",
+"흐웨이", "헤카림", "피들스틱"];
 
+const minimized = ref(true);
 const client = ref(null);
 
 // 랜덤 아이디 생성 함수
@@ -90,7 +94,7 @@ const userId = ref("");
 let message = ref("");
 const mList = ref([]);
 
-onMounted(() => {
+onMounted(async () => {
   // localStorage에서 userId 가져오기
   const storedUserId = localStorage.getItem("userId");
 
@@ -106,19 +110,39 @@ onMounted(() => {
 
   client.value = new Client({
     brokerURL: "wss://j10a605.p.ssafy.io/ws-stomp",
+    // brokerURL: "ws://localhost:8080/ws-stomp",
     connectHeaders: {},
     onConnect: () => {
       client.value.subscribe("/sub/chat/room/" + 1, (message) =>
         onMessageReceivedFromSocket(message)
       );
-      // client.publish({ destination: '/pub/chat/enterUser', body: JSON.stringify({meesageType: "ENTER", content: userInfo.name +"님 환영합니다!", userId: userId.value, chatRoomId: 1 }) });
     },
     onStompError: () => {
       console.log("STOMP connection error");
     },
+    
   });
 
   client.value.activate();
+
+  try {
+    const response = await localAxios.get(
+      `/chat`
+    );
+    console.log(response);
+
+    // 성공적으로 데이터를 받아온 경우
+    mList.value = response.data.map(
+      (chat) => ({
+        me: chat.userId == userId.value,
+        content: chat.content,
+        userId: chat.userId
+      })
+    );
+  } catch (error) {
+    console.error("API 호출 중 오류 발생:", error);
+  }
+  
 });
 
 function toggleMinimize() {
@@ -128,7 +152,6 @@ function toggleMinimize() {
 // 메세지 받는 로직
 function onMessageReceivedFromSocket(payload) {
   var chat = JSON.parse(payload.body);
-  console.log(chat);
   const newMessage = {
     me: chat.userId === userId.value,
     content: chat.content,
@@ -142,12 +165,12 @@ function onMessageReceivedFromSocket(payload) {
 
 // 메세지 보내는 로직
 function sendMessageToSocket() {
+
   if (!message.value.trim()) return;
   var chatMessage = {
-    chatRoomId: 1,
+    roomId: 1,
     userId: userId.value,
     content: message.value,
-    messageType: "TALK",
   };
   message.value = "";
   client.value.publish({
@@ -157,17 +180,6 @@ function sendMessageToSocket() {
   });
 }
 
-function discnnectChat() {
-  client.disconnect(
-    {
-      destination: "/pub/message",
-      userId: userInfo.userId,
-      chatRoomId: userInfo.roomId,
-    },
-    { userId: userInfo.userId, chatRoomId: userInfo.roomId }
-  );
-  alert("see you next Time!!");
-}
 </script>
 
 <style scoped>
@@ -216,8 +228,7 @@ function discnnectChat() {
 }
 
 .message {
-  padding: 10px;
-  margin: 0 0 5px 0; /* 좌우 마진 제거, 상하 마진 조정 */
+  margin: 0 0 5px 10px; /* 좌우 마진 제거, 상하 마진 조정 */
   border-radius: 10px;
 }
 
@@ -229,18 +240,22 @@ function discnnectChat() {
 }
 
 .me {
+  padding: 10px 15px 10px 0;
+  margin: 8px 7px 8px 0;
   background-color: #ffffff;
   color: black; /* 텍스트 색상 변경 */
-  text-align: left;
-  margin-right: auto; /* 왼쪽 정렬 */
+  text-align: right;
+  margin-left: auto; /* 왼쪽 정렬 */
   max-width: 66%; /* 메시지 최대 너비 설정 */
 }
 
 .other {
+  margin: 8px 0 8px 7px;
+  padding: 10px 0 10px 15px;
   background-color: #ffffff; /* 상대방의 메시지 배경색 변경 */
   color: black;
-  text-align: right;
-  margin-left: auto; /* 오른쪽 정렬 */
+  text-align: left;
+  margin-right: auto; /* 오른쪽 정렬 */
   max-width: 66%; /* 메시지 최대 너비 설정 */
 }
 

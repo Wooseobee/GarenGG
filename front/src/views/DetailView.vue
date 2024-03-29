@@ -3,7 +3,7 @@
     <Header />
     <div v-if="champions.length === 0" class="loading-container">
       <img src="@/assets/ornn-loading.gif" alt="로딩 중" data-aos="fade-in" />
-      <p>로딩중...</p>
+      <p>AI가 분석 중입니다...</p>
     </div>
     <!-- 조건부 렌더링을 사용하여 Team_Comp와 안내 문구를 같이 보여줌 -->
     <template v-else>
