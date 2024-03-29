@@ -3,8 +3,6 @@
     <div v-if="searchResults.length" class="row">
       <div v-for="video in searchResults" :key="video.id" class="col-md-4">
         <iframe
-          width="420"
-          height="235"
           :src="'https://www.youtube.com/embed/' + video.id"
           frameborder="0"
           allowfullscreen
@@ -25,4 +23,9 @@ const props = defineProps({
 });
 </script>
 
-<style scoped></style>
+<style scoped>
+iframe {
+  max-width: 440px;
+  height: 235px;
+}
+</style>

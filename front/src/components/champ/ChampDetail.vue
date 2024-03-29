@@ -1,99 +1,103 @@
 <template>
   <div>
-    <div class="champion-info">
-      <div class="champion-portrait">
-        <!-- 초상화 -->
-        <img
-          :src="`https://ddragon.leagueoflegends.com/cdn/14.6.1/img/champion/${champname}.png`"
-          alt=""
-        />
+    <div class="box">
+      <div class="champion-info">
+        <div class="champion-portrait">
+          <!-- 초상화 -->
+          <img
+            :src="`https://ddragon.leagueoflegends.com/cdn/14.6.1/img/champion/${champname}.png`"
+            alt=""
+          />
+        </div>
+        <div>
+          <div style="color: #f0e6d2">
+            <h1>
+              {{ champData.name }}
+            </h1>
+            <!-- <p>{{ champData.title }}</p> -->
+          </div>
+
+          <!-- 패시브 -->
+          <div class="skills-container">
+            <div class="skill">
+              <img
+                v-if="champData.passive && champData.passive.image"
+                :src="`https://ddragon.leagueoflegends.com/cdn/14.6.1/img/passive/${champData.passive.image.full}`"
+                alt=""
+                @mouseover="showModal('passive')"
+                @mouseleave="closeModal"
+              />
+              <SkillModal
+                :name="passiveName"
+                :description="removeHTMLTags(passiveDescription)"
+                v-if="activeSpell === 'passive' && modalVisible"
+              />
+            </div>
+            <!-- 패시브 끝 -->
+            <!-- 스킬 -->
+            <div v-if="champData.spells">
+              <img
+                v-for="(spell, index) in champData.spells"
+                :key="index"
+                :src="getSpellImageURL(spell.id)"
+                alt=""
+                @mouseover="showModal('spell', spell)"
+                @mouseleave="closeModal"
+                :style="{
+                  marginRight:
+                    index < champData.spells.length - 1 ? '20px' : '0',
+                }"
+              />
+
+              <SkillModal
+                :name="activeSpellData.name"
+                :tooltip="`${removeHTMLTags(activeSpellData.tooltip)}`"
+                :description="`${removeHTMLTags(activeSpellData.description)}`"
+                :cooldownBurn="`재사용대기시간: ${activeSpellData.cooldownBurn} 초`"
+                :costBurn="`소모: ${getCostBurnDisplay(
+                  activeSpellData.costBurn
+                )}`"
+                :rangeBurn="`범위: ${activeSpellData.rangeBurn}`"
+                v-if="activeSpell === 'spell' && modalVisible"
+              />
+            </div>
+            <!-- 스킬 끝 -->
+          </div>
+        </div>
       </div>
+
       <div>
-        <div style="color: #f0e6d2">
-          <h2>
-            {{ champData.name }}
-          </h2>
-          <!-- <p>{{ champData.title }}</p> -->
-        </div>
-
-        <!-- 패시브 -->
-        <div class="skills-container">
-          <div class="skill">
-            <img
-              v-if="champData.passive && champData.passive.image"
-              :src="`https://ddragon.leagueoflegends.com/cdn/14.6.1/img/passive/${champData.passive.image.full}`"
-              alt=""
-              @mouseover="showModal('passive')"
-              @mouseleave="closeModal"
-            />
-            <SkillModal
-              :name="passiveName"
-              :description="removeHTMLTags(passiveDescription)"
-              v-if="activeSpell === 'passive' && modalVisible"
-            />
-          </div>
-          <!-- 패시브 끝 -->
-          <!-- 스킬 -->
-          <div v-if="champData.spells">
-            <img
-              v-for="(spell, index) in champData.spells"
-              :key="index"
-              :src="getSpellImageURL(spell.id)"
-              alt=""
-              @mouseover="showModal('spell', spell)"
-              @mouseleave="closeModal"
-              :style="{
-                marginRight: index < champData.spells.length - 1 ? '20px' : '0',
-              }"
-            />
-
-            <SkillModal
-              :name="activeSpellData.name"
-              :tooltip="`${removeHTMLTags(activeSpellData.tooltip)}`"
-              :description="activeSpellData.description"
-              :cooldownBurn="`재사용대기시간: ${activeSpellData.cooldownBurn} 초`"
-              :costBurn="`소모: ${getCostBurnDisplay(
-                activeSpellData.costBurn
-              )}`"
-              :rangeBurn="`범위: ${activeSpellData.rangeBurn}`"
-              v-if="activeSpell === 'spell' && modalVisible"
-            />
-          </div>
-          <!-- 스킬 끝 -->
+        <div>
+          <h1>설정</h1>
+          <p>{{ champData.lore }}</p>
         </div>
       </div>
-    </div>
-
-    <div>
-      <div class="box">
-        <h2>설정</h2>
-        <p>{{ champData.lore }}</p>
+      <h1>플레이 팁</h1>
+      <ul>
+        <li v-for="(tip, index) in champData.allytips" :key="index">
+          {{ index + 1 }}{{ ". " }} {{ tip }}
+        </li>
+      </ul>
+      <!-- </div> -->
+      <!-- 유튜브 -->
+      <!-- <div class="box"> -->
+      <h1>챔피언 플레이 가이드</h1>
+      <div>
+        <Youtube :searchResults="searchResults" />
       </div>
+      <!-- 스킨 -->
+      <div>
+        <h1>스킨</h1>
+        <div v-if="champData.skins">
+          <Carousel
+            :skins="champData.skins.slice(1).reverse()"
+            :getSkinImageURL="getSkinImageURL"
+          />
+        </div>
 
-      <div class="box">
-        <h2>플레이 팁</h2>
-        <ul>
-          <li v-for="(tip, index) in champData.allytips" :key="index">
-            {{ tip }}
-          </li>
-        </ul>
+        <!-- 스킨 끝 -->
       </div>
     </div>
-    <!-- 유튜브 -->
-    <h1>챔피언 플레이 가이드</h1>
-    <div>
-      <Youtube :searchResults="searchResults" />
-    </div>
-    <!-- 스킨 -->
-    <h1>스킨</h1>
-    <div v-if="champData.skins">
-      <Carousel
-        :skins="champData.skins.slice(1).reverse()"
-        :getSkinImageURL="getSkinImageURL"
-      />
-    </div>
-
-    <!-- 스킨 끝 -->
   </div>
   <div>
     {{ latestPatch }}
@@ -171,6 +175,7 @@ const getCostBurnDisplay = (costBurn) => {
   return costBurn === "0" ? "소모값 없음" : costBurn;
 };
 const removeHTMLTags = (str) => {
+  str = str.replace(/<br>/g, "\n");
   str = str.replace(/<[^>]*>?/gm, "");
   str = str.replace(/{{(.*?)}}/g, "?");
   return str;
@@ -226,6 +231,8 @@ const route = useRoute();
 <style scoped>
 .champion-info {
   display: flex;
+  align-content: center;
+  margin: 20px 0px 40px 0px;
 }
 .champion-portrait {
   margin-right: 20px; /* 초상화와 스킬 컨테이너 사이 간격 조정 */
@@ -240,10 +247,14 @@ const route = useRoute();
   flex: none; /* 크기 고정 */
 }
 
+.container-sm {
+  margin-top: 20px;
+}
+
 /* box */
 .box {
   display: inline-block; /* 인라인 요소로 표시하여 가로로 배열되도록 설정 */
-  width: 36%; /* 상자의 너비를 줄임 */
+  max-width: 100%; /* 상자의 너비를 줄임 */
   background-color: #010a13;
   border: 1px solid #c89b3c;
   border-radius: 5px;
@@ -253,14 +264,13 @@ const route = useRoute();
   vertical-align: top; /* 상자를 상단으로 정렬 */
   box-sizing: border-box; /* 패딩과 테두리를 상자 크기에 포함 */
 }
-
+.box h1,
 .box h2 {
   color: #c89b3c;
-  margin-top: 0;
 }
 
 .box p {
-  margin: 0;
+  margin-bottom: 10px;
 }
 
 .box ul {
