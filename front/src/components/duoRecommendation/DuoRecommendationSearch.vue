@@ -66,7 +66,7 @@ const selectedChampion = ref({});
 const positionImages = ref([
     { position: "TOP", url: topImage },
     { position: "JUNGLE", url: jungleImage },
-    { position: "MID", url: midImage },
+    { position: "MIDDLE", url: midImage },
     { position: "BOTTOM", url: bottomImage },
     { position: "UTILITY", url: utilityImage }
 ]);
