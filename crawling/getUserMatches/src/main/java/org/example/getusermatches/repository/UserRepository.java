@@ -7,5 +7,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface UserRepository extends JpaRepository<PlayerInfo, String> {
 
-    Page<PlayerInfo> findAll(Pageable pageable);
+    Page<PlayerInfo> findAllByApiKeyId(Pageable pageable, int apiKey);
 }
