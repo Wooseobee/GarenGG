@@ -26,7 +26,7 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import { useChampionStore } from "@/stores/championStore.js";
 const championStore = useChampionStore();
@@ -40,15 +40,16 @@ const props = defineProps({
 const { championKeys, championIds } = championStore;
 
 // champinfo 객체 생성
-const champinfo = {};
 
-for (let i = 0; i < championKeys.length; i++) {
-  champinfo[championIds[i]] = championKeys[i];
-}
-const champkey = champinfo[props.champname];
 // 소리
-const audiolink = ref(
-  `https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/ko_kr/v1/champion-choose-vo/${champkey}.ogg`
+const audiolink = computed ( () =>{
+  const champinfo = {};
+  for (let i = 0; i < championKeys.length; i++) {
+  champinfo[championIds[i]] = championKeys[i];
+  }
+  const champkey = champinfo[props.champname];
+  return `https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/ko_kr/v1/champion-choose-vo/${champkey}.ogg`
+}
 );
 const playSound = (sound) => {
   if (sound) {
@@ -94,7 +95,8 @@ const startEffect = () => {
 const stopEffect = () => {
   isEffect.value = false;
 };
-const champImageUrl = `https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${props.champname}_0.jpg`;
+const champImageUrl = computed( () =>{
+  return `https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${props.champname}_0.jpg`});
 </script>
 
 <style scoped>
