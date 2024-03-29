@@ -1,6 +1,7 @@
 package org.example.getusermatches.service;
 
 import jakarta.annotation.PostConstruct;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.example.getusermatches.domain.ApiKey;
 import org.example.getusermatches.repository.ApiKeyRepository;
@@ -11,6 +12,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Getter
 public class APIKeyService {
 
     private final ApiKeyRepository apiKeyRepository;
@@ -21,10 +23,6 @@ public class APIKeyService {
         apiKeys = apiKeyRepository.findAll().stream()
                 .map(ApiKey::getApiKey)
                 .collect(Collectors.toList());
-    }
-
-    public List<String> getApiKeys() {
-        return apiKeys;
     }
 
 }

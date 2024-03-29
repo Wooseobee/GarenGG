@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-@Document(collection = "player_match_v1")
+@Document(collection = "player_match")
 @Getter
 @Setter
 public class MatchInfo {
