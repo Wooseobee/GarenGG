@@ -84,11 +84,5 @@ router.beforeEach(async (to, from, next) => {
     await championStore.initialize();
   }
   next();
-
-  if (to.path === "/predictChampion") {
-    window.location.href = "/predictChampion";
-  } else {
-    next();
-  }
 });
 export default router;
