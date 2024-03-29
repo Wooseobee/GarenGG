@@ -9,15 +9,16 @@
           <TeamList
             :players="teamOnePlayers"
             :isRightTeam="false"
-            :currentHint="currentHint"
+            :currentHint="currentHints"
           />
         </div>
         <div class="match-info">
-          <div v-if="currentHint >= 3" class="matchTime">{{ matchTime }}</div>
+          <div v-if="currentHints >= 3" class="matchTime">{{ matchTime }}</div>
+          <div class="usedHints">{{ usedHints }}/{{ maxHints }}</div>
           <div class="round">{{ currentRound }}/{{ totalRounds }}</div>
           <div class="vs">VS</div>
           <div class="hint" @click="showHint">
-            <span>{{ currentHint }}/{{ totalHints }}</span> 힌트보기
+            <span>{{ currentHints }}/{{ totalHints }}</span> 힌트보기
           </div>
         </div>
         <!-- 우측 팀 리스트 -->
@@ -25,7 +26,7 @@
           <TeamList
             :players="teamTwoPlayers"
             :isRightTeam="true"
-            :currentHint="currentHint"
+            :currentHint="currentHints"
           />
         </div>
       </div>
@@ -57,6 +58,20 @@
         />
         <button @click="submitNickname">Submit</button>
         <button @click="goBack">return</button>
+        <div class="description">
+          <h3>*게임 설명*</h3>
+          <div>
+            1. 이번 시즌 실제로 진행되었던 게임의 승리 팀을 맞추는 게임입니다.
+          </div>
+          <div>2. 최대 100경기가 준비되어 있습니다.</div>
+          <div>3. 틀리는 즉시 게임은 종료됩니다.</div>
+          <div>4. 조합으로 맞추기 어렵다면 힌트를 보세요.</div>
+          <div>
+            5. 힌트는 미아핑 > 첫번째 킬 > 게임 진행 시간 > K/D 순서로 제공되며,
+            힌트를 볼 때마다 점수가 차감됩니다.
+          </div>
+          <div>6. 최대 사용 가능한 힌트는 20개 입니다.</div>
+        </div>
       </div>
     </div>
     <div
@@ -81,16 +96,17 @@ import { useRouter } from "vue-router";
 
 const router = useRouter();
 const currentRound = ref(1);
-const totalRounds = 5;
-const currentHint = ref(0);
+const totalRounds = 100;
 const totalHints = 4;
+const maxHints = 20;
+const usedHints = ref(0);
 const showRankModal = ref(false);
 const matchData = ref(null);
 const teamOnePlayers = ref([]);
 const teamTwoPlayers = ref([]);
 const championStore = useChampionStore();
-const score = ref(100);
-const usedHints = ref(0);
+const score = ref(0);
+const currentHints = ref(0);
 const showNicknameModal = ref(true);
 const nickname = ref("");
 const rank = ref([]);
@@ -154,7 +170,7 @@ const decryptData = async (data) => {
 
 const fetchMatchData = async () => {
   try {
-    currentHint.value = 0;
+    currentHints.value = 0;
     const response = await randomMatch();
     matchData.value = response.data;
 
@@ -242,8 +258,12 @@ onMounted(() => {
 
 const showHint = () => {
   if (showAnswerFeedback.value) return;
-  if (currentHint.value < totalHints) {
-    currentHint.value++;
+  if (usedHints.value >= maxHints) {
+    alert("힌트를 모두 사용하셨습니다!");
+    return;
+  }
+  if (currentHints.value < totalHints) {
+    currentHints.value++;
     usedHints.value++;
   }
 };
@@ -251,21 +271,23 @@ const showHint = () => {
 const selectTeam = async (team) => {
   if (showAnswerFeedback.value) return;
   correctAnswer.value = team[0].win; // 승리 팀을 선택했는지 여부
+  const useHintThisRound = currentHints.value;
   showAnswerFeedback.value = true; // 정답 피드백을 보여주기
 
-  currentHint.value = 4;
+  currentHints.value = 4;
   await new Promise((resolve) => setTimeout(resolve, 5000));
 
   showAnswerFeedback.value = false; // 피드백 숨김
 
   if (team[0].win) {
-    score.value -= usedHints.value * 4;
-  } else {
-    score.value -= 20;
-  }
-  if (currentRound.value < totalRounds) {
-    currentRound.value++;
-    fetchMatchData();
+    score.value += 5 - useHintThisRound;
+    if (currentRound.value < totalRounds) {
+      currentRound.value++;
+      fetchMatchData();
+    } else {
+      showRankModal.value = true;
+      rank.value = response.data;
+    }
   } else {
     uuid.value = uuidv4();
     const response = await playGame({
@@ -277,8 +299,7 @@ const selectTeam = async (team) => {
     showRankModal.value = true;
     rank.value = response.data;
   }
-  usedHints.value = 0;
-  currentHint.value = 0;
+  currentHints.value = 0;
 };
 
 const closeModal = () => {
@@ -336,12 +357,6 @@ const closeModal = () => {
   font-family: "Press Start 2P", cursive; /* 레트로 폰트 */
 }
 
-/* .upcoming-match-header {
-  text-align: center;
-  font-size: 1.5rem;
-  color: #ffffff;
-  padding: 20px 0;
-} */
 .matchTime {
   position: absolute;
   top: 120px; /* 위치 조정 */
@@ -351,6 +366,22 @@ const closeModal = () => {
   background-color: #005a82; /* 노란색 배경 */
   color: white; /* 텍스트 색상 */
   cursor: pointer; /* 클릭 가능한 요소로 표시 */
+}
+
+.match-info {
+  display: flex; /* Flexbox 레이아웃 사용 */
+  align-items: center; /* 모든 아이템을 세로 축에서 가운데 정렬 */
+  justify-content: space-around; /* 아이템들 사이에 공간을 균등하게 배분 */
+  padding: 10px; /* 내부 여백 추가 */
+  border-radius: 5px; /* 경계선 둥글게 처리 */
+  flex-direction: column;
+}
+
+.usedHints {
+  position: absolute;
+  top: 200px; /* 위치 조정 */
+  left: 50%; /* 화면의 중앙 */
+  transform: translateX(-50%); /* 정확한 중앙 정렬을 위해 */
 }
 
 .hint {
@@ -429,11 +460,29 @@ const closeModal = () => {
 }
 
 .nickname-modal-content {
-  background: white;
+  background: #32281e;
   padding: 20px;
   border-radius: 10px;
   text-align: center;
   color: black;
+}
+
+.nickname-modal-content h3 {
+  color: #f0e6d2;
+}
+
+.nickname-modal-content input {
+  background-color: #f0e6d2;
+}
+
+.nickname-modal-content button {
+  background-color: #f0e6d2;
+  margin-left: 10px;
+  margin-bottom: 10px;
+}
+
+.description {
+  color: #c8aa6e;
 }
 
 .answer-feedback {
