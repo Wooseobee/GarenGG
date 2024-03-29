@@ -2,6 +2,7 @@ package gg.garen.back.championRecommendation.service;
 
 import gg.garen.back.championRecommendation.dto.request.RequestPredictDto;
 import gg.garen.back.championRecommendation.dto.request.RequestPredictNotDto;
+import gg.garen.back.championRecommendation.dto.response.ChampionRecommendationData;
 import gg.garen.back.championRecommendation.dto.response.ResponseGetChampionRecommendationDto;
 import gg.garen.back.common.domain.mongo.*;
 import gg.garen.back.common.domain.mysql.ApiKey;
@@ -301,19 +302,21 @@ public class ChampionRecommendationServiceImpl implements ChampionRecommendation
                 }
 
                 try {
-                    url = "https://j10a605.p.ssafy.io:8000/api/predict/not";
+                    url = "http://j10a605.p.ssafy.io:8000/api/predict/not";
                     RequestPredictNotDto requestPredictNotDto = new RequestPredictNotDto();
                     requestPredictNotDto.setPlayerId(newPastSeasonPlayerInfo.getPlayerId());
                     requestPredictNotDto.setTier(newPastSeasonPlayerInfo.getTier());
                     requestPredictNotDto.setMostDatas(newPastSeasonPlayerMost.getMostDatas());
 
-                    ResponseEntity<ResponseGetChampionRecommendationDto> response2 = restTemplate.exchange(
+                    // ParameterizedTypeReference를 사용하여 List<ChampionRecommendationData> 타입의 응답을 처리합니다.
+                    ResponseEntity<List<ChampionRecommendationData>> response2 = restTemplate.exchange(
                             url,
                             HttpMethod.POST,
                             new HttpEntity<>(requestPredictNotDto),
-                            ResponseGetChampionRecommendationDto.class);
+                            new ParameterizedTypeReference<List<ChampionRecommendationData>>() {
+                            });
 
-                    responseGetChampionRecommendationDto = response2.getBody();
+                    responseGetChampionRecommendationDto.setChampionRecommendationDatas(response2.getBody());
 
                     System.out.println("성공");
                     return ResponseEntity.status(HttpStatus.OK).body(responseGetChampionRecommendationDto);
@@ -349,19 +352,21 @@ public class ChampionRecommendationServiceImpl implements ChampionRecommendation
                 }
 
                 try {
-                    url = "https://j10a605.p.ssafy.io:8000/api/predict/not";
+                    url = "http://j10a605.p.ssafy.io:8000/api/predict/not";
                     RequestPredictNotDto requestPredictNotDto = new RequestPredictNotDto();
                     requestPredictNotDto.setPlayerId(findedPastSeasonPlayerInfo.getPlayerId());
                     requestPredictNotDto.setTier(findedPastSeasonPlayerInfo.getTier());
                     requestPredictNotDto.setMostDatas(findedPastSeasonPlayerMost.getMostDatas());
 
-                    ResponseEntity<ResponseGetChampionRecommendationDto> response2 = restTemplate.exchange(
+                    // ParameterizedTypeReference를 사용하여 List<ChampionRecommendationData> 타입의 응답을 처리합니다.
+                    ResponseEntity<List<ChampionRecommendationData>> response2 = restTemplate.exchange(
                             url,
                             HttpMethod.POST,
                             new HttpEntity<>(requestPredictNotDto),
-                            ResponseGetChampionRecommendationDto.class);
+                            new ParameterizedTypeReference<List<ChampionRecommendationData>>() {
+                            });
 
-                    responseGetChampionRecommendationDto = response2.getBody();
+                    responseGetChampionRecommendationDto.setChampionRecommendationDatas(response2.getBody());
 
                     System.out.println("성공");
                     return ResponseEntity.status(HttpStatus.OK).body(responseGetChampionRecommendationDto);
@@ -397,18 +402,20 @@ public class ChampionRecommendationServiceImpl implements ChampionRecommendation
             System.out.println("findedPlayerMost 성공");
 
             try {
-                url = "https://j10a605.p.ssafy.io:8000/api/predict";
+                url = "http://j10a605.p.ssafy.io:8000/api/predict";
                 RequestPredictDto requestPredictDto = new RequestPredictDto();
                 requestPredictDto.setPlayerId(findedPlayerInfo.getPlayerId());
                 requestPredictDto.setTier(findedPlayerInfo.getTier());
 
-                ResponseEntity<ResponseGetChampionRecommendationDto> response2 = restTemplate.exchange(
+                // ParameterizedTypeReference를 사용하여 List<ChampionRecommendationData> 타입의 응답을 처리합니다.
+                ResponseEntity<List<ChampionRecommendationData>> response2 = restTemplate.exchange(
                         url,
                         HttpMethod.POST,
                         new HttpEntity<>(requestPredictDto),
-                        ResponseGetChampionRecommendationDto.class);
+                        new ParameterizedTypeReference<List<ChampionRecommendationData>>() {
+                        });
 
-                responseGetChampionRecommendationDto = response2.getBody();
+                responseGetChampionRecommendationDto.setChampionRecommendationDatas(response2.getBody());
 
                 System.out.println("성공");
                 return ResponseEntity.status(HttpStatus.OK).body(responseGetChampionRecommendationDto);

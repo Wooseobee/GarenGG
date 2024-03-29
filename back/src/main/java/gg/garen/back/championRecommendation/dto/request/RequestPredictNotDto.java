@@ -15,5 +15,7 @@ public class RequestPredictNotDto {
 
     private String tier;
 
+    private String rankNum = "0";
+
     private List<MostData> mostDatas;
 }
