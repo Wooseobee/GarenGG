@@ -132,7 +132,7 @@ onMounted(async () => {
     console.log(response);
 
     // 성공적으로 데이터를 받아온 경우
-    mList.value = response.data.map(
+    mList.value = response.data.reverse().map(
       (chat) => ({
         me: chat.userId == userId.value,
         content: chat.content,
