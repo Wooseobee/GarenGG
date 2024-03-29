@@ -100,7 +100,15 @@ for (let i = 0; i < props.skins.length; i += 5) {
 }
 .carousel-item-container {
   position: relative; /* 상대 위치 설정 */
-  max-width: 260px;
+  max-width: calc(20% - 20px);
+  max-height: 660px;
+}
+.carousel-control-prev {
+  justify-content: left;
+}
+
+.carousel-control-next {
+  justify-content: right;
 }
 .carousel-caption {
   position: absolute; /* 절대 위치 설정 */
