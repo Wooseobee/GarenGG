@@ -1,5 +1,15 @@
 <template>
+    
     <div class="container">
+        <transition name="fade">
+        <div v-show="showIntro" class="intro-container section-title">
+        <!-- 로고 이미지 또는 텍스트 -->
+        <img src="@/assets/icon.png" alt="듀오챔피언추천 로고" :style="{ width: 100 + 'px', height: 100 + 'px'}">
+        <h1> 듀오 챔피언 추천 </h1>
+        </div>
+      </transition>
+      <div v-show="showIntro != true" class="section-title">
+        <h1>듀오 챔피언 추천</h1>
         <div class="input-group mb-3">
             <input v-model="searchValue" type="text" class="form-control" placeholder="챔피언 입력" aria-label="Recipient's username"
                 aria-describedby="button-addon2" />
@@ -32,7 +42,7 @@
         <button v-if='selectedChampion.id != undefined && selectedPosition != ""' @click="searchDuoChamp()">
             추천!
         </button>
-
+    </div>
     </div>
 </template>
 
@@ -46,7 +56,7 @@ import midImage from '@/assets/Position_Diamond-Mid.png';
 import bottomImage from '@/assets/Position_Diamond-Bot.png';
 import utilityImage from '@/assets/Position_Diamond-Support.png';
 import router from '@/router';
-
+const showIntro = ref(true);
 const championStore = useChampionStore();
 const searchValue = ref("");
 // 챔피언 데이터
@@ -151,6 +161,10 @@ onMounted(() => {
     
 })
 
+setTimeout(() => {
+  showIntro.value = false;
+
+}, 1000); // 3초 후 로고 숨김
 
 </script>
 
@@ -208,5 +222,9 @@ onMounted(() => {
     box-shadow: 0 0 8px 2px rgba(255, 105, 180, 0.6), 
                 0 0 20px 5px rgba(255, 20, 147, 0.4); /* 블러 처리와 그라데이션 효과 */
 }
+
+
+/* intro setting */
+
 
 </style>

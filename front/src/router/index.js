@@ -7,6 +7,7 @@ import DetailView from "@/views/DetailView.vue";
 import ChampDetailView from "@/views/ChampDetailView.vue";
 import { useChampionStore } from "@/stores/championStore";
 import PredictMatchView from "@/views/PredictMatchView.vue";
+import PredictChampionView from "@/views/PredictChampionView.vue";
 import { duoRecommendationChampion } from "@/api/duoRecommend";
 import DuoRecommendationResult from "@/components/duoRecommendation/DuoRecommendationResult.vue";
 
@@ -39,19 +40,25 @@ const router = createRouter({
       path: "/duoRecommendation",
       name: "DuoRecommendation",
       component: DuoRecommendationView,
-      // redirect : {name : "DuoRecommmendationSearch"}, //View.vue가 가진 routerview에 뿌려줌.
-      children : [
+      redirect: { name: "DuoRecommendationSearch" }, //View.vue가 가진 routerview에 뿌려줌.
+      children: [
         {
-          path : "DuoRecommendataionSearch",
-          name : "DuoRecommendationSearch",
-          component : () => import("@/components/duoRecommendation/DuoRecommendationSearch.vue"),
+          path: "DuoRecommendataionSearch",
+          name: "DuoRecommendationSearch",
+          component: () =>
+            import(
+              "@/components/duoRecommendation/DuoRecommendationSearch.vue"
+            ),
         },
         {
-          path : "DuoRecommendataionResult",
-          name : "DuoRecommendationResult",
-          component : () => import("@/components/duoRecommendation/DuoRecommendationResult.vue"),
-        }
-      ]
+          path: "DuoRecommendataionResult",
+          name: "DuoRecommendationResult",
+          component: () =>
+            import(
+              "@/components/duoRecommendation/DuoRecommendationResult.vue"
+            ),
+        },
+      ],
     },
     {
       path: "/playground",
@@ -62,6 +69,11 @@ const router = createRouter({
       path: "/predictmatch",
       name: "predictmatch",
       component: PredictMatchView,
+    },
+    {
+      path: "/predictChampion",
+      name: "predictChampion",
+      component: PredictChampionView,
     },
   ],
 });
