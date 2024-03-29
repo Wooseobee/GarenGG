@@ -56,6 +56,40 @@ public class ChampionRecommendationServiceImpl implements ChampionRecommendation
         MatchInfo receivedMatchInfo;
         HashMap<String, WinLose> player;
 
+        // 닉네임을 거지 같게 입력 했을 수도 있습니다.
+        while (true) {
+            try {
+                apiKey = apiKeyUtils.getOneApiKey();
+                url = "https://asia.api.riotgames.com/riot/account/v1/accounts/by-riot-id/{summonerName}/{tagLine}?api_key={apiKey}";
+                receivedAccountDto = restTemplate.getForObject(url, AccountDto.class, summonerName, tagLine, apiKey.getApiKey());
+                break;
+            } catch (HttpClientErrorException e) {
+                // 키 폭발
+                if (e.getStatusCode() == HttpStatus.TOO_MANY_REQUESTS) {
+                    System.out.println("receivedAccountDto 받기 " + e.getStatusText());
+                }
+                // 없는 유저
+                else if (e.getStatusCode() == HttpStatus.BAD_REQUEST || e.getStatusCode() == HttpStatus.NOT_FOUND) {
+                    System.out.println("최초 receivedAccountDto 받기 없는 유저");
+                    responseGetChampionRecommendationDto.setErrorMessage("없는 유저입니다");
+                    return ResponseEntity.status(e.getStatusCode()).body(responseGetChampionRecommendationDto);
+                }
+                // 기타 다른 HTTP 에러
+                else {
+                    System.out.println("최초 receivedAccountDto 받기 기타 다른 HTTP 에러");
+                    responseGetChampionRecommendationDto.setErrorMessage("최초 receivedAccountDto 받기 기타 다른 HTTP 에러");
+                    return ResponseEntity.status(e.getStatusCode()).body(responseGetChampionRecommendationDto);
+                }
+            } catch (Exception e) {
+                System.out.println("최초 receivedAccountDto 받기 Exception");
+                responseGetChampionRecommendationDto.setErrorMessage("최초 receivedAccountDto 받기 Exception");
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseGetChampionRecommendationDto);
+            }
+        }
+
+        summonerName = receivedAccountDto.getGameName();
+        tagLine = receivedAccountDto.getTagLine();
+
         // playerInfo에서 찾아
         findedPlayerInfo = playerInfoRepository.findBySummonerNameAndTagLine(summonerName, tagLine);
 
