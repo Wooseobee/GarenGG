@@ -20,13 +20,18 @@
     <div class="face face-back">
       <div class="image-container">
         <img :src="champImageUrl" alt="champ" />
+        <!-- <div class="cardInfo">
+          <p>{{ champKoreanName }}</p>
+          <div></div>
+          <p>#{{ rank }}</p>
+        </div> -->
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import { useChampionStore } from "@/stores/championStore.js";
 const championStore = useChampionStore();
@@ -36,20 +41,25 @@ const props = defineProps({
     type: String,
     required: true,
   },
+  champKoreanName: {
+    type: String,
+    required: false,
+  },
+  rank: Number, // 순위 prop 추가
 });
 const { championKeys, championIds } = championStore;
 
 // champinfo 객체 생성
-const champinfo = {};
 
-for (let i = 0; i < championKeys.length; i++) {
-  champinfo[championIds[i]] = championKeys[i];
-}
-const champkey = champinfo[props.champname];
 // 소리
-const audiolink = ref(
-  `https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/ko_kr/v1/champion-choose-vo/${champkey}.ogg`
-);
+const audiolink = computed(() => {
+  const champinfo = {};
+  for (let i = 0; i < championKeys.length; i++) {
+    champinfo[championIds[i]] = championKeys[i];
+  }
+  const champkey = champinfo[props.champname];
+  return `https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/ko_kr/v1/champion-choose-vo/${champkey}.ogg`;
+});
 const playSound = (sound) => {
   if (sound) {
     const audio = new Audio(sound);
@@ -94,7 +104,9 @@ const startEffect = () => {
 const stopEffect = () => {
   isEffect.value = false;
 };
-const champImageUrl = `https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${props.champname}_0.jpg`;
+const champImageUrl = computed(() => {
+  return `https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${props.champname}_0.jpg`;
+});
 </script>
 
 <style scoped>
@@ -200,5 +212,18 @@ const champImageUrl = `https://ddragon.leagueoflegends.com/cdn/img/champion/load
   object-fit: cover;
   /* filter: grayscale(); */
   /* opacity: 0.7; */
+}
+
+.cardInfo h1,
+.cardInfo p {
+  color: #ffffff;
+  text-align: center;
+  position: relative;
+  bottom: 10px; /* 아래에서부터 10px의 여백 */
+  left: 50%;
+  transform: translateX(-50%); /* 중앙 정렬 */
+  z-index: 10; /* 다른 요소들 위에 오도록 z-index 설정 */
+  padding: 5px; /* 패딩 추가 */
+  border-radius: 5px; /* 모서리 둥글게 */
 }
 </style>
