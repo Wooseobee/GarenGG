@@ -20,15 +20,14 @@ public class GetMatchController {
     private final GetMatchService getMatchService;
     private final RenewChampionService renewChampionService;
 
-    @GetMapping("/combination/{offset}")
+    @GetMapping("/duoRecord/{offset}")
     public String setMatch(@PathVariable("offset") int offset) {
         int page = offset;
-        Pageable pageable = PageRequest.of(page, 10);
+        Pageable pageable = PageRequest.of(page, 5);
         int successData;
         do {
             successData = getMatchService.saveMatchData(pageable);
-            pageable = PageRequest.of(++page, 10);
-            log.info("조합 저장 완료 - page:{} & successData:{}", page, successData);
+            pageable = PageRequest.of(++page, 5);
         } while (successData > 0);
         return "ok";
     }
