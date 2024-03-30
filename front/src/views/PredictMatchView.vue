@@ -10,6 +10,7 @@
             :players="teamOnePlayers"
             :isRightTeam="false"
             :currentHint="currentHints"
+            :tier="tier"
           />
         </div>
         <div class="match-info">
@@ -27,6 +28,7 @@
             :players="teamTwoPlayers"
             :isRightTeam="true"
             :currentHint="currentHints"
+            :tier="tier"
           />
         </div>
       </div>
@@ -71,6 +73,7 @@
             힌트를 볼 때마다 점수가 차감됩니다.
           </div>
           <div>6. 최대 사용 가능한 힌트는 20개 입니다.</div>
+          <div>7. 양쪽 팀 중 이겼다고 생각하는 팀을 선택해주세요.</div>
         </div>
       </div>
     </div>
@@ -118,6 +121,7 @@ const nicknameInput = ref(null);
 const key = ref();
 const iv = ref();
 const decoder = new TextDecoder();
+const tier = ref("");
 
 const calculateGameTime = (seconds) => {
   const minutes = Math.floor(seconds / 60);
@@ -185,6 +189,7 @@ const fetchMatchData = async () => {
     ).buffer;
 
     const time = parseInt(await decryptData(response.data.gameDuration));
+    tier.value = response.data.tier;
     matchTime.value = calculateGameTime(time);
     // 승리 팀과 패배 팀을 분류하기 위한 임시 배열
     const winTeam = [];
