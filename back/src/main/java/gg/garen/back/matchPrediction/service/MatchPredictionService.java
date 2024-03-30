@@ -21,7 +21,10 @@ public class MatchPredictionService {
     private final UserMatchRepository userMatchRepository;
 
     public RandomMatchResponseDto getRandomMatch(SecretKey secretKey) throws Exception {
-        MatchInfo matchInfo = userMatchRepository.findRandomMatchInfo().get(0);
+        MatchInfo matchInfo;
+        do {
+            matchInfo = userMatchRepository.findRandomMatchInfo().get(0);
+        } while (matchInfo.getTier()!= null && matchInfo.getInfo().getGameDuration() >= 900);
 
         List<ParticipantDto> participants = new ArrayList<>();
 
@@ -57,6 +60,7 @@ public class MatchPredictionService {
                 .participants(participants)
                 .secretKey(secretKey.getEncoded())
                 .iv(iv)
+                .tier(matchInfo.getTier())
                 .build();
     }
 
