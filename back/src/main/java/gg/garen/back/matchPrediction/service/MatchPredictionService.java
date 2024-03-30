@@ -21,10 +21,7 @@ public class MatchPredictionService {
     private final UserMatchRepository userMatchRepository;
 
     public RandomMatchResponseDto getRandomMatch(SecretKey secretKey) throws Exception {
-        MatchInfo matchInfo;
-        do {
-            matchInfo = userMatchRepository.findRandomMatchInfo().get(0);
-        } while (matchInfo.getTier()!= null && matchInfo.getInfo().getGameDuration() >= 900);
+        MatchInfo matchInfo = userMatchRepository.findRandomMatchInfo().get(0);
 
         List<ParticipantDto> participants = new ArrayList<>();
 
