@@ -1,4 +1,4 @@
-package org.example.apikeycrawling.apikeycrawling.domain;
+package org.example.apikeycrawling.entity.mysql;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

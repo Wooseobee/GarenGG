@@ -1,6 +1,6 @@
-package org.example.apikeycrawling.apikeycrawling.repository;
+package org.example.apikeycrawling.repository;
 
-import org.example.apikeycrawling.apikeycrawling.domain.ApiKey;
+import org.example.apikeycrawling.entity.mysql.ApiKey;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

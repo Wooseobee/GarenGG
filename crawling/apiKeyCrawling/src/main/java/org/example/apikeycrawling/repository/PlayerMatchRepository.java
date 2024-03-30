@@ -1,6 +1,6 @@
-package org.example.garencrawling.mostchampion.repository;
+package org.example.apikeycrawling.repository;
 
-import org.example.garencrawling.mostchampion.domain.readmongo.PlayerMatch;
+import org.example.apikeycrawling.entity.mongo.PlayerMatch;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;

@@ -1,4 +1,4 @@
-package org.example.garencrawling.mostchampion.domain.writemongo;
+package org.example.apikeycrawling.entity.mongo;
 
 import lombok.*;
 import org.springframework.data.annotation.Id;
@@ -15,10 +15,17 @@ import java.util.List;
 public class PlayerMost {
     @Id
     private Integer playerId;
-
     private String tier;
-
-    private String rankNum;
-
     private List<MostData> mostDatas;
+
+    @Getter
+    @Setter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Builder
+    public static class MostData {
+        private String mostSeq;
+        private String champion;
+        private String game;
+    }
 }

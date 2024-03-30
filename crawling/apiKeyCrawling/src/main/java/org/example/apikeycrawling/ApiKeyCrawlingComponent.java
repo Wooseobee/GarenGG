@@ -1,15 +1,14 @@
-package org.example.apikeycrawling.global;
+package org.example.apikeycrawling;
 
-import lombok.*;
-import org.example.apikeycrawling.apikeycrawling.domain.ApiKey;
-import org.example.apikeycrawling.apikeycrawling.repository.ApiKeyRepository;
 import io.github.bonigarcia.wdm.WebDriverManager;
+import lombok.RequiredArgsConstructor;
+import org.example.apikeycrawling.dto.AccountDto;
+import org.example.apikeycrawling.entity.mysql.ApiKey;
+import org.example.apikeycrawling.repository.ApiKeyRepository;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
-import org.springframework.boot.ApplicationArguments;
-import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
@@ -19,17 +18,9 @@ import java.util.concurrent.TimeUnit;
 
 @Component
 @RequiredArgsConstructor
-public class MyStartupTask implements ApplicationRunner {
+public class ApiKeyCrawlingComponent {
 
     private final ApiKeyRepository apiKeyRepository;
-
-    @Override
-    public void run(ApplicationArguments args) throws InterruptedException {
-
-        function1();
-//        function2();
-
-    }
 
     public void function1() throws InterruptedException {
         ChromeOptions options;
@@ -123,15 +114,5 @@ public class MyStartupTask implements ApplicationRunner {
             }
         }
 
-    }
-
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Getter
-    @Setter
-    public static class AccountDto {
-        private String puuid;
-        private String gameName;
-        private String tagLine;
     }
 }
