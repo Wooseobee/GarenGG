@@ -16,4 +16,5 @@ public class RandomMatchResponseDto {
     private String gameVersion;
     private byte[] secretKey;
     private byte[] iv;
+    private String tier;
 }

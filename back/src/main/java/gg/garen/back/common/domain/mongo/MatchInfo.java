@@ -14,4 +14,6 @@ public class MatchInfo {
     private String matchId;
     private Metadata metadata;
     private Info info;
+    private String tier;
+    private String rank;
 }
