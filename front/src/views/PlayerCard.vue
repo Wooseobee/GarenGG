@@ -37,6 +37,7 @@ const props = defineProps({
   player: Object,
   isRightTeam: Boolean, // 오른쪽 팀 여부를 결정하는 새로운 prop
   currentHint: Number,
+  tier: String,
 });
 
 // 이미지 경로를 처리하는 메서드
@@ -60,7 +61,10 @@ const getPositionImage = (path) => {
     default:
       break;
   }
-  return new URL(`../assets/Position_Diamond-${path}.png`, import.meta.url)
+  const tier =
+    props.tier.charAt(0).toUpperCase() + props.tier.slice(1).toLowerCase();
+
+  return new URL(`../assets/Position_${tier}-${path}.png`, import.meta.url)
     .href;
 };
 </script>
