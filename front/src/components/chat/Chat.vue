@@ -14,7 +14,7 @@
           :key="index"
           :class="{ message: true, me: message.me, other: !message.me }"
         >
-          <div class="message-userId">{{ message.userId }}</div>
+          <div class="message-userId">{{ message.userId }} ({{ message.time }})</div>
           <div class="message-content">{{ message.content }}</div>
         </div>
       </div>
@@ -129,14 +129,14 @@ onMounted(async () => {
     const response = await localAxios.get(
       `/chat`
     );
-    console.log(response);
 
     // 성공적으로 데이터를 받아온 경우
     mList.value = response.data.reverse().map(
       (chat) => ({
         me: chat.userId == userId.value,
         content: chat.content,
-        userId: chat.userId
+        userId: chat.userId,
+        time: chat.time
       })
     );
   } catch (error) {
@@ -156,6 +156,7 @@ function onMessageReceivedFromSocket(payload) {
     me: chat.userId === userId.value,
     content: chat.content,
     userId: chat.userId,
+    time: chat.time
   };
   mList.value.push(newMessage);
   if (mList.value.length > 100) {
