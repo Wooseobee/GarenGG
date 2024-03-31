@@ -20,16 +20,17 @@ public class ChatService {
 
     public final ChatRepository chatRepository;
 
-    public void saveChat(ChatDto dto) {
+    public Chat saveChat(ChatDto dto) {
         try {
             Chat chat = Chat.builder()
                     .roomId(dto.getRoomId())
                     .userId(dto.getUserId())
                     .content(dto.getContent())
                     .build();
-            chatRepository.save(chat);
+            return chatRepository.save(chat);
         }catch (Exception e) {
             log.error("Exception {}", e.getMessage());
+            return null;
         }
 
     }
@@ -40,7 +41,8 @@ public class ChatService {
             List<Chat> chats = chatRepository.findByRoomIdOrderByCreatedAtDesc(1, pageRequest).getContent();
             List<ChatDto> list = new ArrayList<>();
             for (Chat chat : chats) {
-                list.add(ChatDto.of(chat.getContent(), chat.getUserId(), chat.getRoomId()));
+                list.add(ChatDto.of(chat.getContent(), chat.getUserId(), chat.getRoomId(), chat.getCreatedAt()));
+
             }
             return list;
         } catch (Exception e) {

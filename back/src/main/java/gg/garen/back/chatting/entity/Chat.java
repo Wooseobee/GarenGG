@@ -6,7 +6,9 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import org.springframework.data.mongodb.core.mapping.Document;
-import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Document(collection = "chats")
 @Getter
@@ -18,7 +20,7 @@ public class Chat {
     private String id;
     private int roomId;
     private String userId;
-    private LocalDateTime createdAt;
+    private String createdAt;
     private String content;
 
     @Builder
@@ -26,6 +28,7 @@ public class Chat {
         this.roomId = roomId;
         this.userId = userId;
         this.content = content;
-        this.createdAt = LocalDateTime.now(); // 객체 생성 시 현재 시간으로 초기화
+        this.createdAt = ZonedDateTime.now(ZoneId.of("Asia/Seoul"))
+                .format(DateTimeFormatter.ofPattern("HH:mm"));
     }
 }
