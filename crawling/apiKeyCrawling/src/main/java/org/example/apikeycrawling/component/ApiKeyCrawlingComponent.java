@@ -1,4 +1,4 @@
-package org.example.apikeycrawling;
+package org.example.apikeycrawling.component;
 
 import io.github.bonigarcia.wdm.WebDriverManager;
 import lombok.RequiredArgsConstructor;
@@ -109,7 +109,7 @@ public class ApiKeyCrawlingComponent {
                 RestTemplate restTemplate = new RestTemplate();
                 String url = "https://asia.api.riotgames.com/riot/account/v1/accounts/by-riot-id/{gameName}/{tagLine}?api_key={apiKey}";
                 AccountDto accountDto = restTemplate.getForObject(url, AccountDto.class, "틀딱기", "KR1", apiKeys.get(i).getApiKey());
-                System.out.println("count = " + count + " i = " + i + " " + accountDto.getPuuid());
+//                System.out.println("count = " + count + " i = " + i + " " + accountDto.getPuuid());
 
             }
         }

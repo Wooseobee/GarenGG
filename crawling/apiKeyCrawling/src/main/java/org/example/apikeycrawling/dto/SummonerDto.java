@@ -7,7 +7,6 @@ import lombok.*;
 @Getter
 @Setter
 @Builder
-public class AccountDto {
-    private String gameName;
-    private String tagLine;
+public class SummonerDto {
+    private String puuid;
 }

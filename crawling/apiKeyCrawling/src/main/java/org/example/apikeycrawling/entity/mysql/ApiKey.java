@@ -8,12 +8,12 @@ import jakarta.persistence.Table;
 import lombok.*;
 
 @Entity
-@Table(name = "api_key")
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Table(name = "api_key")
 public class ApiKey {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
