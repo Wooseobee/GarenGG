@@ -1,6 +1,5 @@
 package gg.garen.back.championRecommendation.dto.request;
 
-import gg.garen.back.common.domain.mongo.MostData;
 import lombok.*;
 
 import java.util.List;
@@ -11,11 +10,18 @@ import java.util.List;
 @Setter
 @Builder
 public class RequestPredictNotDto {
-    private Integer playerId;
-
     private String tier;
-
+    private List<MostData> mostDatas;
     private String rankNum = "0";
 
-    private List<MostData> mostDatas;
+    @Getter
+    @Setter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Builder
+    public static class MostData {
+        private String mostSeq;
+        private String champion;
+        private String game;
+    }
 }

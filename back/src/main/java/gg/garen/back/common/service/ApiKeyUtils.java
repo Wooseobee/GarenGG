@@ -30,17 +30,4 @@ public class ApiKeyUtils {
 
         return apiKeys.get(index);
     }
-
-    public ApiKey getSpecificApiKey(Long index2){
-        if (apiKeys == null) {
-            apiKeys = new HashMap<>();
-
-            List<ApiKey> findedApiKeys = apiKeyRepository.findAll();
-            for (ApiKey apiKey : findedApiKeys) {
-                apiKeys.put(apiKey.getId(), apiKey);
-            }
-        }
-
-        return apiKeys.get(index2);
-    }
 }
