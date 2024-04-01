@@ -14,6 +14,11 @@
             >
               <RouterLink :to="{ name: 'champ-rec' }">
                 <GameCardView />
+                <!-- <div class="member-img">
+                  <img src="@/assets/garen.avif" class="img-fluid" alt="" />
+                  <div class="social">
+                  </div>
+                </div> -->
                 <div class="member-info text-center">
                   <h4>챔피언 추천</h4>
                   <p>승리하기 위한 새로운 챔피언을 찾아보세요</p>
@@ -28,6 +33,10 @@
             >
               <RouterLink :to="{ name: 'DuoRecommendation' }">
                 <GameCardView />
+                <!-- <div class="member-img">
+                  <img src="@/assets/garen.avif" class="img-fluid" alt="" />
+                  <div class="social"></div>
+                </div> -->
                 <div class="member-info text-center">
                   <h4>듀오 추천</h4>
                   <p>어떤 챔피언과 함께 하면 좋을지 알아보세요</p>
@@ -42,6 +51,10 @@
             >
               <RouterLink :to="{ name: 'playground' }">
                 <GameCardView />
+                <!-- <div class="member-img">
+                  <img src="@/assets/garen.avif" class="img-fluid" alt="" />
+                  <div class="social"></div>
+                </div> -->
                 <div class="member-info text-center">
                   <h4>놀이터</h4>
                   <p>큐잡을때 심심할 때</p>
