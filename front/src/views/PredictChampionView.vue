@@ -34,7 +34,8 @@
           <div>1. 대사를 듣고 챔피언을 맞추는 게임입니다.</div>
           <div>2. 최대 167경기가 준비되어 있습니다.</div>
           <div>3. 틀리는 즉시 게임은 종료됩니다.</div>
-          <div>4. PlaySound 버튼을 누르고 5초 이내에 골라주세요.</div>
+          <div>4. 대사는 1초만 한번 들을 수 있습니다.</div>
+          <div>5. PlaySound 버튼을 누르고 3초 이내에 골라주세요.</div>
         </div>
       </div>
     </div>
@@ -103,7 +104,7 @@ const timerId = ref(null);
 const showAnswerFeedback = ref(false);
 const correctAnswer = ref(false);
 const showRankModal = ref(false);
-const timeLeft = ref(5); // 타이머 남은 시간
+const timeLeft = ref(3); // 타이머 남은 시간
 
 const uuid = ref("");
 const rank = ref([]);
@@ -197,7 +198,7 @@ const proceedToNextRound = () => {
     // 다음 라운드를 위한 상태 초기화
     correctAnswer.value = false;
     soundPlayed.value = false;
-    timeLeft.value = 5; // 타이머 재설정
+    timeLeft.value = 3; // 타이머 재설정
   } else {
     alert("Congratulations! You've completed the game!");
     endGame();
