@@ -409,6 +409,7 @@ const closeModal = () => {
 .team-button {
   cursor: pointer; /* 클릭 가능한 요소로 표시 */
   transition: border 0.3s;
+  text-align: center;
   width: 100%;
   height: auto;
 }
