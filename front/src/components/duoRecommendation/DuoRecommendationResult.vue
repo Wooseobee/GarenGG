@@ -154,7 +154,7 @@ onMounted(() => {
 
 /* 카드 설정 */
 .cards {
-  margin-top: 10px; /* 필요한 경우 조절하세요 */
+  margin-top: 0px; /* 필요한 경우 조절하세요 */
   flex-wrap: wrap;
 }
 
@@ -171,6 +171,12 @@ onMounted(() => {
   flex-wrap: wrap; /* 필요시 줄바꿈 */
   gap: 10px; /* 이미지 사이의 간격 */
   z-index: 2;
+  margin-top: -130px;
+  margin-bottom: 0px;
+  padding: 0px;
+}
+.position-image:hover {
+  cursor: pointer;
 }
 
 .position-image-container {
@@ -178,6 +184,13 @@ onMounted(() => {
   flex-direction: column; /* 항목들을 세로로 나열 */
   align-items: center; /* 세로축 중앙 정렬 */
   border-radius: 50%;
+  margin-bottom: 0px;
+  padding: 0px;
+}
+.position-image {
+  margin-top: 0px;
+  margin-bottom: 0px;
+  padding: 0px;
 }
 
 /* .unselected{
