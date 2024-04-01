@@ -14,7 +14,7 @@ public interface DuoRecommendationRepository extends JpaRepository<DuoRecord, In
     List<Object[]> findAllNamesAndKeysAndIds();
     @Query(value = "SELECT * " +
             "FROM duo_record d " +
-            "where ((d.champion1 = :championKey AND d.lane1 = :position )  OR (d.champion2 = :championKey AND d.lane2 = :position)) AND d.total_match >= 5 AND d.win_rate >= 50 " +
-            "order by d.win_rate", nativeQuery = true)
+            "where ((d.champion1 = :championKey AND d.lane1 = :position )  OR (d.champion2 = :championKey AND d.lane2 = :position)) AND d.total_match >= 10 AND d.win_rate >= 50 " +
+            "order by victory desc, d.win_rate desc", nativeQuery = true)
     List<DuoRecord> findDuoRecordByChampionName(@Param("championKey") Long championKey, @Param("position") String position);
 }
