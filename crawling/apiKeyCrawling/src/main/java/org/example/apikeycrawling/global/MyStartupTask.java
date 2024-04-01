@@ -19,6 +19,6 @@ public class MyStartupTask implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) throws InterruptedException {
 
-        playerMostCrawlingComponent.crawlingVersion2();
+        playerMostCrawlingComponent.crawlingVersion2(0, 100);
     }
 }
