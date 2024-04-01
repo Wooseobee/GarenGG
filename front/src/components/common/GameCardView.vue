@@ -41,7 +41,7 @@ const getRandomImage = (num) => {
   box-shadow: 0 15px 35px -10px rgba(0, 0, 0, 0.2);
   border: 1px solid #c89b3c;
   max-width: 100%; /* 이미지의 최대 너비를 컨테이너 너비에 맞춤 */
-  height: 560px; /* 이미지의 높이를 자동으로 조절하여 비율을 유지 */
+  height: 400px; /* 이미지의 높이를 자동으로 조절하여 비율을 유지 */
   transition: transform 0.3s ease-in-out, filter 0.3s ease-in-out;
 }
 
