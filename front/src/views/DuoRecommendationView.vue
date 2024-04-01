@@ -60,7 +60,8 @@ onMounted(() => {
   position: relative;
   padding: 160px 0 80px 0;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
+  /* align-items: center; */
   justify-content: center;
 }
 
@@ -104,7 +105,7 @@ onMounted(() => {
 
 .section-title {
   text-align: center;
-  padding-bottom: 60px;
+  padding-bottom: 30px;
 }
 
 .section-title h1 {
