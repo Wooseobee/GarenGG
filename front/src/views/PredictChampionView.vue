@@ -29,6 +29,13 @@
         />
         <button @click="submitNickname">Submit</button>
         <button @click="goBack">return</button>
+        <div class="description">
+          <h3>*게임 설명*</h3>
+          <div>1. 대사를 듣고 챔피언을 맞추는 게임입니다.</div>
+          <div>2. 최대 167경기가 준비되어 있습니다.</div>
+          <div>3. 틀리는 즉시 게임은 종료됩니다.</div>
+          <div>4. PlaySound 버튼을 누르고 5초 이내에 골라주세요.</div>
+        </div>
       </div>
     </div>
 
@@ -236,9 +243,15 @@ const autoFail = async () => {
 const playSound = () => {
   if (showAnswerFeedback.value || timeLeft.value <= 0 || soundPlayed.value)
     return;
-  audioPlayer.value.play();
-  startTimer();
-  soundPlayed.value = true; // Mark sound as played for this round
+
+  audioPlayer.value.play(); // 오디오 재생 시작
+  startTimer(); // 타이머 시작 (이 부분은 기존 로직을 유지)
+  soundPlayed.value = true; // 소리 재생 상태를 true로 설정
+
+  setTimeout(() => {
+    audioPlayer.value.pause(); // 1초 후 오디오 재생을 멈춤
+    audioPlayer.value.currentTime = 0; // 오디오 재생 위치를 시작 지점으로 리셋
+  }, 500); // 1000밀리초(1초) 후 실행될 코드
 };
 
 // 기존 checkAnswer 함수에서 endGame 로직 분리
@@ -499,5 +512,198 @@ watch(currentRound, () => {
   width: 100px; /* 챔피언 이미지 크기 조정 */
   height: 100px; /* 챔피언 이미지 크기 조정 */
   object-fit: cover; /* 이미지 비율 유지 */
+}
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh; /* 전체 화면 높이 */
+}
+
+.round {
+  text-align: center;
+  font-size: 1.5rem;
+  color: #ffffff;
+  /* padding-top을 제거하고 flex layout에 맡김 */
+}
+
+.game-container {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: white; /* 텍스트 색상 */
+  /* 게임 화면의 추가적인 스타일링이 여기에 들어감 */
+}
+
+.match-prediction {
+  width: 100%; /* 전체 너비를 사용 */
+  max-width: 1200px; /* 최대 너비 설정 */
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  /* 이곳에 더 많은 스타일을 추가할 수 있음 */
+  align-items: center;
+  background: radial-gradient(
+    circle,
+    rgba(0, 0, 0, 1) 0%,
+    rgba(0, 0, 0, 1) 100%
+  );
+  background-size: cover;
+  box-shadow: 0 0 10px 10px #005a82; /* 네온 효과 */
+  border: 1px solid #005a82; /* 네온 테두리 */
+  border-radius: 15px; /* 둥근 모서리 */
+}
+
+.vs {
+  font-size: 3rem; /* 크기 증가 */
+  color: #d00;
+  text-shadow: 0 0 10px #d00; /* 텍스트 네온 효과 */
+  font-family: "Press Start 2P", cursive; /* 레트로 폰트 */
+}
+
+.matchTime {
+  padding: 10px;
+  background-color: #005a82; /* 노란색 배경 */
+  color: white; /* 텍스트 색상 */
+  cursor: pointer; /* 클릭 가능한 요소로 표시 */
+}
+
+.match-info {
+  display: flex; /* Flexbox 레이아웃 사용 */
+  align-items: center; /* 모든 아이템을 세로 축에서 가운데 정렬 */
+  justify-content: space-around; /* 아이템들 사이에 공간을 균등하게 배분 */
+  padding: 10px; /* 내부 여백 추가 */
+  border-radius: 5px; /* 경계선 둥글게 처리 */
+  flex-direction: column;
+}
+
+.hint {
+  padding: 10px 20px;
+  background-color: #005a82; /* 파란색 배경 */
+  color: #fff; /* 텍스트 색상 */
+  border-radius: 5px; /* 약간 둥근 모서리 */
+  cursor: pointer; /* 클릭 가능한 요소로 표시 */
+}
+
+.usedHints {
+  margin-top: 150px;
+}
+.team-selection {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px; /* 상단 여백 추가 */
+}
+
+.team-button {
+  cursor: pointer; /* 클릭 가능한 요소로 표시 */
+  transition: border 0.3s;
+}
+.team-button:hover {
+  border: 2px solid #00ffea; /* 네온 테두리 색상, 적절한 색상으로 조정 가능 */
+}
+
+.rank-modal {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.rank-modal-content {
+  width: 80%; /* 모달의 너비를 화면의 80%로 설정 */
+  max-width: 640px; /* 최대 너비를 640px로 제한 */
+  height: auto; /* 모달의 높이를 내용에 따라 자동으로 조정 */
+  max-height: 90%; /* 화면의 90%를 넘지 않는 높이로 제한 */
+  padding: 40px; /* 내부 여백을 40px로 설정 */
+  background: white;
+  border-radius: 10px; /* 모달의 모서리를 둥글게 */
+  position: relative;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 모달에 그림자 효과 추가 */
+  overflow-y: auto; /* 필요한 경우 내부 스크롤바 활성화 */
+}
+
+.close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 25px;
+  cursor: pointer;
+  color: black;
+}
+
+.nickname-modal {
+  /* 모달 위치 및 스타일링 설정 */
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000; /* z-index를 높여 다른 요소들 위에 오도록 설정 */
+}
+
+.nickname-modal-content {
+  background: #32281e;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  color: black;
+}
+
+.nickname-modal-content h3 {
+  color: #f0e6d2;
+}
+
+.nickname-modal-content input {
+  background-color: #f0e6d2;
+}
+
+.nickname-modal-content button {
+  background-color: #f0e6d2;
+  margin-left: 10px;
+  margin-bottom: 10px;
+}
+
+.description {
+  color: #c8aa6e;
+}
+
+.answer-feedback {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 20rem;
+  animation: fadeInOut 5s ease-in-out;
+}
+
+.correct {
+  color: green;
+}
+
+.wrong {
+  color: #d00;
+}
+
+@keyframes fadeInOut {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 </style>
