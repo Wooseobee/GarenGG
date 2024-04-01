@@ -18,14 +18,25 @@
               </div>
             </RouterLink>
           </div>
-        </div>
-      </div>
-      <div class="container">
-        <div class="row">
+
+          <!-- <div
+            class="col-lg-4 col-md-6 member"
+            data-aos="fade-up"
+            data-aos-delay="200"
+          >
+            <RouterLink :to="{ name: 'predictSkill' }" class="link-wrapper">
+              <GameCardView />
+              <div class="member-info text-center">
+                <h4>스킬 이름 맞추기</h4>
+                <p>무슨 스킬인지 맞춰보세요!</p>
+              </div>
+            </RouterLink>
+          </div> -->
+
           <div
             class="col-lg-4 col-md-6 member"
             data-aos="fade-up"
-            data-aos-delay="100"
+            data-aos-delay="300"
           >
             <RouterLink :to="{ name: 'predictChampion' }" class="link-wrapper">
               <GameCardView />

@@ -1,7 +1,7 @@
 <template>
   <div class="chat-view" :class="{ minimized: minimized }">
     <div v-if="!minimized" class="chat-content">
-      <!-- 채팅 내용 및 헤더 -->
+      <!-- 채팅 내용 및 헤더! -->
       <div class="chat-header">
         <span class="chat-title">Chat Room</span>
         <button @click="toggleMinimize" class="minimize-button">
