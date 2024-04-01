@@ -18,7 +18,7 @@ public class GlobalConstants {
     public static String[] lowTiers = new String[]{"DIAMOND", "EMERALD", "PLATINUM", "GOLD", "SILVER", "BRONZE", "IRON"};
     public static String[] divisions = new String[]{"I", "II", "III", "IV"};
 
-    //        public static String[] highTiers = new String[]{"CHALLENGER", "GRANDMASTER", "MASTER"};
+    //    public static String[] highTiers = new String[]{"CHALLENGER", "GRANDMASTER", "MASTER"};
     public static String[] highTiers = new String[]{"MASTER"};
 
     public static List<ApiKey> apiKeys;

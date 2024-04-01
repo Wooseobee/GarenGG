@@ -15,6 +15,8 @@ import java.util.List;
 public class PlayerMost {
     @Id
     private Integer playerId;
+    private String tier;
+    private String rankNum;
     private List<MostData> mostDatas;
 
     @Getter

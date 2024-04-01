@@ -68,13 +68,16 @@ public class PlayerMostCrawlingComponent {
     }
 
     public void crawlingVersion2() {
-
         StringBuilder sb;
+        HashMap<String, HashMap<String, WinLose>> oldPlayers = new HashMap<>();
+
+
+        readPlayerMost(oldPlayers);
+
         int pageNumber = 0;
-        int pageSize = 1000;
+        int pageSize = 10000;
         Page<PlayerMatch> page;
 
-        HashMap<String, HashMap<String, WinLose>> newPlayers = new HashMap<>();
 
         do {
             page = playerMatchRepository.findAll(PageRequest.of(pageNumber, pageSize));
@@ -240,6 +243,53 @@ public class PlayerMostCrawlingComponent {
         // 추가
         newPlayerMosts.add(newPlayerMost);
     }
+
+    public void readPlayerMost(HashMap<String, HashMap<String, WinLose>> oldPlayers) {
+        StringBuilder sb;
+        int pageNumber = 0;
+        int pageSize = 100;
+        Page<PlayerMost> page;
+
+        do {
+            page = playerMostRepository.findAll(PageRequest.of(pageNumber, pageSize));
+            List<PlayerMost> curPlayerMosts = page.getContent();
+
+            // 한명씩
+            for (PlayerMost curPlayerMost : curPlayerMosts) {
+
+                HashMap<String, WinLose> newPlayer = new HashMap<>();
+                // 모스트 하나씩
+                for (PlayerMost.MostData curMostData : curPlayerMost.getMostDatas()) {
+
+                    newPlayer.put(curMostData.getChampion(), new WinLose());
+
+                    Pattern pattern = Pattern.compile("(\\d+)(W|L)");
+                    Matcher matcher = pattern.matcher(curMostData.getGame());
+
+                    while (matcher.find()) {
+                        if (matcher.group(2).equals("W"))
+                            newPlayer.get(curMostData.getChampion()).setWin(Integer.valueOf(matcher.group(1)));
+                        else if (matcher.group(2).equals("L"))
+                            newPlayer.get(curMostData.getChampion()).setLose(Integer.valueOf(matcher.group(1)));
+                    }
+                }
+                playerInfoTestReposi
+                oldPlayers.put()
+            }
+
+            pageNumber++;
+
+            sb = new StringBuilder();
+            sb.append("현재 시간: ").append(GlobalConstants.formatter.format(new Date()))
+                    .append(" page.getTotalPages() = " + page.getTotalPages())
+                    .append(" 중 pageNumber = ").append(pageNumber).append(" 완료");
+            System.out.println(sb);
+
+        } while (pageNumber < page.getTotalPages());
+
+
+    }
+
 
     @Builder
     @Setter
