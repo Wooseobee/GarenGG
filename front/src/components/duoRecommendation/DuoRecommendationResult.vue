@@ -149,7 +149,7 @@ onMounted(() => {
 .selected {
   width: 100px;
   height: 100px;
-  font-size: 50px;
+  font-size: 30px;
 }
 
 /* 카드 설정 */
