@@ -1,7 +1,11 @@
 <template>
   <div class="container">
     <transition name="fade">
-      <div v-show="showIntro" class="intro-container section-title">
+      <div
+        v-show="showIntro"
+        class="intro-container section-title"
+        style="padding-bottom: 400px"
+      >
         <!-- 로고 이미지 또는 텍스트 -->
         <img
           src="@/assets/icon.png"
@@ -12,7 +16,9 @@
       </div>
     </transition>
     <div v-show="showIntro != true" class="section-title">
-      <h1>듀오 챔피언 추천</h1>
+      <h3>
+        내가 플레이할 챔피언을 골라보세요! 어울리는 친구 챔피언을 찾아드릴게요.
+      </h3>
       <div class="input-group mb-3">
         <input
           v-model="searchValue"
@@ -32,7 +38,7 @@
           class="image-container"
         >
           <img
-            class="rounded"
+            class="rounded clickImg"
             :class="{
               highlighted:
                 selectedChampion != null && selectedChampion.id === champion.id,
@@ -41,6 +47,27 @@
             @click="selectChampion(champion)"
             :style="{ width: champion.int + 'px', height: champion.int + 'px' }"
           />
+          <!-- /////////// -->
+          <div
+            v-if="selectedChampion != null && selectedPosition != ''"
+            class="position-selector clickImg"
+          >
+            <div class="position-image-container">
+              <img
+                :src="filteredPositionImages[0].url"
+                @click="selectPosition(positionImage)"
+                :class="{
+                  'selected highlighted':
+                    selectedPosition === filteredPositionImages[0],
+                }"
+                class="position-image"
+              />
+              <div>
+                {{ filteredPositionImages[0].position }}
+              </div>
+            </div>
+          </div>
+          <!--  -->
         </div>
       </div>
 
@@ -54,7 +81,10 @@
             </label>
       </div> -->
 
-      <div v-if="selectedChampion !== null" class="position-selector">
+      <div
+        v-if="selectedChampion !== null && selectedPosition == ''"
+        class="position-selector clickImg"
+      >
         <div
           v-for="(positionImage, index) in filteredPositionImages"
           :key="index"
@@ -90,7 +120,6 @@
 import { onMounted, ref, computed } from "vue";
 import { useChampionStore } from "@/stores/championStore.js";
 import { useBackGroundStore } from "@/stores/backGroundStore";
-import Header from "@/components/common/Header.vue";
 import topImage from "@/assets/Position_Diamond-Top.png";
 import jungleImage from "@/assets/Position_Diamond-Jungle.png";
 import midImage from "@/assets/Position_Diamond-Mid.png";
@@ -155,7 +184,7 @@ const filteredPositionImages = computed(() => {
 function selectChampion(champion) {
   if (selectedChampion.value == null) {
     selectedChampion.value = champion;
-    selectedChampion.value.int = 500;
+    selectedChampion.value.int = 200;
   } else {
     selectedPosition.value = "";
     selectedChampion.value.int = 100;
@@ -258,9 +287,13 @@ setTimeout(() => {
 }
 
 .rounded {
-  border-radius: 10%;
+  border-radius: 50%;
   overflow: hidden;
   display: inline-block;
+}
+
+.clickImg:hover {
+  cursor: pointer;
 }
 
 .input-group {
