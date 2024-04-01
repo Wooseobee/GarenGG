@@ -22,7 +22,9 @@ public class MatchPredictionService {
 
     public RandomMatchResponseDto getRandomMatch(SecretKey secretKey) throws Exception {
         MatchInfo matchInfo = userMatchRepository.findRandomMatchInfo().get(0);
-
+        while (matchInfo.getInfo().getGameDuration() < 900) {
+            matchInfo = userMatchRepository.findRandomMatchInfo().get(0);
+        }
         List<ParticipantDto> participants = new ArrayList<>();
 
         byte[] iv = new byte[12];
