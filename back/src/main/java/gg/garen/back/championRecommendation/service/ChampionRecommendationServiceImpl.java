@@ -71,10 +71,12 @@ public class ChampionRecommendationServiceImpl implements ChampionRecommendation
                     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseGetChampionRecommendationDto);
                 } else {
                     responseGetChampionRecommendationDto.setErrorMessage("receivedAccountDto 에러1");
+                    System.out.println("진용이 = " + e.getMessage());
                     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseGetChampionRecommendationDto);
                 }
             } catch (Exception e) {
                 responseGetChampionRecommendationDto.setErrorMessage("receivedAccountDto 에러2");
+                System.out.println("진용이 = " + e.getMessage());
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseGetChampionRecommendationDto);
             }
         }
