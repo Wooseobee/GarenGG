@@ -53,11 +53,13 @@ const goBack = () => {
   padding: 15px 0;
   transition: all 0.5s;
   z-index: 997;
+  pointer-events: none;
 }
 
 .header .logo img {
   max-height: 80px;
   margin-right: 6px;
+  pointer-events: auto;
 }
 
 .header .logo h1 {
