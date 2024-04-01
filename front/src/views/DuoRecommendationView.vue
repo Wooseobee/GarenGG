@@ -7,6 +7,9 @@
       alt=""
       data-aos="fade-in"
     />
+    <video v-else autoplay muted loop class="background-img">
+      <source src="@\assets\background-video-m-01.mp4" type="video/mp4" />
+    </video>
     <div class="content">
       <Header />
       <div>

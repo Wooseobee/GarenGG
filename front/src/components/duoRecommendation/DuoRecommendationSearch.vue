@@ -33,7 +33,10 @@
         >
           <img
             class="rounded"
-            :class="{ highlighted: selectedChampion.id === champion.id }"
+            :class="{
+              highlighted:
+                selectedChampion != null && selectedChampion.id === champion.id,
+            }"
             :src="champion.url"
             @click="selectChampion(champion)"
             :style="{ width: champion.int + 'px', height: champion.int + 'px' }"
@@ -41,7 +44,7 @@
         </div>
       </div>
 
-      <div v-if="selectedChampion.id != undefined" class="section-title">
+      <div v-if="selectedChampion != null" class="section-title">
         <h1>{{ selectedChampion.name }}</h1>
       </div>
 
@@ -49,9 +52,9 @@
             <label v-for="role in ['TOP', 'JUNGLE', 'MID', 'BOT', 'SUP']" :key="role">
             <input type="radio" v-model="selectedPosition" :value="role"> {{ role }}
             </label>
-        </div> -->
+      </div> -->
 
-      <div v-if="selectedChampion.id != undefined" class="position-selector">
+      <div v-if="selectedChampion !== null" class="position-selector">
         <div
           v-for="(positionImage, index) in filteredPositionImages"
           :key="index"
@@ -70,13 +73,15 @@
           </div>
         </div>
       </div>
-
-      <button
-        v-if="selectedChampion.id != undefined && selectedPosition != ''"
-        @click="searchDuoChamp()"
-      >
-        추천!
-      </button>
+      <div>
+        <button
+          class="recommend-button"
+          v-if="selectedChampion != null && selectedPosition != ''"
+          @click="searchDuoChamp()"
+        >
+          추천!
+        </button>
+      </div>
     </div>
   </div>
 </template>
@@ -99,7 +104,7 @@ const searchValue = ref("");
 // 챔피언 데이터
 const champions = ref([]);
 const selectedPosition = ref(""); // 선택된 포지션을 위한 ref 추가
-const selectedChampion = ref({});
+const selectedChampion = ref(null);
 
 const positionImages = ref([
   { position: "TOP", url: topImage },
@@ -110,16 +115,22 @@ const positionImages = ref([
 ]);
 
 const filteredChampions = computed(() => {
-  console.log("selectedChampion.value.id: " + selectedChampion.value.id);
-  // selectedIndex.value가 -1이 아닌 경우 선택된 챔피언만을 포함하는 배열 반환
-  if (selectedChampion.value.id != undefined) {
+  console.log(
+    "선택챔피언 변경됨. selectedChampion.value " + selectedChampion.value
+  );
+  if (selectedChampion.value != null) {
     // selectedChampion.int = 1000;
+    console.log(
+      "seletecf,야냉ㅇ아ㅑ내값애뭔데dChampion.value : ",
+      selectedChampion.value
+    );
     return [selectedChampion.value];
   }
   // 그렇지 않은 경우, searchValue에 따라 필터링
   if (!searchValue.value) {
     return champions.value; // 검색어가 없으면 전체 목록 반환
   }
+
   return champions.value.filter((item) => {
     let tmp = "";
     if (/^[A-Za-z]+$/.test(searchValue.value)) {
@@ -132,19 +143,23 @@ const filteredChampions = computed(() => {
 
 const filteredPositionImages = computed(() => {
   if (selectedPosition.value == "") {
+    console.log("선택한 포지션 없습니다.");
+    console.log(positionImages.value);
     return positionImages.value;
-  } else {
-    return [selectedPosition.value];
   }
+
+  console.log("선택한 포지션기반으로 필터이미지 저장합니다..");
+  return [selectedPosition.value];
 });
 
 function selectChampion(champion) {
-  if (selectedChampion.value.id == undefined) {
+  if (selectedChampion.value == null) {
     selectedChampion.value = champion;
     selectedChampion.value.int = 500;
   } else {
+    selectedPosition.value = "";
     selectedChampion.value.int = 100;
-    selectedChampion.value = {};
+    selectedChampion.value = null;
   }
 }
 
@@ -161,19 +176,16 @@ function selectPosition(positionImage) {
 
 function searchDuoChamp() {
   // console.log(selectedChampion.id)
-  if (selectedChampion.value.id == undefined || selectedPosition.value == "") {
+  if (selectedChampion.value == null || selectedPosition.value == "") {
     alert("잘못된 요청입니다.");
     return;
   }
   backGroundStore.updateBackgroundImage(selectedChampion.value.id);
 
-  //   backGroundStore.backgroundImageUrl =
-  //     "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/" +
-  //     selectedChampion.value.id +
-  //     "_0.jpg";
+  console.log(
+    "background changed, url : " + backGroundStore.backgroundImageUrl
+  );
 
-  console.log("헤헤, url : " + backGroundStore.backgroundImageUrl);
-  // 예시: DuoRecommendationResult로 라우팅하는 메소드나 함수 내에서
   router.push({
     name: "DuoRecommendationResult",
     query: {
@@ -262,4 +274,56 @@ setTimeout(() => {
 }
 
 /* intro setting */
+
+/* 추천 버튼  */
+
+.recommend-button {
+  display: inline-block;
+  padding: 10px 20px;
+  background: #091428; /*내부 그라데이션*/
+  color: white; /* 글자 색상 */
+  border: 4px solid #1be05d; /*내부 두꺼운 테두리*/
+  border-image: linear-gradient(180deg, #005a82, #0ac8b9) 1;
+  outline: 4px solid #091428; /*중간 테두리 */
+  box-shadow: 0 0 0 5px #c89b3c; /*바깥 테두리 */
+  font-size: 18px;
+  font-weight: bold;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s;
+  user-select: none;
+
+  position: relative;
+  overflow: hidden; /* 애니메이션을 위한 설정 */
+  transition: all 0.3s ease; /* 애니메이션 효과 시간 조정 */
+}
+
+.recommend-button::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%; /* 왼쪽에서 시작하여 오른쪽으로 이동 */
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    120deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  transition: all 0.5s ease;
+}
+
+.recommend-button:hover::before {
+  left: 100%; /* 왼쪽에서 오른쪽으로 애니메이션 적용 */
+}
+.recommend-button:hover {
+  background: linear-gradient(
+    120deg,
+    #091428,
+    #005a82
+  ); /* 호버 시 그라데이션 변경 */
+  /* color: #c89b3c; 호버 시 텍스트 색상 변경 */
+  /* 기타 호버 시 변화하길 원하는 스타일 */
+}
 </style>
