@@ -66,18 +66,7 @@ const playSound = (sound) => {
     audio.play();
   }
 };
-// 쓰레기 코드
-// const audio = ref(null);
-// const playFlipSound = async () => {
-//   try {
-//     console.log(champkey);
-//     console.log(audio.value);
-//     audio.value?.play();
-//   } catch (error) {
-//     console.error('에러 발생:', error);
-//   }
-// };
-//
+
 // 카드 뒤집기
 const isFlipped = ref(false);
 const toggleCard = () => {
@@ -114,8 +103,8 @@ const champImageUrl = computed(() => {
   padding: 20px;
 }
 .card {
-  width: 308px;
-  height: 560px;
+  width: 277.2px; /* 308px의 90% */
+  height: 504px; /* 560px의 90% */
   margin-left: 15px;
   margin-right: 15px;
   position: relative;
@@ -207,8 +196,8 @@ const champImageUrl = computed(() => {
 }
 .card .face-back img,
 .card .face-front img {
-  width: 308px;
-  height: 560px;
+  width: 277.2px; /* 변경된 카드의 너비에 맞춤 */
+  height: 504px; /* 변경된 카드의 높이에 맞춤 */
   object-fit: cover;
   /* filter: grayscale(); */
   /* opacity: 0.7; */
