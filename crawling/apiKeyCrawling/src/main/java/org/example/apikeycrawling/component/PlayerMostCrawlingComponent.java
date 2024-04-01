@@ -100,7 +100,8 @@ public class PlayerMostCrawlingComponent {
         System.out.println(sb);
 
         ////////////////////////////// readPlayerMatch ////////////////////////////////
-        readPlayerMatch(oldPlayers, startPageNumber, endPageNumber);
+        HashMap<String, Boolean> visited = new HashMap<>();
+        readPlayerMatch(oldPlayers, visited, startPageNumber, endPageNumber);
         sb = new StringBuilder();
         sb.append("현재 시간: ").append(GlobalConstants.formatter.format(new Date()))
                 .append(" readPlayerMatch 완료");
@@ -109,9 +110,10 @@ public class PlayerMostCrawlingComponent {
         ////////////////////////////// newPlayerMosts ////////////////////////////////
         List<PlayerMost> newPlayerMosts = new ArrayList<>();
         for (String curName : oldPlayers.keySet()) {
-            if (!hashMapNamePlayerInfoTest.containsKey(curName)) {
+            if (!hashMapNamePlayerInfoTest.containsKey(curName))
                 continue;
-            }
+            if(!visited.get(curName))
+                continue;
             calculate(oldPlayers.get(curName), newPlayerMosts, hashMapNamePlayerInfoTest, curName);
         }
         sb = new StringBuilder();
@@ -122,7 +124,7 @@ public class PlayerMostCrawlingComponent {
         ////////////////////////////// saveAll ////////////////////////////////
         List<PlayerMost> temp = new ArrayList<>();
 
-        int batchSize = 1000;
+        int batchSize = 10000;
         int totalSize = newPlayerMosts.size();
         for (int i = 0; i < totalSize; i++) {
             temp.add(newPlayerMosts.get(i));
@@ -147,7 +149,7 @@ public class PlayerMostCrawlingComponent {
                                HashMap<Integer, PlayerInfoTest> hashMapPlayerIdPlayerInfoTest) {
         StringBuilder sb;
         int pageNumber = 0;
-        int pageSize = 1000;
+        int pageSize = 10000;
         Page<PlayerMost> page;
 
         do {
@@ -192,11 +194,11 @@ public class PlayerMostCrawlingComponent {
         } while (pageNumber < page.getTotalPages());
     }
 
-    public void readPlayerMatch(HashMap<String, HashMap<String, WinLose>> oldPlayers, int startPageNumber, int endPageNumber) {
+    public void readPlayerMatch(HashMap<String, HashMap<String, WinLose>> oldPlayers, HashMap<String, Boolean> visited, int startPageNumber, int endPageNumber) {
 
         StringBuilder sb;
         int pageNumber = startPageNumber;
-        int pageSize = 1000;
+        int pageSize = 10000;
         Page<PlayerMatch> page;
 
         do {
@@ -210,6 +212,8 @@ public class PlayerMostCrawlingComponent {
                 for (PlayerMatch.ParticipantDto participant : curPlayerMatch.getInfo().getParticipants()) {
 
                     String curName = participant.getRiotIdGameName() + "-" + participant.getRiotIdTagline();
+
+                    visited.put(curName,true);
 
                     if (!oldPlayers.containsKey(curName))
                         oldPlayers.put(curName, new HashMap<>());

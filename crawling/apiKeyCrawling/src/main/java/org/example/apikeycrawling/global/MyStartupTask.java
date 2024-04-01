@@ -8,6 +8,8 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
+
 @Component
 @RequiredArgsConstructor
 public class MyStartupTask implements ApplicationRunner {
@@ -19,6 +21,7 @@ public class MyStartupTask implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) throws InterruptedException {
 
-        playerMostCrawlingComponent.crawlingVersion2(0, 100);
+        playerMostCrawlingComponent.crawlingVersion2(1, 40);
+
     }
 }
