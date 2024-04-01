@@ -6,5 +6,5 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 public interface ChatRepository extends MongoRepository<Chat, String> {
-    Page<Chat> findByRoomIdOrderByCreatedAtDesc(int roomId, Pageable pageable);
+    Page<Chat> findAll(Pageable pageable);
 }

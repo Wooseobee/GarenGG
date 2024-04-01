@@ -6,12 +6,12 @@ import gg.garen.back.chatting.repository.ChatRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -37,8 +37,8 @@ public class ChatService {
 
     public List<ChatDto> getChat() {
         try {
-            PageRequest pageRequest = PageRequest.of(0, 100, Sort.by(Sort.Direction.DESC, "createdAt"));
-            List<Chat> chats = chatRepository.findByRoomIdOrderByCreatedAtDesc(1, pageRequest).getContent();
+            PageRequest pageRequest = PageRequest.of(0, 100, Sort.by(Sort.Direction.DESC, "_id"));
+            List<Chat> chats = chatRepository.findAll(pageRequest).getContent();
             List<ChatDto> list = new ArrayList<>();
             for (Chat chat : chats) {
                 list.add(ChatDto.of(chat.getContent(), chat.getUserId(), chat.getRoomId(), chat.getCreatedAt()));

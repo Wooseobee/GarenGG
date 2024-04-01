@@ -32,7 +32,6 @@ public class ChatController {
     public void connectEvent(SessionConnectEvent sessionConnectEvent){
 //        System.out.println(sessionConnectEvent);
 //        System.out.println("연결 성공 감지!_!#!#!#!@#!@@#!@!#!$!@");
-        //return "redirect:chat/message";
     }
 
     // TALK 타입 메세지가 WebSocket으로 발행되는 경우, 일로 온다.
