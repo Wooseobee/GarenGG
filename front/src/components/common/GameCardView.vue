@@ -13,14 +13,16 @@ import { ref, onMounted } from "vue";
 import axios from "axios";
 onMounted(() => {
   randomSkinNum.value = getRandomSkinNum();
-  randomImagePath.value = `src/assets/garenimage/Garen_${randomSkinNum.value}.jpg`;
+  randomImagePath.value = `./src/assets/garenimage/Garen_${randomSkinNum.value}.jpg`;
 });
 const skinNum = ref([0, 1, 2, 3, 4, 5, 6, 10, 11, 13, 14, 22, 23, 24, 33]);
 const randomSkinNum = ref(0);
-const randomImagePath = ref("src/assets/garenimage/Garen_23.jpg");
+const randomImagePath = ref("/assets/garenimage/Garen_23.jpg");
 
 const getRandomSkinNum = () => {
-  return skinNum.value[Math.floor(Math.random() * skinNum.value.length)];
+  return String(
+    skinNum.value[Math.floor(Math.random() * skinNum.value.length)]
+  );
 };
 </script>
 
