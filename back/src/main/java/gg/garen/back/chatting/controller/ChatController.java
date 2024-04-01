@@ -28,6 +28,7 @@ public class ChatController {
     private final SimpMessageSendingOperations template;
     public final ChatService chatService;
 
+    // 연결 감지
     @EventListener
     public void connectEvent(SessionConnectEvent sessionConnectEvent){
 //        System.out.println(sessionConnectEvent);
