@@ -1,6 +1,10 @@
 <template>
   <div class="member-img">
-    <img :src="randomImagePath" class="img-fluid" alt="" />
+    <img
+      :src="getRandomImage(randomSkinNum)"
+      class="img-fluid"
+      :alt="randomSkinNum"
+    />
   </div>
 </template>
 
@@ -8,7 +12,6 @@
 import { ref, onMounted } from "vue";
 onMounted(() => {
   randomSkinNum.value = getRandomSkinNum();
-  randomImagePath.value = `./src/assets/garenimage/Garen_${randomSkinNum.value}.jpg`;
 });
 const skinNum = ref([0, 1, 2, 3, 4, 5, 6, 10, 11, 13, 14, 22, 23, 24, 33]);
 const randomSkinNum = ref(0);
@@ -18,6 +21,9 @@ const getRandomSkinNum = () => {
   return String(
     skinNum.value[Math.floor(Math.random() * skinNum.value.length)]
   );
+};
+const getRandomImage = (num) => {
+  return new URL(`../../assets/garenimage/Garen_${num}.jpg`, import.meta.url);
 };
 </script>
 
