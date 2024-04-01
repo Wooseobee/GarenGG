@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-// @Primary
+@Primary
 @Slf4j
 @RequiredArgsConstructor
 public class DuoRecommendationServiceImpl implements DuoRecommendationService{
