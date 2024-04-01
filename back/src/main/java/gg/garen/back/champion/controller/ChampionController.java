@@ -25,7 +25,6 @@ public class ChampionController {
     @GetMapping
     public ResponseEntity<List<ChampionDto>> championInfo(){
         List<ChampionDto> list = championUtils.championInfo();
-        log.info("ChampList : {}", list);
         return new ResponseEntity<>(list, HttpStatus.OK);
     }
 }

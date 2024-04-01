@@ -7,7 +7,6 @@ import gg.garen.back.matchPrediction.dto.ParticipantDto;
 import gg.garen.back.matchPrediction.dto.RandomMatchResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.crypto.*;
 import javax.crypto.spec.GCMParameterSpec;
@@ -21,7 +20,6 @@ public class MatchPredictionService {
 
     private final UserMatchRepository userMatchRepository;
 
-    @Transactional
     public RandomMatchResponseDto getRandomMatch(SecretKey secretKey) throws Exception {
         MatchInfo matchInfo = userMatchRepository.findRandomMatchInfo().get(0);
 
@@ -59,6 +57,7 @@ public class MatchPredictionService {
                 .participants(participants)
                 .secretKey(secretKey.getEncoded())
                 .iv(iv)
+                .tier(matchInfo.getTier())
                 .build();
     }
 

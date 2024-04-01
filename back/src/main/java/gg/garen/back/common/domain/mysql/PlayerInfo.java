@@ -4,7 +4,7 @@ import gg.garen.back.common.audit.Auditable;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "player_info", uniqueConstraints = {
+@Table(name = "player_info_v0", uniqueConstraints = {
         @UniqueConstraint(columnNames = {"summoner_name", "tag_line"})
 })
 public class PlayerInfo extends Auditable {

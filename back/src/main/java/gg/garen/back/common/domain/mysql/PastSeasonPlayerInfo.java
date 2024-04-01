@@ -21,8 +21,10 @@ public class PastSeasonPlayerInfo {
 
     private String tier;
 
+    @Column(columnDefinition = "VARCHAR(100) COLLATE utf8mb4_bin")
     private String tagLine;
 
+    @Column(columnDefinition = "VARCHAR(100) COLLATE utf8mb4_bin")
     private String summonerName;
 
     private Long apiKeyId;
