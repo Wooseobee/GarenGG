@@ -17,6 +17,10 @@
           <div v-if="currentHints >= 3" class="matchTime">{{ matchTime }}</div>
           <div class="round">{{ currentRound }}/{{ totalRounds }}</div>
           <div class="vs">VS</div>
+          <div>
+            <img :src="getRankImage()" alt="" width="180px" height="auto" />
+          </div>
+          <div>{{ tier }}</div>
           <div class="usedHints">{{ usedHints }}/{{ maxHints }}</div>
           <div class="hint" @click="showHint">
             <span>{{ currentHints }}/{{ totalHints }}</span> 힌트보기
@@ -122,6 +126,12 @@ const key = ref();
 const iv = ref();
 const decoder = new TextDecoder();
 const tier = ref("");
+
+const getRankImage = () => {
+  const tierImg =
+    tier.value.charAt(0).toUpperCase() + tier.value.slice(1).toLowerCase();
+  return new URL(`../assets/emblem/Rank=${tierImg}.png`, import.meta.url).href;
+};
 
 const calculateGameTime = (seconds) => {
   const minutes = Math.floor(seconds / 60);
@@ -387,7 +397,7 @@ const closeModal = () => {
 }
 
 .usedHints {
-  margin-top: 150px;
+  margin-top: 100px;
 }
 .team-selection {
   display: flex;
@@ -399,6 +409,8 @@ const closeModal = () => {
 .team-button {
   cursor: pointer; /* 클릭 가능한 요소로 표시 */
   transition: border 0.3s;
+  width: 100%;
+  height: auto;
 }
 .team-button:hover {
   border: 2px solid #00ffea; /* 네온 테두리 색상, 적절한 색상으로 조정 가능 */
