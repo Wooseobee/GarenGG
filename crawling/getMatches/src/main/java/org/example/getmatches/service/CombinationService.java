@@ -38,11 +38,10 @@ public class CombinationService {
         if (duoRecordMatchRepository.findById(new DuoRecordMatchKey(foundDuoRecord.getId(), matchId)).isEmpty()) {
             updateAndSaveFoundCombination(foundDuoRecord, isVictory);
             saveCombinationMatch(foundDuoRecord, matchId);
-        } else {
-            log.info("already calculated match: matchId={}, combinationId={}", matchId, foundDuoRecord.getId());
         }
-        log.info("조합 저장 완료 - matchId: {}", matchId);
-
+//        else {
+//            log.info("already calculated match: matchId={}, combinationId={}", matchId, foundDuoRecord.getId());
+//        }
     }
 
     private void saveCombinationMatch(DuoRecord duoRecord, String matchId) {
