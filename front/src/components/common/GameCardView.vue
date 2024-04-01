@@ -1,5 +1,6 @@
 <template>
   <div class="member-img">
+<<<<<<< HEAD
     <img :src="randomImagePath" class="img-fluid" alt="" />
   </div>
 </template>
@@ -21,10 +22,22 @@ const getRandomSkinNum = () => {
   );
 };
 </script>
+=======
+    <img src="@/assets/garen.avif" class="img-fluid" alt="" />
+  </div>
+</template>
+
+<script setup></script>
+>>>>>>> 0d8d2d3282ac9f6d80ed585c9c7f296c53e780e6
 
 <style scoped>
 .member-img {
   position: relative;
+<<<<<<< HEAD
+=======
+  border: 4px solid #c89b3c;
+  box-shadow: 0 15px 35px -10px rgba(0, 0, 0, 0.2);
+>>>>>>> 0d8d2d3282ac9f6d80ed585c9c7f296c53e780e6
   display: flex;
   justify-content: center;
   align-items: center;
@@ -33,10 +46,13 @@ const getRandomSkinNum = () => {
 }
 
 .member-img img {
+<<<<<<< HEAD
   box-shadow: 0 15px 35px -10px rgba(0, 0, 0, 0.2);
   border: 1px solid #c89b3c;
+=======
+>>>>>>> 0d8d2d3282ac9f6d80ed585c9c7f296c53e780e6
   max-width: 100%; /* 이미지의 최대 너비를 컨테이너 너비에 맞춤 */
-  height: 400px; /* 이미지의 높이를 자동으로 조절하여 비율을 유지 */
+  height: 560px; /* 이미지의 높이를 자동으로 조절하여 비율을 유지 */
   transition: transform 0.3s ease-in-out, filter 0.3s ease-in-out;
 }
 
