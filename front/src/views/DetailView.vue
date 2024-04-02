@@ -26,7 +26,9 @@ import Help from "@/components/common/Help.vue";
 import { useRoute, useRouter } from "vue-router";
 import { localAxios } from "@/utils/http-commons";
 
-const modalContent = ref("테스트입니다");
+const modalContent = ref(
+  "테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다"
+);
 
 const route = useRoute();
 const router = useRouter();

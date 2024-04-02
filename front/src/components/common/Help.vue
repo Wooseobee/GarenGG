@@ -1,5 +1,5 @@
 <template>
-  <div @mouseover="showModal" @mouseleave="closeModal">
+  <div class="button-container" @mouseover="showModal" @mouseleave="closeModal">
     <button>
       <img src="@/assets/help.png" alt="" />
     </button>
@@ -32,9 +32,13 @@ const showModal = () => {
 const closeModal = () => {
   isVisible.value = false;
 };
+
 window.addEventListener("mousemove", (event) => {
   modalTop.value = event.clientY + 20; // 마우스 위치에서 약간 아래로
   modalLeft.value = event.clientX + 20; // 마우스 위치에서 약간 오른쪽으로
+  const modalHeight = 500; // 모달의 세로 길이
+  const viewportHeight = window.innerHeight;
+  modalTop.value = Math.min(event.clientY - 100, viewportHeight - modalHeight); // 모달이 화면 밖으로 나가지 않도록 조정
 });
 </script>
 
@@ -46,7 +50,8 @@ window.addEventListener("mousemove", (event) => {
   display: flex;
   justify-content: center;
   align-items: center;
-  max-width: 500px;
+  max-width: 400px;
+  max-height: 500px;
 }
 
 .modal-content {
