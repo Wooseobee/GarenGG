@@ -68,7 +68,7 @@
           </div>
         </div>
       </div>
-      <div class="info-container">
+      <div v-if="resultChampions != null" class="info-container">
         <p class="info-text">카드를 클릭하면 상세 정보를 볼 수 있습니다</p>
         <Help :modalContent="modalContent" />
       </div>
@@ -87,6 +87,8 @@ import bottomImage from "@/assets/Position_Diamond-Bot.png";
 import utilityImage from "@/assets/Position_Diamond-Support.png";
 import { useChampionStore } from "@/stores/championStore";
 import { useBackGroundStore } from "@/stores/backGroundStore";
+import Help from "@/components/common/Help.vue";
+const modalContent = ref("");
 const route = useRoute();
 const championStore = useChampionStore();
 const { championNames, championIds } = championStore;
@@ -123,9 +125,30 @@ function selectPosition(positionImage) {
   }
 }
 
+function checkFinalConsonant(str) {
+  // 문자열의 마지막 문자를 추출
+  const c = str.charAt(str.length - 1);
+
+  // 한글 유니코드 범위 내에서만 작동
+  if (c >= "가" && c <= "힣") {
+    // '가'로부터의 거리를 이용하여 받침 유무 판단
+    const charCode = c.charCodeAt(0) - "가".charCodeAt(0);
+    // 한글은 각 자음마다 28개의 문자를 가지고 있음 (21개의 모음 * 28개의 받침)
+    // 따라서, 28로 나눈 나머지가 0이면 받침이 없는 것
+    return charCode % 28 !== 0;
+  } else {
+    return false;
+  }
+}
+
 onMounted(() => {
   curChampion.value = route.query.name;
   curPosition.value = route.query.position;
+  if (checkFinalConsonant(curChampion.value)) {
+    modalContent.value = `${curChampion.value}이랑 어울리는 챔피언을 포지션 별로 추천해줘요! 왼쪽 카드부터 1등 2등, 3등이에요.\n 게임 횟수, 승률 기반으로 계산했어요.`;
+  } else {
+    modalContent.value = `${curChampion.value}랑 어울리는 챔피언을 포지션 별로 추천해줘요! 왼쪽 카드부터 1등 2등, 3등이에요.\n 게임 횟수, 승률 기반으로 계산했어요.`;
+  }
   const params = {
     name: route.query.name,
     position: route.query.position,

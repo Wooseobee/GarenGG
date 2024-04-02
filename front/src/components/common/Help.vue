@@ -1,8 +1,6 @@
 <template>
   <div class="button-container" @mouseover="showModal" @mouseleave="closeModal">
-    <button>
-      <img src="@/assets/help.png" alt="" />
-    </button>
+    <img src="@/assets/help.png" alt="" />
   </div>
   <div
     v-if="isVisible"
@@ -76,7 +74,7 @@ button {
   max-width: 32px;
   max-height: 32px;
 }
-button img {
+.button-container img {
   height: 32px;
   width: 32px;
   margin-left: 10px;
