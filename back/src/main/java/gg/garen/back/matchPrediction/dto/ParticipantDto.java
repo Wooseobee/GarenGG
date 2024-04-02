@@ -15,6 +15,7 @@ public class ParticipantDto {
     private byte[] riotIdTagline;
     private byte[] kills;
     private byte[] deaths;
+    private byte[] assists;
     private byte[] firstBloodKill;
     private byte[] win;
 }

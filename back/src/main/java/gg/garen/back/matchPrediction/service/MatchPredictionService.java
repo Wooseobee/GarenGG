@@ -47,6 +47,7 @@ public class MatchPredictionService {
                             .riotIdTagline(encryptData(secretKey, p.getRiotIdTagline(), iv))
                             .kills(encryptData(secretKey, String.valueOf(p.getKills()), iv))
                             .deaths(encryptData(secretKey, String.valueOf(p.getDeaths()), iv))
+                            .assists(encryptData(secretKey,String.valueOf(p.getAssists()), iv))
                             .firstBloodKill(encryptData(secretKey, String.valueOf(p.isFirstBloodKill()), iv))
                             .win(encryptData(secretKey, String.valueOf(p.isWin()), iv))
                             .build());
