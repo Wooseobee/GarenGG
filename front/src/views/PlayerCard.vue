@@ -18,13 +18,13 @@
     </div>
     <div class="player-stats">
       <div v-if="currentHint >= 2 && player.firstBloodKill" class="firstBlood">
-        !FirstBlood!
+        !첫 킬 달성!
       </div>
       <div v-if="currentHint >= 1" class="enemyMissingPings">
         미아핑 : {{ player.enemyMissingPings }}
       </div>
       <div v-if="currentHint >= 4" class="kd">
-        K/D : {{ player.kills }} / {{ player.deaths }}
+        K/D/A : {{ player.kills }} / {{ player.deaths }} / {{ player.assists }}
       </div>
     </div>
   </div>

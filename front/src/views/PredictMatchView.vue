@@ -67,14 +67,16 @@
         <div class="description">
           <h3>*게임 설명*</h3>
           <div>
-            1. 이번 시즌 실제로 진행되었던 게임의 승리 팀을 맞추는 게임입니다.
+            1. 이번 시즌
+            <span class="notice">실제로 진행되었던</span> 게임의 승리 팀을
+            맞추는 게임입니다.
           </div>
           <div>2. 최대 100경기가 준비되어 있습니다.</div>
           <div>3. 틀리는 즉시 게임은 종료됩니다.</div>
           <div>4. 조합으로 맞추기 어렵다면 힌트를 보세요.</div>
           <div>
-            5. 힌트는 미아핑 > 첫번째 킬 > 게임 진행 시간 > K/D 순서로 제공되며,
-            힌트를 볼 때마다 점수가 차감됩니다.
+            5. 힌트는 미아핑 > 첫번째 킬 달성 > 게임 진행 시간 > K/D/A 순서로
+            제공되며, 힌트를 볼 때마다 점수가 차감됩니다.
           </div>
           <div>6. 최대 사용 가능한 힌트는 20개 입니다.</div>
           <div>7. 양쪽 팀 중 이겼다고 생각하는 팀을 선택해주세요.</div>
@@ -228,6 +230,7 @@ const fetchMatchData = async () => {
       const riotIdTagline = await decryptData(participant.riotIdTagline);
       const kills = await decryptData(participant.kills);
       const deaths = await decryptData(participant.deaths);
+      const assists = await decryptData(participant.assists);
       const firstBloodKill = JSON.parse(
         await decryptData(participant.firstBloodKill)
       );
@@ -243,6 +246,7 @@ const fetchMatchData = async () => {
         riotIdTagline,
         kills,
         deaths,
+        assists,
         firstBloodKill,
         win,
       };
@@ -507,6 +511,11 @@ const closeModal = () => {
 
 .wrong {
   color: #d00;
+}
+
+.notice {
+  color: #d00;
+  font-weight: bold;
 }
 
 @keyframes fadeInOut {
