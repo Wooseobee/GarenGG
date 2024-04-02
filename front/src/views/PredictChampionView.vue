@@ -89,6 +89,7 @@ import Header from "@/components/common/Header.vue";
 import { localAxios } from "../utils/http-commons";
 import { v4 as uuidv4 } from "uuid";
 import RankView from "@/components/common/RankView.vue";
+import CryptoJS from "crypto-js"; // 암호화/복호화를 위한 crypto-js 라이브러리
 
 /////////////////////////////////////////////////////////
 
@@ -145,12 +146,43 @@ const submitNickname = () => {
 const getRounds = async function () {
   try {
     const response = await localAxios.get(`/championPrediction/start`);
-    rounds.value = response.data.rounds;
+    // 서버로부터 받은 암호화된 데이터와 비밀키를 사용하여 데이터를 복호화합니다.
+    const decryptedData = decryptData(
+      response.data.encryptedData,
+      response.data.secretKey
+    );
+    console.log(decryptedData);
+    // 복호화된 데이터를 rounds에 저장합니다.
+    rounds.value = decryptedData;
   } catch (error) {
     console.error("API 호출 중 오류 발생:", error);
     alert(error.response.data.errorMessage);
     router.push({ name: "championPrediction" });
   }
+};
+
+const decryptData = (encryptedData, secretKey) => {
+  // Base64로 인코딩된 비밀키를 바이트 배열로 디코딩합니다.
+  const key = CryptoJS.enc.Base64.parse(secretKey);
+
+  // Base64로 인코딩된 암호화된 데이터를 디코딩합니다.
+  const base64DecryptedData = CryptoJS.enc.Base64.parse(encryptedData);
+
+  // 디코딩된 암호화된 데이터를 복호화합니다.
+  const decryptedData = CryptoJS.AES.decrypt(
+    { ciphertext: base64DecryptedData },
+    key,
+    {
+      mode: CryptoJS.mode.ECB,
+      padding: CryptoJS.pad.Pkcs7,
+    }
+  );
+
+  // 복호화된 데이터를 UTF8 포맷의 문자열로 변환합니다.
+  const decryptedText = decryptedData.toString(CryptoJS.enc.Utf8);
+
+  // JSON으로 파싱하여 반환합니다.
+  return JSON.parse(decryptedText);
 };
 
 const goBack = () => {
