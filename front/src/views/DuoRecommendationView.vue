@@ -90,19 +90,6 @@ onMounted(() => {
   z-index: 3;
 }
 
-/* 배경 설정 */
-/* .background-img {
-  position: absolute;
-  inset: 0;
-  display: block;
-  width: 100%;
-  height: 100%;
-  -o-object-fit: cover;
-  object-fit: cover;
-  z-index: 0;
-  pointer-events: none;
-} */
-
 .section-title {
   text-align: center;
   padding-bottom: 30px;
@@ -151,7 +138,10 @@ onMounted(() => {
   justify-content: center;
   align-items: center;
   flex-direction: column; /* 요소들을 수직 방향으로 정렬 */
-  height: 100vh; /* 화면 전체 높이 */
+  min-height: 0vh;
+  height: auto;
+  /* height: 100vh; */
+  /* 화면 전체 높이 */
 }
 
 /* 기존 스타일 */

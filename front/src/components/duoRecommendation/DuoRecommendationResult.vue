@@ -1,6 +1,34 @@
 <template>
   <div class="container">
-    <div class="position-selector">
+    <transition name="fade">
+      <div
+        v-if="resultChampions == null && showIntro"
+        class="intro-container section-title"
+      >
+        <!-- 로고 이미지 또는 텍스트 -->
+        <img
+          src="@/assets/icon.png"
+          alt="듀오챔피언추천 로고"
+          :style="{ width: 100 + 'px', height: 100 + 'px' }"
+        />
+        <h1>이런!</h1>
+        <h2>
+          {{ curPosition }} 위치의 {{ curChampion }}.. 듀오 챔피언을 가지고 있지
+          않네요.
+        </h2>
+      </div>
+    </transition>
+    <div class="intro-container">
+      <!-- 뒤로가기 버튼 -->
+      <router-link v-if="backButton == true" to="#" @click="goBack">
+        <img
+          src="@/assets/goback.png"
+          alt=""
+          style="width: 200px; height: 200"
+        />
+      </router-link>
+    </div>
+    <div v-if="resultChampions != null" class="position-selector">
       <div
         v-for="(positionImage, index) in filteredPositionImages"
         :key="index"
@@ -44,7 +72,7 @@
 </template>
 <script setup>
 import { onMounted, ref, computed } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { duoRecommendationChampion } from "@/api/duoRecommend";
 import Card from "@/components/common/Card.vue";
 import topImage from "@/assets/Position_Diamond-Top.png";
@@ -57,7 +85,11 @@ import { useBackGroundStore } from "@/stores/backGroundStore";
 const route = useRoute();
 const championStore = useChampionStore();
 const { championNames, championIds } = championStore;
-
+const showIntro = ref("true");
+const backButton = ref("false");
+const router = useRouter();
+const curChampion = ref("");
+const curPosition = ref("");
 const resultChampions = ref([]);
 const selectedPosition = ref("");
 const backgroundStore = useBackGroundStore();
@@ -87,6 +119,8 @@ function selectPosition(positionImage) {
 }
 
 onMounted(() => {
+  curChampion.value = route.query.name;
+  curPosition.value = route.query.position;
   const params = {
     name: route.query.name,
     position: route.query.position,
@@ -111,7 +145,18 @@ onMounted(() => {
         "이고, 백그라운드 : ",
         backgroundStore.backgroundImageUrl
       );
-      // console.log(data);
+      if (!data || data.length == 0) {
+        resultChampions.value = null;
+        setTimeout(() => {
+          showIntro.value = false;
+          setTimeout(() => {
+            backButton.value = true;
+          }, 1200);
+        }, 2000); // 3초 후 로고 숨김
+
+        console.log("이걸로행시켜");
+        return;
+      }
       resultChampions.value = data.reduce((acc, { position, champion, id }) => {
         // 해당 position이 이미 누적 객체에 존재하는지 확인
         const existingGroup = acc.find((group) => group.position === position);
@@ -128,18 +173,25 @@ onMounted(() => {
         return acc;
       }, []);
 
-      if (resultChampions.value.length > 1)
+      if (resultChampions.value.length >= 1)
         selectedPosition.value = resultChampions.value[0].position;
 
-      console.log("챔피언불러오기완료. ", resultChampions.value);
+      console.log(
+        "챔피언불러오기완료. resultChampions: ",
+        resultChampions.value
+      );
       console.log("champions.value[0] ", resultChampions.value[0]);
       console.log("시작 포지션 설정 완료. ", selectedPosition.value);
     },
     (err) => {
-      console.log("듀챔추가져오는중 에러발생");
+      console.log("듀챔추가져오는중 에러발생, err : ", err);
     }
   );
 });
+
+const goBack = () => {
+  router.go(-1);
+};
 </script>
 <style scoped>
 /* 로고 */
