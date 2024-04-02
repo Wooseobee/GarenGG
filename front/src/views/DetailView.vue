@@ -7,8 +7,13 @@
     </div>
     <!-- 조건부 렌더링을 사용하여 Team_Comp와 안내 문구를 같이 보여줌 -->
     <template v-else>
-      <Team_Comp :champions="champions" />
-      <p class="info-text">카드를 클릭하면 상세 정보를 볼 수 있습니다</p>
+      <div>
+        <Team_Comp :champions="champions" />
+        <div class="info-container">
+          <p class="info-text">카드를 클릭하면 상세 정보를 볼 수 있습니다</p>
+          <Help :modalContent="modalContent" />
+        </div>
+      </div>
     </template>
   </div>
 </template>
@@ -17,8 +22,11 @@
 import { ref, onMounted } from "vue";
 import Header from "@/components/common/Header.vue";
 import Team_Comp from "@/components/team_comp/Team_Comp.vue";
+import Help from "@/components/common/Help.vue";
 import { useRoute, useRouter } from "vue-router";
 import { localAxios } from "@/utils/http-commons";
+
+const modalContent = ref("테스트입니다");
 
 const route = useRoute();
 const router = useRouter();
@@ -60,6 +68,7 @@ onMounted(async () => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  align-content: center;
   height: 100vh; /* 전체 화면 높이 */
 }
 
@@ -72,6 +81,12 @@ onMounted(async () => {
 /* 안내 문구 스타일 */
 .info-text {
   text-align: center;
+  margin-top: 20px; /* Team_Comp 컴포넌트와의 여백 */
+}
+.info-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
   margin-top: 20px; /* Team_Comp 컴포넌트와의 여백 */
 }
 </style>
