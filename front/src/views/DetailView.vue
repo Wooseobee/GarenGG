@@ -11,7 +11,11 @@
         <Team_Comp :champions="champions" />
         <div class="info-container">
           <p class="info-text">카드를 클릭하면 상세 정보를 볼 수 있습니다</p>
-          <Help :modalContent="modalContent" />
+          <Help
+            :modalContent="modalContent"
+            :modalContent2="modalContent2"
+            :modalContent3="modalContent3"
+          />
         </div>
       </div>
     </template>
@@ -26,9 +30,11 @@ import Help from "@/components/common/Help.vue";
 import { useRoute, useRouter } from "vue-router";
 import { localAxios } from "@/utils/http-commons";
 
-const modalContent = ref(
-  "테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다테스트입니다"
-);
+const modalContent = `유저의 최근 솔로랭크 100판을 기준으로 승률, 판수, 티어를 고려한 자체 알고리즘으로 새로운 챔피언을 추천합니다.`;
+const modalContent2 = `잠재 요인 협업 필터링 방식을 사용하였으며 특이값 분해로 잠재 요인을 찾아 플레이 기록이 없는 챔피언의 점수를 유추합니다.`;
+const modalContent3 = `DB에는 현재 시즌 티어가 있는 유저 270만명의 모스트 챔피언 정보를 저장했습니다.
+자동화된 프로세스로 Riot Open API key 5000개를 발급받아 5000개의 스레드를 사용하여 동시에 API 호출하는 방식으로 데이터를 수집했습니다.
+`;
 
 const route = useRoute();
 const router = useRouter();
