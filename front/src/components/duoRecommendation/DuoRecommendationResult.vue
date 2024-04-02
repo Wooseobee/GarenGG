@@ -68,6 +68,10 @@
           </div>
         </div>
       </div>
+      <div class="info-container">
+        <p class="info-text">카드를 클릭하면 상세 정보를 볼 수 있습니다</p>
+        <Help :modalContent="modalContent" />
+      </div>
     </div>
   </div>
 </template>
@@ -199,11 +203,6 @@ const goBack = () => {
 .container {
   z-index: 2;
 }
-.selected {
-  width: 100px;
-  height: 100px;
-  font-size: 30px;
-}
 
 /* 카드 설정 */
 .cards {
@@ -224,7 +223,7 @@ const goBack = () => {
   flex-wrap: wrap; /* 필요시 줄바꿈 */
   gap: 10px; /* 이미지 사이의 간격 */
   z-index: 2;
-  margin-top: -130px;
+  margin-top: -140px;
   margin-bottom: 0px;
   padding: 0px;
 }
@@ -237,13 +236,20 @@ const goBack = () => {
   flex-direction: column; /* 항목들을 세로로 나열 */
   align-items: center; /* 세로축 중앙 정렬 */
   border-radius: 50%;
-  margin-bottom: 0px;
+  margin-bottom: 10px;
   padding: 0px;
 }
 .position-image {
+  width: 50px;
+  height: 50px;
   margin-top: 0px;
   margin-bottom: 0px;
   padding: 0px;
+}
+.position-image.selected {
+  width: 100px;
+  height: 100px;
+  font-size: 30px;
 }
 
 /* .unselected{
@@ -273,5 +279,17 @@ const goBack = () => {
     box-shadow: 0 0 20px 0 rgba(120, 90, 40, 0.7),
       0 0 30px 0 rgba(120, 90, 40, 0.5), 0 0 40px 0 rgba(120, 90, 40, 0.3);
   }
+}
+
+/* 안내 문구 스타일 */
+.info-text {
+  text-align: center;
+  margin-top: 20px; /* Team_Comp 컴포넌트와의 여백 */
+}
+.info-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px; /* Team_Comp 컴포넌트와의 여백 */
 }
 </style>
