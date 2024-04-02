@@ -13,7 +13,8 @@ import java.util.List;
 @Builder
 public class ResponseGetChampionPredictionStartDto {
 
-    private List<Round> rounds;
+    private String encryptedData;
+    private String secretKey;
 
     @Getter
     @Setter
