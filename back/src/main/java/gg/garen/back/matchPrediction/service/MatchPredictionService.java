@@ -21,12 +21,14 @@ import java.util.List;
 public class MatchPredictionService {
 
     private final UserMatchRepository userMatchRepository;
+    private final DetectDuplicateMatchService detectDuplicateMatchService;
 
     public RandomMatchResponseDto getRandomMatch(SecretKey secretKey1, SecretKey secretKey2) throws Exception {
         MatchInfo matchInfo = userMatchRepository.findRandomMatchInfo().get(0);
-        while (matchInfo.getInfo().getGameDuration() < 900) {
+        while (matchInfo.getInfo().getGameDuration() < 900 && !detectDuplicateMatchService.isDuplicate(matchInfo.getMatchId())) {
             matchInfo = userMatchRepository.findRandomMatchInfo().get(0);
         }
+        detectDuplicateMatchService.markMatchId(matchInfo.getMatchId());
         List<ParticipantDto> participants = new ArrayList<>();
 
         byte[] iv = new byte[12];
