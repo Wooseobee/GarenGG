@@ -8,6 +8,9 @@
       class="face face-front"
       @mouseenter="startEffect"
       @mouseleave="stopEffect"
+      :class="{
+        cardHover: isEffect === true,
+      }"
     >
       <!-- card content -->
       <!-- <audio hidden="true" ref="audio">
@@ -214,5 +217,8 @@ const champImageUrl = computed(() => {
   z-index: 10; /* 다른 요소들 위에 오도록 z-index 설정 */
   padding: 5px; /* 패딩 추가 */
   border-radius: 5px; /* 모서리 둥글게 */
+}
+.cardHover {
+  cursor: pointer;
 }
 </style>

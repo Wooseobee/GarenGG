@@ -62,6 +62,7 @@
                 :champname="champion.id"
                 :champKoreanName="champion.name"
                 :rank="index + 1"
+                class="cardElement"
               />
             </div>
           </div>
@@ -250,7 +251,7 @@ const goBack = () => {
 } */
 
 /* 뒤에 빛나는설정 */
-.effecting {
+.position-image-container > .effecting {
   animation: goldGlow 2s infinite alternate,
     bounce 3s ease-in-out infinite alternate;
   border-radius: 50%;
