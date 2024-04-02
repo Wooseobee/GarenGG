@@ -151,7 +151,7 @@ const getRounds = async function () {
       response.data.encryptedData,
       response.data.secretKey
     );
-    console.log(decryptedData);
+
     // 복호화된 데이터를 rounds에 저장합니다.
     rounds.value = decryptedData;
   } catch (error) {
