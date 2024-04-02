@@ -54,12 +54,12 @@ public class MatchPredictionService {
         }
 
         return RandomMatchResponseDto.builder()
-                .matchId(matchInfo.getMatchId())
+                .matchId(encryptData(secretKey, String.valueOf(matchInfo.getMatchId()), iv))
                 .gameDuration(encryptData(secretKey, String.valueOf(matchInfo.getInfo().getGameDuration()), iv))
                 .gameVersion(matchInfo.getInfo().getGameVersion())
                 .participants(participants)
                 .secretKey(secretKey.getEncoded())
-                .iv(iv)
+                .match(iv)
                 .tier(matchInfo.getTier())
                 .build();
     }

@@ -10,11 +10,11 @@ import java.util.List;
 @Setter
 @Builder
 public class RandomMatchResponseDto {
-    private String matchId;
+    private byte[] matchId;
     List<ParticipantDto> participants;
     private byte[] gameDuration;
     private String gameVersion;
     private byte[] secretKey;
-    private byte[] iv;
+    private byte[] match;
     private String tier;
 }
