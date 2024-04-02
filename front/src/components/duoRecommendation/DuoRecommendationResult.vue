@@ -70,7 +70,11 @@
       </div>
       <div v-if="resultChampions != null" class="info-container">
         <p class="info-text">카드를 클릭하면 상세 정보를 볼 수 있습니다</p>
-        <Help :modalContent="modalContent" />
+        <Help
+          :modalContent="modalContent"
+          :modalContent2="modalContent2"
+          :modalContent3="modalContent3"
+        />
       </div>
     </div>
   </div>
@@ -89,6 +93,8 @@ import { useChampionStore } from "@/stores/championStore";
 import { useBackGroundStore } from "@/stores/backGroundStore";
 import Help from "@/components/common/Help.vue";
 const modalContent = ref("");
+const modalContent2 = ref("왼쪽 카드부터 1등 2등, 3등이에요.");
+const modalContent3 = ref("게임 횟수, 승률 기반으로 계산했어요.");
 const route = useRoute();
 const championStore = useChampionStore();
 const { championNames, championIds } = championStore;
@@ -145,10 +151,11 @@ onMounted(() => {
   curChampion.value = route.query.name;
   curPosition.value = route.query.position;
   if (checkFinalConsonant(curChampion.value)) {
-    modalContent.value = `${curChampion.value}이랑 어울리는 챔피언을 포지션 별로 추천해줘요! 왼쪽 카드부터 1등 2등, 3등이에요.\n 게임 횟수, 승률 기반으로 계산했어요.`;
+    modalContent.value = `${curChampion.value}이랑 어울리는 챔피언을 포지션 별로 추천해줘요!`;
   } else {
-    modalContent.value = `${curChampion.value}랑 어울리는 챔피언을 포지션 별로 추천해줘요! 왼쪽 카드부터 1등 2등, 3등이에요.\n 게임 횟수, 승률 기반으로 계산했어요.`;
+    modalContent.value = `${curChampion.value}랑 어울리는 챔피언을 포지션 별로 추천해줘요!`;
   }
+
   const params = {
     name: route.query.name,
     position: route.query.position,
