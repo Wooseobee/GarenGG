@@ -26,7 +26,7 @@ def preprocess_data(score_data):
         columns='champion',
         values='score'
     ).fillna(0)
-
+ 
     # champ_user_score = user_champ_score.T.to_numpy()
 
     matrix = user_champ_score.to_numpy()
@@ -57,7 +57,7 @@ def SVD(matrix_user_mean, user_champ_score):
 
     return pd.DataFrame(svd_user_predicted_scores, columns = user_champ_score.columns)
 
-if __name__ == "__main__":
+def train():
     start_time = time.time()
     score_data, champ_data = load_data()
     norm_matrix_user_mean, matrix_user_mean, user_champ_score = preprocess_data(score_data)
@@ -72,4 +72,9 @@ if __name__ == "__main__":
     with open('models/user_champ_score.pkl', 'wb') as f:
         pickle.dump(user_champ_score, f)
     end_time = time.time()
-    print(f"train took {end_time - start_time:.4f} seconds")
+    elapsed_time_minutes = (end_time - start_time) / 60
+    print(f"save data took {elapsed_time_minutes:.2f} minutes")
+
+if __name__ == "__main__":
+    train()
+    pass

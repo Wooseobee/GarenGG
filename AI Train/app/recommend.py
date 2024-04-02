@@ -23,6 +23,7 @@ def recommend_champs(df_svd_preds, user_id, champ_data, score_data, user_index, 
     # 위에서 뽑은 user_data와 원본 챔피언 데이터를 합친다.
     user_history = pd.merge(user_data, champ_data, left_on='champion', right_on='id', how='inner').sort_values(['score'], ascending=False)
     user_history.drop(columns=['name'], inplace=True)
+
     # user_history = user_data.merge(champ_data, on = 'id')
     # user_history = pd.merge(user_data, champ_data, left_on = 'champion', right_on='id', how='inner')# .sort_values(['score'], ascending=False)
     # 원본 챔피언 데이터에서 사용자가 본 챔피언 데이터를 제외한 데이터를 추출
@@ -35,7 +36,31 @@ def recommend_champs(df_svd_preds, user_id, champ_data, score_data, user_index, 
     
     recommendations = recommendations.rename(columns = {user_row_number: 'Predictions'}).sort_values('Predictions', ascending = False).iloc[:20, :]
 
-    if tier in ['Iron', 'Bronze', 'Silver']:
+    recommendations = tier_process(recommendations, tier)
+
+    return recommendations
+
+def recommend_champs_not(df_svd_preds, user_id, champ_data, score_data, user_index, tier, champions_list):
+    # index와 user_id를 맞추는 부분. 현재는 index와 user_id 둘 다 0부터 시작하므로 변화 x.
+    user_row_number = user_index
+    
+    # 최종적으로 만든 pred_df에서 사용자 index에 따라 챔피언 데이터 정렬 -> 챔피언 평점이 높은 순으로 정렬 됨
+    sorted_user_predictions = df_svd_preds.iloc[user_row_number].sort_values(ascending=False)
+    
+    recommendations = champ_data[~champ_data['id'].isin(champions_list)]
+
+    recommendations = pd.merge(recommendations, sorted_user_predictions, left_on='id', right_on='champion', how='inner')
+    # recommendations = recommendations.merge( pd.DataFrame(sorted_user_predictions).reset_index(), on = 'id')
+    # 컬럼 이름 바꾸고 정렬해서 return
+    
+    recommendations = recommendations.rename(columns = {user_row_number: 'Predictions'}).sort_values('Predictions', ascending = False).iloc[:20, :]
+
+    recommendations = tier_process(recommendations, tier)
+
+    return recommendations
+
+def tier_process(recommendations, tier):
+    if tier in ['IRON', 'BRONZE', 'SILVER']:
         conditions = [
             recommendations['difficulty'] >= 9,
             recommendations['difficulty'] >= 7,
@@ -50,7 +75,7 @@ def recommend_champs(df_svd_preds, user_id, champ_data, score_data, user_index, 
         ]
         default = recommendations['Predictions'] * 1.3
     
-    elif tier in ['Gold', 'Platinum']:
+    elif tier in ['GOLD', 'PLATINUM']:
         conditions = [
                 recommendations['difficulty'] >= 8,
                 recommendations['difficulty'] >= 7
@@ -60,7 +85,7 @@ def recommend_champs(df_svd_preds, user_id, champ_data, score_data, user_index, 
                 recommendations['Predictions'] * 0.8
             ]
         default = recommendations['Predictions'] * 1.0
-    elif tier in ['Emerald', 'Diamond']:
+    elif tier in ['EMERALD', 'DIAMOND']:
         conditions = [
                 recommendations['difficulty'] >= 9
             ] 
@@ -68,7 +93,7 @@ def recommend_champs(df_svd_preds, user_id, champ_data, score_data, user_index, 
                 recommendations['Predictions'] * 0.8
             ]
         default = recommendations['Predictions'] * 1.0
-    elif tier in ['Unranked']:
+    elif tier in ['UNRANKED']:
         conditions = [
                 recommendations['difficulty'] >= 9
             ] 
@@ -89,16 +114,14 @@ def recommend_champs(df_svd_preds, user_id, champ_data, score_data, user_index, 
 
     recommendations['Predictions'] = np.select(conditions, values, default=default)
     recommendations = recommendations.sort_values('Predictions', ascending = False).iloc[:3, :]
-
     return recommendations
-
 
 def find_userId(player):
     
     if not player.mostDatas:
         return "데이터가 존재하지 않습니다"
 
-    new_df = pd.DataFrame(0, index=[player.playerId], columns=df_svd_preds.columns)
+    new_df = pd.DataFrame(0, index=[1], columns=df_svd_preds.columns)
 
     for champion_data in player.mostDatas:
         
@@ -108,7 +131,8 @@ def find_userId(player):
         # 게임 데이터에서 총 게임 수와 승리율 추출
         game_data = champion_data.game
         total_games, win_rate = process_game_data(game_data)
-        new_df.at[player.playerId, champion_data.champion] = total_games * win_rate / 100
+        score = total_games * win_rate / 100
+        new_df.at[1, champion_data.champion] = score if score == 0 else 0.01
 
     new_user_matrix = new_df.values[0]
 
@@ -166,4 +190,8 @@ with open('models/user_champ_score.pkl', 'rb') as f:
 
 def get_recommendations(user_id, user_index, tier):
     predictions = recommend_champs(df_svd_preds, user_id, champ_data, score_data, user_index, tier)
+    return predictions
+
+def get_recommendations_not(user_id, user_index, tier, champions_list):
+    predictions = recommend_champs_not(df_svd_preds, user_id, champ_data, score_data, user_index, tier, champions_list)
     return predictions

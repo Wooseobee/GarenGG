@@ -19,7 +19,7 @@ db = async_client["a605"]
 # MongoDB에서 데이터 가져오는 함수 (비동기)!
 async def get_player_prev_solo_rank():
 
-    collection = db["player_cur_solo_rank"]
+    collection = db["player_most"]
     
     # here
     # _id가 50 이하인 플레이어 데이터만 조회 {"_id": {"$lte": 10000}}
@@ -61,7 +61,9 @@ async def get_player_prev_solo_rank():
             else:
                 multiplier = 0.3
             
-            score = multiplier * win_rate
+            score = round(multiplier * win_rate, 2)
+            if score == 0:
+                score = 0.01
 
             # 최종 결과에 추가
             result.append({
@@ -117,5 +119,6 @@ if __name__ == "__main__":
         result = await get_player_prev_solo_rank()
         await save_result_to_csv(result)
         end_time = time.time()
-        print(f"save data took {end_time - start_time:.4f} seconds")
+        elapsed_time_minutes = (end_time - start_time) / 60
+        print(f"save data took {elapsed_time_minutes:.2f} minutes")
     asyncio.run(main())
