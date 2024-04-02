@@ -1,7 +1,6 @@
 <template>
   <div class="app-container">
     <Header />
-
     <!-- 모달 창 구현 -->
     <div v-if="showRankModal" class="rank-modal">
       <div class="rank-modal-content">
@@ -98,6 +97,8 @@ const nickname = ref("");
 const router = useRouter();
 const currentRound = ref(0);
 const audioPlayer = ref(null);
+const correctAudioPlayer = ref(null);
+const wrongAudioPlayer = ref(null);
 const rounds = ref([]);
 const timerId = ref(null);
 
@@ -110,9 +111,19 @@ const uuid = ref("");
 const rank = ref([]);
 const soundPlayed = ref(false);
 
+const correctSrc = ref(
+  new URL("/src/assets/sounds/correct.mp3", import.meta.url).href
+);
+const wrongSrc = ref(
+  new URL("/src/assets/sounds/wrong.mp3", import.meta.url).href
+);
 /////////////////////////////////////////////////////////
 
 onMounted(async function () {
+  //정답여부 음성 출력
+  correctAudioPlayer.value = new Audio(correctSrc.value);
+  wrongAudioPlayer.value = new Audio(wrongSrc.value);
+
   nicknameInput.value.focus();
 
   await getRounds();
@@ -180,6 +191,12 @@ const checkAnswer = async (championKey) => {
   correctAnswer.value = isCorrect;
   showAnswerFeedback.value = true;
 
+  //정답결과에따른 소리출력
+  if (isCorrect) {
+    correctAudioPlayer.value.play();
+  } else {
+    wrongAudioPlayer.value.play();
+  }
   // 정답 확인 후 처리
   await new Promise((resolve) => setTimeout(resolve, 2000));
   showAnswerFeedback.value = false;
@@ -275,6 +292,16 @@ watch(currentRound, () => {
   soundPlayed.value = false; // 소리 재생 상태 초기화
   // 필요하다면 타이머 관련 로직도 여기에 추가할 수 있습니다.
 });
+
+// const playAnswerSound = (isCorrect) => {
+//   // const correctAudio = new Audio("@/assets/sounds/correct.mp3");
+//   // const wrongAudio = new Audio("@/assets/sounds/wrong.mp3");
+//   const correctAudio = new Audio("@/assets/sounds/correct.mp3");
+//   const wrongAudio = new Audio("@/assets/sounds/wrong.mp3");
+
+//   if (isCorrect) correctAudio.play();
+//   else wrongAudio.play();
+// };
 </script>
 
 <style scoped>

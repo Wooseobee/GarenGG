@@ -129,6 +129,16 @@ const iv = ref();
 const decoder = new TextDecoder();
 const tier = ref("");
 
+//소리관련
+const correctAudioPlayer = ref(null);
+const wrongAudioPlayer = ref(null);
+const correctSrc = ref(
+  new URL("/src/assets/sounds/correct.mp3", import.meta.url).href
+);
+const wrongSrc = ref(
+  new URL("/src/assets/sounds/wrong.mp3", import.meta.url).href
+);
+
 const getRankImage = () => {
   const tierImg =
     tier.value.charAt(0).toUpperCase() + tier.value.slice(1).toLowerCase();
@@ -271,6 +281,10 @@ const fetchMatchData = async () => {
 };
 
 onMounted(() => {
+  //정답여부 음성 출력
+  correctAudioPlayer.value = new Audio(correctSrc.value);
+  wrongAudioPlayer.value = new Audio(wrongSrc.value);
+
   nicknameInput.value.focus();
   fetchMatchData();
 });
@@ -292,8 +306,15 @@ const selectTeam = async (team) => {
   correctAnswer.value = team[0].win; // 승리 팀을 선택했는지 여부
   const useHintThisRound = currentHints.value;
   showAnswerFeedback.value = true; // 정답 피드백을 보여주기
-
   currentHints.value = 4;
+
+  //정답처리결과에따른 소리출력
+  if (correctAnswer.value) {
+    correctAudioPlayer.value.play();
+  } else {
+    wrongAudioPlayer.value.play();
+  }
+
   await new Promise((resolve) => setTimeout(resolve, 5000));
 
   showAnswerFeedback.value = false; // 피드백 숨김

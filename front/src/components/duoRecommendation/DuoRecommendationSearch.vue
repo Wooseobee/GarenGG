@@ -185,6 +185,7 @@ function selectChampion(champion) {
   if (selectedChampion.value == null) {
     selectedChampion.value = champion;
     selectedChampion.value.int = 200;
+    playSound(audiolink.value);
   } else {
     selectedPosition.value = "";
     selectedChampion.value.int = 100;
@@ -231,11 +232,13 @@ onMounted(() => {
   backGroundStore.updateBackgroundImage("");
   champions.value = championStore.championIds.map((championId, index) => ({
     id: championId,
+    key: championStore.championKeys[index],
     url: championStore.championSquareImgUrls[index],
     name: championStore.championNames[index],
     int: 100,
   }));
 
+  console.log("champions : ", champions.value);
   //챔피언 Id(영어이름같은거) 달라고 해서 받기
 
   //url 세팅해서
@@ -244,6 +247,17 @@ onMounted(() => {
 setTimeout(() => {
   showIntro.value = false;
 }, 100); // 3초 후 로고 숨김
+
+// 소리
+const audiolink = computed(() => {
+  return `https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/ko_kr/v1/champion-choose-vo/${selectedChampion.value.key}.ogg`;
+});
+const playSound = (sound) => {
+  if (sound) {
+    const audio = new Audio(sound);
+    audio.play();
+  }
+};
 </script>
 
 <style scoped>
