@@ -427,7 +427,7 @@ watch(currentRound, () => {
   left: 50%;
   transform: translate(-50%, -50%);
   font-size: 20rem;
-  animation: fadeInOut 5s ease-in-out;
+  animation: fadeInOut 0s ease-in-out;
 }
 
 .correct {
@@ -687,7 +687,7 @@ watch(currentRound, () => {
   left: 50%;
   transform: translate(-50%, -50%);
   font-size: 20rem;
-  animation: fadeInOut 5s ease-in-out;
+  /* animation: fadeInOut 5s ease-in-out; */
 }
 
 .correct {
