@@ -12,7 +12,7 @@
         {{ modalContent }}
         <br />
         {{ modalContent2 }}
-        <br /><br />
+        <br />
         {{ modalContent3 }}
       </p>
     </div>
@@ -20,7 +20,7 @@
 </template>
 
 <script setup>
-import { defineProps, ref } from "vue";
+import { defineProps, ref, watchEffect } from "vue";
 const props = defineProps({
   modalContent: {
     type: String,
@@ -46,9 +46,11 @@ const closeModal = () => {
 window.addEventListener("mousemove", (event) => {
   modalTop.value = event.clientY + 20; // 마우스 위치에서 약간 아래로
   modalLeft.value = event.clientX + 20; // 마우스 위치에서 약간 오른쪽으로
-  const modalHeight = 200; // 모달의 세로 길이
-  const viewportHeight = window.innerHeight;
-  modalTop.value = Math.min(event.clientY - 300, viewportHeight - modalHeight); // 모달이 화면 밖으로 나가지 않도록 조정
+  const modalElement = document.querySelector(".modal-container");
+  if (modalElement) {
+    const modalHeight = modalElement.offsetHeight;
+    modalTop.value = Math.min(modalTop.value, window.innerHeight - modalHeight);
+  }
 });
 </script>
 
