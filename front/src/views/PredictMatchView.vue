@@ -125,7 +125,7 @@ const showAnswerFeedback = ref(false); // 정답 피드백 표시 여부
 const matchTime = ref("0");
 const nicknameInput = ref(null);
 const key = ref();
-const iv = ref();
+const match = ref();
 const decoder = new TextDecoder();
 const tier = ref("");
 
@@ -166,7 +166,7 @@ const goBack = () => {
 
 async function decryptMessage(ciphertext) {
   const decryptedCiphertext = await window.crypto.subtle.decrypt(
-    { name: "AES-GCM", iv: iv.value },
+    { name: "AES-GCM", iv: match.value },
     key.value,
     ciphertext
   );
@@ -206,7 +206,7 @@ const fetchMatchData = async () => {
     ).buffer;
     const importedKey = await importKey(secretKeyBuffer);
     key.value = importedKey;
-    iv.value = Uint8Array.from(atob(response.data.iv), (c) =>
+    match.value = Uint8Array.from(atob(response.data.match), (c) =>
       c.charCodeAt(0)
     ).buffer;
 
