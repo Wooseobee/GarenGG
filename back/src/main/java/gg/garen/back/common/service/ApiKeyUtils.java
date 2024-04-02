@@ -26,7 +26,7 @@ public class ApiKeyUtils {
             }
         }
 
-        index++;
+        index = index%5000+1;
 
         return apiKeys.get(index);
     }
