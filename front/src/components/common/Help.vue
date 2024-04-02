@@ -1,8 +1,6 @@
 <template>
   <div class="button-container" @mouseover="showModal" @mouseleave="closeModal">
-    <button>
-      <img src="@/assets/help.png" alt="" />
-    </button>
+    <img src="@/assets/help.png" alt="" />
   </div>
   <div
     v-if="isVisible"
@@ -10,7 +8,13 @@
     :style="{ top: modalTop + 'px', left: modalLeft + 'px' }"
   >
     <div class="modal-content">
-      <p>{{ modalContent }}</p>
+      <p>
+        {{ modalContent }}
+        <br />
+        {{ modalContent2 }}
+        <br /><br />
+        {{ modalContent3 }}
+      </p>
     </div>
   </div>
 </template>
@@ -21,6 +25,12 @@ const props = defineProps({
   modalContent: {
     type: String,
     required: true,
+  },
+  modalContent2: {
+    type: String,
+  },
+  modalContent3: {
+    type: String,
   },
 });
 const isVisible = ref(false);
@@ -36,9 +46,9 @@ const closeModal = () => {
 window.addEventListener("mousemove", (event) => {
   modalTop.value = event.clientY + 20; // 마우스 위치에서 약간 아래로
   modalLeft.value = event.clientX + 20; // 마우스 위치에서 약간 오른쪽으로
-  const modalHeight = 500; // 모달의 세로 길이
+  const modalHeight = 200; // 모달의 세로 길이
   const viewportHeight = window.innerHeight;
-  modalTop.value = Math.min(event.clientY - 100, viewportHeight - modalHeight); // 모달이 화면 밖으로 나가지 않도록 조정
+  modalTop.value = Math.min(event.clientY - 300, viewportHeight - modalHeight); // 모달이 화면 밖으로 나가지 않도록 조정
 });
 </script>
 
@@ -51,7 +61,7 @@ window.addEventListener("mousemove", (event) => {
   justify-content: center;
   align-items: center;
   max-width: 400px;
-  max-height: 500px;
+  /* max-height: 500px; */
 }
 
 .modal-content {
@@ -66,17 +76,11 @@ window.addEventListener("mousemove", (event) => {
   margin-top: 0;
 }
 
-.modat-content p {
+.modal-content p {
   margin-bottom: 0;
 }
 
-button {
-  background-color: #091428;
-  border: 0;
-  max-width: 32px;
-  max-height: 32px;
-}
-button img {
+.button-container img {
   height: 32px;
   width: 32px;
   margin-left: 10px;
