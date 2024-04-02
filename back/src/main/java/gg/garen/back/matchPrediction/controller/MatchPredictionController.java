@@ -23,8 +23,9 @@ public class MatchPredictionController {
     public RandomMatchResponseDto getRandomMatch() throws Exception {
         KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
         keyGenerator.init(256);
-        SecretKey secretKey = keyGenerator.generateKey();
+        SecretKey secretKey1 = keyGenerator.generateKey();
+        SecretKey secretKey2 = keyGenerator.generateKey();
 
-        return matchPredictionService.getRandomMatch(secretKey);
+        return matchPredictionService.getRandomMatch(secretKey1, secretKey2);
     }
 }

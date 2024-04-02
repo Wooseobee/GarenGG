@@ -1,5 +1,6 @@
 package gg.garen.back.matchPrediction.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import gg.garen.back.common.domain.mongo.MatchInfo;
 import gg.garen.back.common.domain.mongo.Participant;
 import gg.garen.back.common.repository.UserMatchRepository;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import javax.crypto.*;
 import javax.crypto.spec.GCMParameterSpec;
+import java.nio.ByteBuffer;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +22,7 @@ public class MatchPredictionService {
 
     private final UserMatchRepository userMatchRepository;
 
-    public RandomMatchResponseDto getRandomMatch(SecretKey secretKey) throws Exception {
+    public RandomMatchResponseDto getRandomMatch(SecretKey secretKey1, SecretKey secretKey2) throws Exception {
         MatchInfo matchInfo = userMatchRepository.findRandomMatchInfo().get(0);
         while (matchInfo.getInfo().getGameDuration() < 900) {
             matchInfo = userMatchRepository.findRandomMatchInfo().get(0);
@@ -40,25 +42,33 @@ public class MatchPredictionService {
             }
             participants.add(
                     ParticipantDto.builder()
-                            .enemyMissingPings(encryptData(secretKey, String.valueOf(p.getEnemyMissingPings()), iv))
-                            .championName(encryptData(secretKey, p.getChampionName(), iv))
-                            .individualPosition(encryptData(secretKey, p.getIndividualPosition(), iv))
-                            .nickName(encryptData(secretKey, nickName, iv))
-                            .riotIdTagline(encryptData(secretKey, p.getRiotIdTagline(), iv))
-                            .kills(encryptData(secretKey, String.valueOf(p.getKills()), iv))
-                            .deaths(encryptData(secretKey, String.valueOf(p.getDeaths()), iv))
-                            .assists(encryptData(secretKey,String.valueOf(p.getAssists()), iv))
-                            .firstBloodKill(encryptData(secretKey, String.valueOf(p.isFirstBloodKill()), iv))
-                            .win(encryptData(secretKey, String.valueOf(p.isWin()), iv))
+                            .enemyMissingPings(encryptData(secretKey1, String.valueOf(p.getEnemyMissingPings()), iv))
+                            .championName(encryptData(secretKey1, p.getChampionName(), iv))
+                            .individualPosition(encryptData(secretKey1, p.getIndividualPosition(), iv))
+                            .nickName(encryptData(secretKey1, nickName, iv))
+                            .riotIdTagline(encryptData(secretKey1, p.getRiotIdTagline(), iv))
+                            .kills(encryptData(secretKey1, String.valueOf(p.getKills()), iv))
+                            .deaths(encryptData(secretKey1, String.valueOf(p.getDeaths()), iv))
+                            .assists(encryptData(secretKey1,String.valueOf(p.getAssists()), iv))
+                            .firstBloodKill(encryptData(secretKey1, String.valueOf(p.isFirstBloodKill()), iv))
+                            .win(encryptData(secretKey1, String.valueOf(p.isWin()), iv))
                             .build());
         }
+        ObjectMapper objectMapper = new ObjectMapper();
+        byte[] p = encryptData(secretKey2, objectMapper.writeValueAsString(participants), iv);
 
+        byte[] key1 = secretKey1.getEncoded();
+        byte[] key2 = secretKey2.getEncoded();
+        byte[] amp = "&&".getBytes();
+        ByteBuffer byteBuffer = ByteBuffer.allocate(key1.length + key2.length + amp.length);
+        byteBuffer.put(key1);
+        byteBuffer.put(amp);
+        byteBuffer.put(key2);
         return RandomMatchResponseDto.builder()
-                .matchId(encryptData(secretKey, String.valueOf(matchInfo.getMatchId()), iv))
-                .gameDuration(encryptData(secretKey, String.valueOf(matchInfo.getInfo().getGameDuration()), iv))
-                .gameVersion(matchInfo.getInfo().getGameVersion())
-                .participants(participants)
-                .secretKey(secretKey.getEncoded())
+                .matchId(encryptData(secretKey1, String.valueOf(matchInfo.getMatchId()), iv))
+                .gameDuration(encryptData(secretKey1, String.valueOf(matchInfo.getInfo().getGameDuration()), iv))
+                .participants(p)
+                .matchInfo(byteBuffer.array())
                 .match(iv)
                 .tier(matchInfo.getTier())
                 .build();
