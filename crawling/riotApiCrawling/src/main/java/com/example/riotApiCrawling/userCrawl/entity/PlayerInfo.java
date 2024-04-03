@@ -3,6 +3,8 @@ package com.example.riotApiCrawling.userCrawl.entity;
 import com.example.riotApiCrawling.audit.Auditable;
 import jakarta.persistence.*;
 
+import java.util.Objects;
+
 @Entity
 @Table(name = "player_info", uniqueConstraints = {
         @UniqueConstraint(columnNames = {"summoner_name", "tag_line"})
@@ -11,7 +13,6 @@ public class PlayerInfo extends Auditable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer playerId;
-
     String puuid;
     String tagLine;
     String leagueId;
@@ -26,13 +27,13 @@ public class PlayerInfo extends Auditable {
     int leaguePoints;
     int wins;
     int losses;
-    int apiKeyId;
+    Long apiKeyId;
 
-    public int getApiKeyId() {
+    public Long getApiKeyId() {
         return apiKeyId;
     }
 
-    public void setApiKeyId(int apiKeyId) {
+    public void setApiKeyId(Long apiKeyId) {
         this.apiKeyId = apiKeyId;
     }
 
@@ -172,22 +173,33 @@ public class PlayerInfo extends Auditable {
     @Override
     public String toString() {
         return "PlayerInfo{" +
-                "playerId='" + playerId + '\'' +
+                "playerId=" + playerId +
                 ", puuid='" + puuid + '\'' +
                 ", tagLine='" + tagLine + '\'' +
-                ", leagueId='" + leagueId + '\'' +
-                ", queueType='" + queueType + '\'' +
                 ", tier='" + tier + '\'' +
                 ", rank='" + rank + '\'' +
+                ", apiKeyId=" + apiKeyId + '\'' +
+                ", leagueId='" + leagueId + '\'' +
+                ", queueType='" + queueType + '\'' +
                 ", summonerId='" + summonerId + '\'' +
                 ", summonerName='" + summonerName + '\'' +
                 ", leaguePoints=" + leaguePoints +
                 ", wins=" + wins +
                 ", losses=" + losses +
-                ", veteran=" + veteran +
-                ", inactive=" + inactive +
-                ", freshBlood=" + freshBlood +
-                ", hotStreak=" + hotStreak +
                 '}';
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PlayerInfo that = (PlayerInfo) o;
+        return Objects.equals(playerId, that.playerId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(playerId);
     }
 }
