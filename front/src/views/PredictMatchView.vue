@@ -11,6 +11,7 @@
             :isRightTeam="false"
             :currentHint="currentHints"
             :tier="tier"
+            :finishRound="finishRound"
           />
         </div>
         <div class="match-info">
@@ -33,6 +34,7 @@
             :isRightTeam="true"
             :currentHint="currentHints"
             :tier="tier"
+            :finishRound="finishRound"
           />
         </div>
       </div>
@@ -129,6 +131,8 @@ const key2 = ref();
 const match = ref();
 const decoder = new TextDecoder();
 const tier = ref("");
+const finishRound = ref(false);
+const positionOrder = ["TOP", "JUNGLE", "MIDDLE", "BOTTOM", "UTILITY"];
 
 //소리관련
 const correctAudioPlayer = ref(null);
@@ -139,6 +143,15 @@ const correctSrc = ref(
 const wrongSrc = ref(
   new URL("/src/assets/sounds/wrong.mp3", import.meta.url).href
 );
+
+function sortByPosition(participants) {
+  return participants.sort((a, b) => {
+    return (
+      positionOrder.indexOf(a.individualPosition) -
+      positionOrder.indexOf(b.individualPosition)
+    );
+  });
+}
 
 const getRankImage = () => {
   const tierImg =
@@ -198,6 +211,7 @@ const decryptData = async (data, key) => {
 
 const fetchMatchData = async () => {
   try {
+    finishRound.value = false;
     currentHints.value = 0;
     const response = await randomMatch();
     matchData.value = response.data;
@@ -222,8 +236,8 @@ const fetchMatchData = async () => {
     tier.value = response.data.tier;
     matchTime.value = calculateGameTime(time);
     // 승리 팀과 패배 팀을 분류하기 위한 임시 배열
-    const winTeam = [];
-    const loseTeam = [];
+    let winTeam = [];
+    let loseTeam = [];
     const participantsArray = await decryptData(
       response.data.participants,
       key2.value
@@ -289,6 +303,9 @@ const fetchMatchData = async () => {
       }
     }
 
+    winTeam = sortByPosition(winTeam);
+    loseTeam = sortByPosition(loseTeam);
+
     if (Math.random() < 0.5) {
       teamOnePlayers.value = winTeam; // 승리 팀을 teamOnePlayers에 할당
       teamTwoPlayers.value = loseTeam; // 패배 팀을 teamTwoPlayers에 할당
@@ -328,6 +345,7 @@ const selectTeam = async (team) => {
   const useHintThisRound = currentHints.value;
   showAnswerFeedback.value = true; // 정답 피드백을 보여주기
   currentHints.value = 4;
+  finishRound.value = true;
 
   //정답처리결과에따른 소리출력
   if (correctAnswer.value) {
@@ -338,13 +356,13 @@ const selectTeam = async (team) => {
 
   await new Promise((resolve) => setTimeout(resolve, 5000));
 
-  showAnswerFeedback.value = false; // 피드백 숨김
-
   if (team[0].win) {
     score.value += 5 - useHintThisRound;
     if (currentRound.value < totalRounds) {
       currentRound.value++;
-      fetchMatchData();
+      await fetchMatchData();
+
+      showAnswerFeedback.value = false; // 피드백 숨김
     } else {
       showRankModal.value = true;
       rank.value = response.data;

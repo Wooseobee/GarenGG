@@ -14,7 +14,9 @@
           :key="index"
           :class="{ message: true, me: message.me, other: !message.me }"
         >
-          <div class="message-userId">{{ message.userId }} ({{ message.time }})</div>
+          <div class="message-userId">
+            {{ message.userId }} ({{ message.time }})
+          </div>
           <div class="message-content">{{ message.content }}</div>
         </div>
       </div>
@@ -73,10 +75,84 @@ const adjectives = [
   "사랑스러운",
 ];
 
-const champions = ["가렌", "갈리오", "갱플랭크", "그라가스", "그레이브즈", "나르", "나미", "나서스", "니달리", "녹턴", "다리우스", "드레이븐", "라이즈", "럭스", "람머스", "럼블", "레오나", "렝가", "루시안",
-"룰루", "리븐", "말자하", "말파이트", "밀리오", "미스포츈", "바드", "바루스", "베이가", "바이", "베이가", "베인", "벡스", "벨베스", "벨코즈", "브라움", "브라이어", "브랜드", "뽀삐", "사미라", "사이온", "샤코", "세라핀", "세트", "소나", "소라카", "쉔",
-"쉬바나", "스몰더", "스웨인", "스카너", "시비르", "아무무", "아리", "쓰레쉬", "아트록스", "애쉬", "애니", "오공", "야스오", "올라프", "워윅", "유미", "잔나", "초가스", "징크스", "카직스", "케일", "타릭", "트런들", "티모", "피오라", "피즈", "판테온",
-"흐웨이", "헤카림", "피들스틱"];
+const champions = [
+  "가렌",
+  "갈리오",
+  "갱플랭크",
+  "그라가스",
+  "그레이브즈",
+  "나르",
+  "나미",
+  "나서스",
+  "니달리",
+  "녹턴",
+  "다리우스",
+  "드레이븐",
+  "라이즈",
+  "럭스",
+  "람머스",
+  "럼블",
+  "레오나",
+  "렝가",
+  "루시안",
+  "룰루",
+  "리븐",
+  "말자하",
+  "말파이트",
+  "밀리오",
+  "미스포츈",
+  "바드",
+  "바루스",
+  "베이가",
+  "바이",
+  "베이가",
+  "베인",
+  "벡스",
+  "벨베스",
+  "벨코즈",
+  "브라움",
+  "브라이어",
+  "브랜드",
+  "뽀삐",
+  "사미라",
+  "사이온",
+  "샤코",
+  "세라핀",
+  "세트",
+  "소나",
+  "소라카",
+  "쉔",
+  "쉬바나",
+  "스몰더",
+  "스웨인",
+  "스카너",
+  "시비르",
+  "아무무",
+  "아리",
+  "쓰레쉬",
+  "아트록스",
+  "애쉬",
+  "애니",
+  "오공",
+  "야스오",
+  "올라프",
+  "워윅",
+  "유미",
+  "잔나",
+  "초가스",
+  "징크스",
+  "카직스",
+  "케일",
+  "타릭",
+  "트런들",
+  "티모",
+  "피오라",
+  "피즈",
+  "판테온",
+  "흐웨이",
+  "헤카림",
+  "피들스틱",
+];
 
 const minimized = ref(true);
 const client = ref(null);
@@ -118,31 +194,25 @@ onMounted(async () => {
       );
     },
     onStompError: () => {
-      console.log("STOMP connection error");
+      // console.log("STOMP connection error");
     },
-    
   });
 
   client.value.activate();
 
   try {
-    const response = await localAxios.get(
-      `/chat`
-    );
+    const response = await localAxios.get(`/chat`);
 
     // 성공적으로 데이터를 받아온 경우
-    mList.value = response.data.reverse().map(
-      (chat) => ({
-        me: chat.userId == userId.value,
-        content: chat.content,
-        userId: chat.userId,
-        time: chat.time
-      })
-    );
+    mList.value = response.data.reverse().map((chat) => ({
+      me: chat.userId == userId.value,
+      content: chat.content,
+      userId: chat.userId,
+      time: chat.time,
+    }));
   } catch (error) {
     console.error("API 호출 중 오류 발생!:", error);
   }
-  
 });
 
 function toggleMinimize() {
@@ -156,7 +226,7 @@ function onMessageReceivedFromSocket(payload) {
     me: chat.userId === userId.value,
     content: chat.content,
     userId: chat.userId,
-    time: chat.time
+    time: chat.time,
   };
   mList.value.push(newMessage);
   if (mList.value.length > 100) {
@@ -166,7 +236,6 @@ function onMessageReceivedFromSocket(payload) {
 
 // 메세지 보내는 로직
 function sendMessageToSocket() {
-
   if (!message.value.trim()) return;
   var chatMessage = {
     roomId: 1,
@@ -180,7 +249,6 @@ function sendMessageToSocket() {
     headers: {},
   });
 }
-
 </script>
 
 <style scoped>

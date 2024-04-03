@@ -41,10 +41,10 @@ const backgroundStyle = computed(() => {
 
 onMounted(() => {
   backGroundStore.updateBackgroundImage("");
-  console.log(
-    "backGroundStore.backgroundImageUrl :",
-    backGroundStore.backgroundImageUrl
-  );
+  // console.log(
+  //   "backGroundStore.backgroundImageUrl :",
+  //   backGroundStore.backgroundImageUrl
+  // );
 });
 </script>
 

@@ -66,7 +66,7 @@ const audiolink = computed(() => {
   // for (let i = 0; i < championKeys.length; i++) {
   //   champinfo.value[championIds[i]] = championKeys[i];
   // }
-  console.log("Champinfo 잘 저장되나?", champinfo.value);
+  // console.log("Champinfo 잘 저장되나?", champinfo.value);
   const champkey = champinfo.value[props.champname];
   return `https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/ko_kr/v1/champion-choose-vo/${champkey}.ogg`;
 });

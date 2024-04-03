@@ -14,7 +14,9 @@
     />
     <div class="player-info">
       <h5>{{ player.championName }}</h5>
-      <p>{{ player.nickName }} #{{ player.riotIdTagline }}</p>
+      <p v-if="finishRound">
+        {{ player.nickName }} #{{ player.riotIdTagline }}
+      </p>
     </div>
     <div class="player-stats">
       <div v-if="currentHint >= 2 && player.firstBloodKill" class="firstBlood">
@@ -38,6 +40,7 @@ const props = defineProps({
   isRightTeam: Boolean, // 오른쪽 팀 여부를 결정하는 새로운 prop
   currentHint: Number,
   tier: String,
+  finishRound: Boolean,
 });
 
 // 이미지 경로를 처리하는 메서드
