@@ -11,6 +11,7 @@
             :isRightTeam="false"
             :currentHint="currentHints"
             :tier="tier"
+            :finishRound="finishRound"
           />
         </div>
         <div class="match-info">
@@ -33,6 +34,7 @@
             :isRightTeam="true"
             :currentHint="currentHints"
             :tier="tier"
+            :finishRound="finishRound"
           />
         </div>
       </div>
@@ -129,6 +131,7 @@ const key2 = ref();
 const match = ref();
 const decoder = new TextDecoder();
 const tier = ref("");
+const finishRound = ref(false);
 
 //소리관련
 const correctAudioPlayer = ref(null);
@@ -198,6 +201,7 @@ const decryptData = async (data, key) => {
 
 const fetchMatchData = async () => {
   try {
+    finishRound.value = false;
     currentHints.value = 0;
     const response = await randomMatch();
     matchData.value = response.data;
@@ -327,7 +331,8 @@ const selectTeam = async (team) => {
   correctAnswer.value = team[0].win; // 승리 팀을 선택했는지 여부
   const useHintThisRound = currentHints.value;
   showAnswerFeedback.value = true; // 정답 피드백을 보여주기
-  currentHints.value = 5;
+  currentHints.value = 4;
+  finishRound.value = true;
 
   //정답처리결과에따른 소리출력
   if (correctAnswer.value) {
@@ -338,13 +343,13 @@ const selectTeam = async (team) => {
 
   await new Promise((resolve) => setTimeout(resolve, 5000));
 
-  showAnswerFeedback.value = false; // 피드백 숨김
-
   if (team[0].win) {
     score.value += 5 - useHintThisRound;
     if (currentRound.value < totalRounds) {
       currentRound.value++;
-      fetchMatchData();
+      await fetchMatchData();
+
+      showAnswerFeedback.value = false; // 피드백 숨김
     } else {
       showRankModal.value = true;
       rank.value = response.data;
