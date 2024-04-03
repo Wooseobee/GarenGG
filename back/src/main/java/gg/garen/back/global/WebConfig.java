@@ -14,7 +14,8 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowedOrigins(
                         "https://j10a605.p.ssafy.io",
                         "http://localhost:5173",
-                        "https://garengg.shop"
+                        "https://garengg.shop",
+                        "https://www.garengg.shop"
                 )
                 .allowedMethods("GET", "POST", "OPTIONS");
     }
