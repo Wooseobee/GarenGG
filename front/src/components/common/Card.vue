@@ -34,9 +34,11 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useChampionStore } from "@/stores/championStore.js";
+import { useBackGroundStore } from "@/stores/backGroundStore";
+const backGroundStore = useBackGroundStore();
 const championStore = useChampionStore();
 const router = useRouter();
 const props = defineProps({
@@ -48,19 +50,24 @@ const props = defineProps({
     type: String,
     required: false,
   },
-  rank: Number, // 순위 prop 추가
+  rank: Number, // 순위 prop 추가,
+  cardType: {
+    type: String,
+    required: false,
+  },
 });
 const { championKeys, championIds } = championStore;
 
 // champinfo 객체 생성
-
+const champinfo = ref({});
 // 소리
 const audiolink = computed(() => {
-  const champinfo = {};
-  for (let i = 0; i < championKeys.length; i++) {
-    champinfo[championIds[i]] = championKeys[i];
-  }
-  const champkey = champinfo[props.champname];
+  // const champinfo = {};
+  // for (let i = 0; i < championKeys.length; i++) {
+  //   champinfo.value[championIds[i]] = championKeys[i];
+  // }
+  console.log("Champinfo 잘 저장되나?", champinfo.value);
+  const champkey = champinfo.value[props.champname];
   return `https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/ko_kr/v1/champion-choose-vo/${champkey}.ogg`;
 });
 const playSound = (sound) => {
@@ -73,6 +80,12 @@ const playSound = (sound) => {
 // 카드 뒤집기
 const isFlipped = ref(false);
 const toggleCard = () => {
+  if (props.cardType != null) {
+    backGroundStore.updateBackgroundImage(props.champname);
+  } else {
+    console.log("cardTypenotnull : ", props.cardType);
+  }
+
   isEffect.value = false;
   if (!isFlipped.value) {
     setTimeout(() => {
@@ -98,6 +111,12 @@ const stopEffect = () => {
 };
 const champImageUrl = computed(() => {
   return `https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${props.champname}_0.jpg`;
+});
+
+onMounted(() => {
+  for (let i = 0; i < championKeys.length; i++) {
+    champinfo.value[championIds[i]] = championKeys[i];
+  }
 });
 </script>
 
