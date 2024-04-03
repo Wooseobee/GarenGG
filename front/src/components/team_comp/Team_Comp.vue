@@ -7,6 +7,7 @@
             v-for="(champion, index) in transformedChampions"
             :key="index"
             :champname="champion.name"
+            :cardType="cardType"
           />
         </div>
       </div>
@@ -17,6 +18,8 @@
 <script setup>
 import Card from "../common/Card.vue";
 import { computed, ref } from "vue";
+
+const cardType = ref("champRec");
 
 const props = defineProps({
   champions: Array,
