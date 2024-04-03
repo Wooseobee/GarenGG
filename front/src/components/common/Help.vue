@@ -9,11 +9,11 @@
   >
     <div class="modal-content">
       <p>
-        {{ modalContent }}
+        ☞ {{ modalContent }}
         <br />
-        {{ modalContent2 }}
+        ☞ {{ modalContent2 }}
         <br />
-        {{ modalContent3 }}
+        ☞ {{ modalContent3 }}
       </p>
     </div>
   </div>

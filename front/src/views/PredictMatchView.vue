@@ -124,8 +124,9 @@ const correctAnswer = ref(false); // 정답 여부
 const showAnswerFeedback = ref(false); // 정답 피드백 표시 여부
 const matchTime = ref("0");
 const nicknameInput = ref(null);
-const key = ref();
-const iv = ref();
+const key1 = ref();
+const key2 = ref();
+const match = ref();
 const decoder = new TextDecoder();
 const tier = ref("");
 
@@ -164,10 +165,10 @@ const goBack = () => {
   router.push("/playground");
 };
 
-async function decryptMessage(ciphertext) {
+async function decryptMessage(ciphertext, key) {
   const decryptedCiphertext = await window.crypto.subtle.decrypt(
-    { name: "AES-GCM", iv: iv.value },
-    key.value,
+    { name: "AES-GCM", iv: match.value },
+    key,
     ciphertext
   );
   return decryptedCiphertext;
@@ -186,10 +187,11 @@ async function importKey(arrayBuffer) {
   );
 }
 
-const decryptData = async (data) => {
+const decryptData = async (data, key) => {
   return decoder.decode(
     await decryptMessage(
-      Uint8Array.from(atob(data), (c) => c.charCodeAt(0)).buffer
+      Uint8Array.from(atob(data), (c) => c.charCodeAt(0)).buffer,
+      key
     )
   );
 };
@@ -200,28 +202,42 @@ const fetchMatchData = async () => {
     const response = await randomMatch();
     matchData.value = response.data;
 
-    const secretKeyBuffer = Uint8Array.from(
-      atob(response.data.secretKey),
-      (c) => c.charCodeAt(0)
-    ).buffer;
-    const importedKey = await importKey(secretKeyBuffer);
-    key.value = importedKey;
-    iv.value = Uint8Array.from(atob(response.data.iv), (c) =>
+    const secretKeyBuffer = atob(response.data.matchInfo);
+    const [secretKey1, secretKey2] = secretKeyBuffer.split("&&");
+    key1.value = await importKey(
+      Uint8Array.from(secretKey1, (c) => c.charCodeAt(0)).buffer
+    );
+
+    key2.value = await importKey(
+      Uint8Array.from(secretKey2, (c) => c.charCodeAt(0)).buffer
+    );
+
+    match.value = Uint8Array.from(atob(response.data.match), (c) =>
       c.charCodeAt(0)
     ).buffer;
 
-    const time = parseInt(await decryptData(response.data.gameDuration));
+    const time = parseInt(
+      await decryptData(response.data.gameDuration, key1.value)
+    );
     tier.value = response.data.tier;
     matchTime.value = calculateGameTime(time);
     // 승리 팀과 패배 팀을 분류하기 위한 임시 배열
     const winTeam = [];
     const loseTeam = [];
+    const participantsArray = await decryptData(
+      response.data.participants,
+      key2.value
+    );
+    const participants = JSON.parse(participantsArray);
 
     // API 응답에서 각 참가자를 순회하며 승리 여부에 따라 분류
-    for (const participant of response.data.participants) {
+    for (const participant of participants) {
       let idx = 0;
 
-      const championId = await decryptData(participant.championName);
+      const championId = await decryptData(
+        participant.championName,
+        key1.value
+      );
 
       for (let index = 0; index < championStore.championIds.length; index++) {
         if (championId === championStore.championIds[index]) {
@@ -231,20 +247,25 @@ const fetchMatchData = async () => {
       }
 
       const enemyMissingPings = await decryptData(
-        participant.enemyMissingPings
+        participant.enemyMissingPings,
+        key1.value
       );
       const individualPosition = await decryptData(
-        participant.individualPosition
+        participant.individualPosition,
+        key1.value
       );
-      const nickName = await decryptData(participant.nickName);
-      const riotIdTagline = await decryptData(participant.riotIdTagline);
-      const kills = await decryptData(participant.kills);
-      const deaths = await decryptData(participant.deaths);
-      const assists = await decryptData(participant.assists);
+      const nickName = await decryptData(participant.nickName, key1.value);
+      const riotIdTagline = await decryptData(
+        participant.riotIdTagline,
+        key1.value
+      );
+      const kills = await decryptData(participant.kills, key1.value);
+      const deaths = await decryptData(participant.deaths, key1.value);
+      const assists = await decryptData(participant.assists, key1.value);
       const firstBloodKill = JSON.parse(
-        await decryptData(participant.firstBloodKill)
+        await decryptData(participant.firstBloodKill, key1.value)
       );
-      const win = JSON.parse(await decryptData(participant.win));
+      const win = JSON.parse(await decryptData(participant.win, key1.value));
 
       const participantData = {
         enemyMissingPings,
@@ -306,7 +327,7 @@ const selectTeam = async (team) => {
   correctAnswer.value = team[0].win; // 승리 팀을 선택했는지 여부
   const useHintThisRound = currentHints.value;
   showAnswerFeedback.value = true; // 정답 피드백을 보여주기
-  currentHints.value = 4;
+  currentHints.value = 5;
 
   //정답처리결과에따른 소리출력
   if (correctAnswer.value) {

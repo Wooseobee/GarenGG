@@ -14,7 +14,9 @@
     />
     <div class="player-info">
       <h5>{{ player.championName }}</h5>
-      <p>{{ player.nickName }} #{{ player.riotIdTagline }}</p>
+      <p v-if="currentHint >= 5">
+        {{ player.nickName }} #{{ player.riotIdTagline }}
+      </p>
     </div>
     <div class="player-stats">
       <div v-if="currentHint >= 2 && player.firstBloodKill" class="firstBlood">
