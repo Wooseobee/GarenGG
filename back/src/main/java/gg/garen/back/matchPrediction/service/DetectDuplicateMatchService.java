@@ -15,11 +15,10 @@ public class DetectDuplicateMatchService {
     }
 
     public void markMatchId(String id) {
-        matchId.put(id, true);
-        for (String s : matchId.keySet()) {
-            System.out.println(s);
+        if (matchId.size() >= 10_000) {
+            matchId.clear();
         }
-        System.out.println("----");
+        matchId.put(id, true);
     }
     @Scheduled(cron = "0 0 0 * * *")
     public void clearHashMapAtMidnight() {
