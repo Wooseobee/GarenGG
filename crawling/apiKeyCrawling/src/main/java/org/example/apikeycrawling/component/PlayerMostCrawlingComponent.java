@@ -67,104 +67,198 @@ public class PlayerMostCrawlingComponent {
 
     }
 
-    public void crawlingVersion2() {
+    public void crawlingVersion2(int startPageNumber, int endPageNumber) {
         StringBuilder sb;
-        HashMap<String, HashMap<String, WinLose>> oldPlayers = new HashMap<>();
 
-
-        readPlayerMost(oldPlayers);
-
-        int pageNumber = 0;
-        int pageSize = 10000;
-        Page<PlayerMatch> page;
-
-
-        do {
-            page = playerMatchRepository.findAll(PageRequest.of(pageNumber, pageSize));
-            List<PlayerMatch> foundPagePlayerMatchs = page.getContent();
-
-            for (PlayerMatch foundPagePlayerMatch : foundPagePlayerMatchs) {
-                for (PlayerMatch.ParticipantDto participant : foundPagePlayerMatch.getInfo().getParticipants()) {
-
-                    String curName = participant.getRiotIdGameName() + "-" + participant.getRiotIdTagline();
-
-                    if (!newPlayers.containsKey(curName))
-                        newPlayers.put(curName, new HashMap<>());
-
-                    if (!newPlayers.get(curName).containsKey(participant.getChampionName()))
-                        newPlayers.get(curName).put(participant.getChampionName(), new WinLose());
-
-                    if (participant.getWin()) {
-                        newPlayers.get(curName).get(participant.getChampionName()).setWin(
-                                newPlayers.get(curName).get(participant.getChampionName()).getWin() + 1
-                        );
-                    } else {
-                        newPlayers.get(curName).get(participant.getChampionName()).setLose(
-                                newPlayers.get(curName).get(participant.getChampionName()).getLose() + 1
-                        );
-                    }
-                }
-            }
-
-            pageNumber++; // 다음 페이지로
-            sb = new StringBuilder();
-            sb.append("현재 시간: ").append(GlobalConstants.formatter.format(new Date()))
-                    .append(" page.getTotalPages() = " + page.getTotalPages())
-                    .append(" 중 pageNumber = ").append(pageNumber).append(" 완료");
-            System.out.println(sb);
-
-        } while (pageNumber < page.getTotalPages()); // 전체 페이지 수에 도달할 때까지 반복
-//        } while (pageNumber < 5); // 전체 페이지 수에 도달할 때까지 반복
-
-
-        List<PlayerInfoTest> findedPlayerInfoTests = playerInfoTestRepository.findAll();
+        ////////////////////////////// 시작 ////////////////////////////////
         sb = new StringBuilder();
         sb.append("현재 시간: ").append(GlobalConstants.formatter.format(new Date()))
-                .append(" findedPlayerInfoTests 완료");
+                .append(" startPageNumber = ").append(startPageNumber)
+                .append(" endPageNumber = ").append(endPageNumber).append(" 시작");
         System.out.println(sb);
 
+        ////////////////////////////// foundPlayerInfoTests ////////////////////////////////
+        List<PlayerInfoTest> foundPlayerInfoTests = playerInfoTestRepository.findAll();
+        HashMap<Integer, PlayerInfoTest> hashMapPlayerIdPlayerInfoTest = new HashMap<>();
+        HashMap<String, PlayerInfoTest> hashMapNamePlayerInfoTest = new HashMap<>();
+        for (PlayerInfoTest foundPlayerInfoTest : foundPlayerInfoTests) {
+            hashMapPlayerIdPlayerInfoTest.put(foundPlayerInfoTest.getPlayerId(), foundPlayerInfoTest);
+            hashMapNamePlayerInfoTest.put(
+                    foundPlayerInfoTest.getSummonerName() + "-" + foundPlayerInfoTest.getTagLine(), foundPlayerInfoTest);
+        }
+        sb = new StringBuilder();
+        sb.append("현재 시간: ").append(GlobalConstants.formatter.format(new Date()))
+                .append(" foundPlayerInfoTests 완료");
+        System.out.println(sb);
+
+        ////////////////////////////// readPlayerMost ////////////////////////////////
+        HashMap<String, HashMap<String, WinLose>> oldPlayers = new HashMap<>();
+        readPlayerMost(oldPlayers, hashMapPlayerIdPlayerInfoTest);
+        sb = new StringBuilder();
+        sb.append("현재 시간: ").append(GlobalConstants.formatter.format(new Date()))
+                .append(" readPlayerMost 완료");
+        System.out.println(sb);
+
+        ////////////////////////////// readPlayerMatch ////////////////////////////////
+        HashMap<String, Boolean> visited = new HashMap<>();
+        readPlayerMatch(oldPlayers, visited, startPageNumber, endPageNumber);
+        sb = new StringBuilder();
+        sb.append("현재 시간: ").append(GlobalConstants.formatter.format(new Date()))
+                .append(" readPlayerMatch 완료");
+        System.out.println(sb);
+
+        ////////////////////////////// newPlayerMosts ////////////////////////////////
         List<PlayerMost> newPlayerMosts = new ArrayList<>();
-        for (PlayerInfoTest findedPlayerInfoTest : findedPlayerInfoTests) {
-
-            String curName = findedPlayerInfoTest.getSummonerName() + "-" + findedPlayerInfoTest.getTagLine();
-
-            if (newPlayers.containsKey(curName))
-                calculate(newPlayers.get(curName), findedPlayerInfoTest, newPlayerMosts);
+        for (String curName : oldPlayers.keySet()) {
+            if (!hashMapNamePlayerInfoTest.containsKey(curName))
+                continue;
+            if(!visited.get(curName))
+                continue;
+            calculate(oldPlayers.get(curName), newPlayerMosts, hashMapNamePlayerInfoTest, curName);
         }
         sb = new StringBuilder();
         sb.append("현재 시간: ").append(GlobalConstants.formatter.format(new Date()))
                 .append(" newPlayerMosts 완료");
         System.out.println(sb);
 
-        // 한번에 저장
-        playerMostRepository.saveAll(newPlayerMosts);
+        ////////////////////////////// saveAll ////////////////////////////////
+        List<PlayerMost> temp = new ArrayList<>();
 
+        int batchSize = 10000;
+        int totalSize = newPlayerMosts.size();
+        for (int i = 0; i < totalSize; i++) {
+            temp.add(newPlayerMosts.get(i));
 
-        int chunkSize = 1000; // Define your chunk size
-        List<List<PlayerMost>> chunks = Lists.partition(newPlayerMosts, chunkSize);
+            if ((i + 1) % batchSize == 0 || i == totalSize - 1) {
+                playerMostRepository.saveAll(temp);
+                temp.clear();
 
-        int totalChunks = chunks.size();
-        for (int i = 0; i < totalChunks; i++) {
+                // 처리된 데이터의 비율(퍼센트) 계산
+                double percentCompleted = ((double) (i + 1) / totalSize) * 100;
 
-            playerMostRepository.saveAll(chunks.get(i));
+                // 현재 시간과 처리된 데이터의 비율(퍼센트)를 출력
+                String progressMessage = String.format("현재 시간: %s, 완료: %.2f%%",
+                        GlobalConstants.formatter.format(new Date()), percentCompleted);
 
-            int progress = (int) ((i + 1) * 100.0 / totalChunks);
+                System.out.println(progressMessage);
+            }
+        }
+    }
+
+    public void readPlayerMost(HashMap<String, HashMap<String, WinLose>> oldPlayers,
+                               HashMap<Integer, PlayerInfoTest> hashMapPlayerIdPlayerInfoTest) {
+        StringBuilder sb;
+        int pageNumber = 0;
+        int pageSize = 10000;
+        Page<PlayerMost> page;
+
+        do {
+            page = playerMostRepository.findAll(PageRequest.of(pageNumber, pageSize));
+            List<PlayerMost> curPlayerMosts = page.getContent();
+
+            // 한명씩
+            for (PlayerMost curPlayerMost : curPlayerMosts) {
+
+                HashMap<String, WinLose> oldPlayer = new HashMap<>();
+
+                // 모스트 하나씩
+                for (PlayerMost.MostData curMostData : curPlayerMost.getMostDatas()) {
+
+                    oldPlayer.put(curMostData.getChampion(), new WinLose());
+
+                    Pattern pattern = Pattern.compile("(\\d+)(W|L)");
+                    Matcher matcher = pattern.matcher(curMostData.getGame());
+
+                    while (matcher.find()) {
+                        if (matcher.group(2).equals("W"))
+                            oldPlayer.get(curMostData.getChampion()).setWin(Integer.valueOf(matcher.group(1)));
+                        else if (matcher.group(2).equals("L"))
+                            oldPlayer.get(curMostData.getChampion()).setLose(Integer.valueOf(matcher.group(1)));
+                    }
+                }
+
+                oldPlayers.put(hashMapPlayerIdPlayerInfoTest.get(curPlayerMost.getPlayerId()).getSummonerName()
+                                + "-"
+                                + hashMapPlayerIdPlayerInfoTest.get(curPlayerMost.getPlayerId()).getTagLine()
+                        , oldPlayer);
+            }
+
+            pageNumber++;
 
             sb = new StringBuilder();
             sb.append("현재 시간: ").append(GlobalConstants.formatter.format(new Date()))
-                    .append(" Progress: " + progress + "%");
+                    .append(" page.getTotalPages() = " + page.getTotalPages())
+                    .append(" 중 pageNumber = ").append(pageNumber).append(" 완료");
             System.out.println(sb);
 
-        }
+        } while (pageNumber < page.getTotalPages());
+    }
+
+    public void readPlayerMatch(HashMap<String, HashMap<String, WinLose>> oldPlayers, HashMap<String, Boolean> visited, int startPageNumber, int endPageNumber) {
+
+        StringBuilder sb;
+        int pageNumber = startPageNumber;
+        int pageSize = 10000;
+        Page<PlayerMatch> page;
+
+        do {
+            page = playerMatchRepository.findAll(PageRequest.of(pageNumber, pageSize));
+            List<PlayerMatch> curPlayerMatchs = page.getContent();
+
+            // 한 경기 씩
+            for (PlayerMatch curPlayerMatch : curPlayerMatchs) {
+
+                // 한명씩
+                for (PlayerMatch.ParticipantDto participant : curPlayerMatch.getInfo().getParticipants()) {
+
+                    String curName = participant.getRiotIdGameName() + "-" + participant.getRiotIdTagline();
+
+                    visited.put(curName,true);
+
+                    if (!oldPlayers.containsKey(curName))
+                        oldPlayers.put(curName, new HashMap<>());
+
+                    if (!oldPlayers.get(curName).containsKey(participant.getChampionName()))
+                        oldPlayers.get(curName).put(participant.getChampionName(), new WinLose());
+
+                    if (participant.getWin()) {
+                        oldPlayers.get(curName).get(participant.getChampionName()).setWin(
+                                oldPlayers.get(curName).get(participant.getChampionName()).getWin() + 1
+                        );
+                    } else {
+                        oldPlayers.get(curName).get(participant.getChampionName()).setLose(
+                                oldPlayers.get(curName).get(participant.getChampionName()).getLose() + 1
+                        );
+                    }
+                }
+            }
+
+            pageNumber++;
+
+            sb = new StringBuilder();
+            sb.append("현재 시간: ").append(GlobalConstants.formatter.format(new Date()))
+                    .append(" startPageNumber = ").append(startPageNumber)
+                    .append(" endPageNumber = ").append(endPageNumber)
+                    .append(" 중 pageNumber = ").append(pageNumber).append(" 완료");
+            System.out.println(sb);
+
+        } while (pageNumber < endPageNumber);
+
 
     }
 
-    public void calculate(HashMap<String, WinLose> newPlayer, PlayerInfoTest findedPlayerInfoTest, List<PlayerMost> newPlayerMosts) {
+    public void calculate(HashMap<String, WinLose> newPlayer, List<PlayerMost> newPlayerMosts, HashMap<String, PlayerInfoTest> hashMapNamePlayerInfoTest, String curName) {
 
         PlayerMost newPlayerMost = new PlayerMost();
 
         // playerId
-        newPlayerMost.setPlayerId(findedPlayerInfoTest.getPlayerId());
+        newPlayerMost.setPlayerId(hashMapNamePlayerInfoTest.get(curName).getPlayerId());
+
+        // tier
+        newPlayerMost.setTier(hashMapNamePlayerInfoTest.get(curName).getTier());
+
+        // rankNum
+        newPlayerMost.setRankNum(hashMapNamePlayerInfoTest.get(curName).getRankNum());
 
         // mostDatas
         ArrayList<PlayerMost.MostData> newMostDatas = new ArrayList<>();
@@ -242,52 +336,6 @@ public class PlayerMostCrawlingComponent {
 
         // 추가
         newPlayerMosts.add(newPlayerMost);
-    }
-
-    public void readPlayerMost(HashMap<String, HashMap<String, WinLose>> oldPlayers) {
-        StringBuilder sb;
-        int pageNumber = 0;
-        int pageSize = 100;
-        Page<PlayerMost> page;
-
-        do {
-            page = playerMostRepository.findAll(PageRequest.of(pageNumber, pageSize));
-            List<PlayerMost> curPlayerMosts = page.getContent();
-
-            // 한명씩
-            for (PlayerMost curPlayerMost : curPlayerMosts) {
-
-                HashMap<String, WinLose> newPlayer = new HashMap<>();
-                // 모스트 하나씩
-                for (PlayerMost.MostData curMostData : curPlayerMost.getMostDatas()) {
-
-                    newPlayer.put(curMostData.getChampion(), new WinLose());
-
-                    Pattern pattern = Pattern.compile("(\\d+)(W|L)");
-                    Matcher matcher = pattern.matcher(curMostData.getGame());
-
-                    while (matcher.find()) {
-                        if (matcher.group(2).equals("W"))
-                            newPlayer.get(curMostData.getChampion()).setWin(Integer.valueOf(matcher.group(1)));
-                        else if (matcher.group(2).equals("L"))
-                            newPlayer.get(curMostData.getChampion()).setLose(Integer.valueOf(matcher.group(1)));
-                    }
-                }
-                playerInfoTestReposi
-                oldPlayers.put()
-            }
-
-            pageNumber++;
-
-            sb = new StringBuilder();
-            sb.append("현재 시간: ").append(GlobalConstants.formatter.format(new Date()))
-                    .append(" page.getTotalPages() = " + page.getTotalPages())
-                    .append(" 중 pageNumber = ").append(pageNumber).append(" 완료");
-            System.out.println(sb);
-
-        } while (pageNumber < page.getTotalPages());
-
-
     }
 
 
