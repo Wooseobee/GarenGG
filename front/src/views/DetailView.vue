@@ -75,7 +75,7 @@ onMounted(async () => {
     const response = await localAxios.get(
       `/championRecommendation/${summonerName}-${tagLine}`
     );
-    console.log(response);
+    // console.log(response);
 
     // 성공적으로 데이터를 받아온 경우
     champions.value = response.data.championRecommendationDatas.map(

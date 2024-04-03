@@ -210,7 +210,7 @@ const getChampData = async (champname) => {
       method: "get",
       url: `https://ddragon.leagueoflegends.com/cdn/14.7.1/data/ko_KR/champion/${champname}.json`,
     });
-    console.log(res);
+    // console.log(res);
     champData.value = res.data.data[champname];
     passiveName.value = champData.value.passive.name;
     passiveDescription.value = champData.value.passive.description;

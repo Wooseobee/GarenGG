@@ -144,15 +144,11 @@ const positionImages = ref([
 ]);
 
 const filteredChampions = computed(() => {
-  console.log(
-    "선택챔피언 변경됨. selectedChampion.value " + selectedChampion.value
-  );
+  // console.log(
+  //   "선택챔피언 변경됨. selectedChampion.value " + selectedChampion.value
+  // );
   if (selectedChampion.value != null) {
     // selectedChampion.int = 1000;
-    console.log(
-      "seletecf,야냉ㅇ아ㅑ내값애뭔데dChampion.value : ",
-      selectedChampion.value
-    );
     return [selectedChampion.value];
   }
   // 그렇지 않은 경우, searchValue에 따라 필터링
@@ -165,19 +161,19 @@ const filteredChampions = computed(() => {
     if (/^[A-Za-z]+$/.test(searchValue.value)) {
       tmp = searchValue.value.toLowerCase();
     } else tmp = searchValue.value;
-    console.log(tmp);
+    // console.log(tmp);
     return item.id.toLowerCase().includes(tmp) || item.name.includes(tmp);
   });
 });
 
 const filteredPositionImages = computed(() => {
   if (selectedPosition.value == "") {
-    console.log("선택한 포지션 없습니다.");
-    console.log(positionImages.value);
+    // console.log("선택한 포지션 없습니다.");
+    // console.log(positionImages.value);
     return positionImages.value;
   }
 
-  console.log("선택한 포지션기반으로 필터이미지 저장합니다..");
+  // console.log("선택한 포지션기반으로 필터이미지 저장합니다..");
   return [selectedPosition.value];
 });
 
@@ -194,13 +190,13 @@ function selectChampion(champion) {
 }
 
 function selectPosition(positionImage) {
-  console.log("click!, position  : ", positionImage);
+  // console.log("click!, position  : ", positionImage);
   if (selectedPosition.value == "") {
     selectedPosition.value = positionImage;
-    console.log("selectedPosition.value : ", selectedPosition.value);
+    // console.log("selectedPosition.value : ", selectedPosition.value);
   } else {
     selectedPosition.value = "";
-    console.log("disable");
+    // console.log("disable");
   }
 }
 
@@ -212,9 +208,9 @@ function searchDuoChamp() {
   }
   backGroundStore.updateBackgroundImage(selectedChampion.value.id);
 
-  console.log(
-    "background changed, url : " + backGroundStore.backgroundImageUrl
-  );
+  // console.log(
+  //   "background changed, url : " + backGroundStore.backgroundImageUrl
+  // );
 
   router.push({
     name: "DuoRecommendationResult",
@@ -224,7 +220,7 @@ function searchDuoChamp() {
     },
   });
   // router.push("/result",selectedPosition.position, selectedChampion.value.name+"/");
-  console.log("click");
+  // console.log("click");
 }
 
 //페이지 들어올 때, 챔피언 이미지 받아오기
@@ -238,7 +234,7 @@ onMounted(() => {
     int: 100,
   }));
 
-  console.log("champions : ", champions.value);
+  // console.log("champions : ", champions.value);
   //챔피언 Id(영어이름같은거) 달라고 해서 받기
 
   //url 세팅해서

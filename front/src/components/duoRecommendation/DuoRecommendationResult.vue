@@ -115,19 +115,19 @@ const positionImages = ref([
 ]);
 
 const filteredPositionImages = computed(() => {
-  console.log("dfsdf", route.query.position);
+  // console.log("dfsdf", route.query.position);
   return positionImages.value.filter(
     (positionImage) => positionImage.position !== route.query.position
   );
 });
 
 function selectPosition(positionImage) {
-  console.log("click!, position  : ", positionImage);
+  // console.log("click!, position  : ", positionImage);
   if (selectedPosition.value != positionImage.position) {
     selectedPosition.value = positionImage.position;
-    console.log("selectedPosition.value : ", selectedPosition.value);
+    // console.log("selectedPosition.value : ", selectedPosition.value);
   } else {
-    console.log("유지");
+    //console.log("유지");
   }
 }
 
@@ -174,12 +174,12 @@ onMounted(() => {
       }
       // ID값으로 배경설정
       backgroundStore.updateBackgroundImage(id);
-      console.log(
-        "결과 발표. id : ",
-        id,
-        "이고, 백그라운드 : ",
-        backgroundStore.backgroundImageUrl
-      );
+      // console.log(
+      //   "결과 발표. id : ",
+      //   id,
+      //   "이고, 백그라운드 : ",
+      //   backgroundStore.backgroundImageUrl
+      // );
       if (!data || data.length == 0) {
         resultChampions.value = null;
         setTimeout(() => {
@@ -189,7 +189,7 @@ onMounted(() => {
           }, 1200);
         }, 2000); // 3초 후 로고 숨김
 
-        console.log("이걸로행시켜");
+        // console.log("이걸로행시켜");
         return;
       }
       resultChampions.value = data.reduce((acc, { position, champion, id }) => {
@@ -211,12 +211,12 @@ onMounted(() => {
       if (resultChampions.value.length >= 1)
         selectedPosition.value = resultChampions.value[0].position;
 
-      console.log(
-        "챔피언불러오기완료. resultChampions: ",
-        resultChampions.value
-      );
-      console.log("champions.value[0] ", resultChampions.value[0]);
-      console.log("시작 포지션 설정 완료. ", selectedPosition.value);
+      // console.log(
+      //   "챔피언불러오기완료. resultChampions: ",
+      //   resultChampions.value
+      // );
+      // console.log("champions.value[0] ", resultChampions.value[0]);
+      // console.log("시작 포지션 설정 완료. ", selectedPosition.value);
     },
     (err) => {
       console.log("듀챔추가져오는중 에러발생, err : ", err);
