@@ -14,10 +14,11 @@ public class UserMatchController {
 
     private final UserMatchService userMatchService;
 
-    @GetMapping("/match/{startTime}/{endTime}")
-    public String match(@PathVariable("startTime") String startTime,
+    @GetMapping("/match/{index}/{startTime}/{endTime}")
+    public String match(@PathVariable("index") int index,
+                        @PathVariable("startTime") String startTime,
                         @PathVariable("endTime") String endTime) throws InterruptedException {
-        userMatchService.saveUserMatch(startTime, endTime);
+        userMatchService.saveUserMatch(index, startTime, endTime);
         return "OK";
     }
 }

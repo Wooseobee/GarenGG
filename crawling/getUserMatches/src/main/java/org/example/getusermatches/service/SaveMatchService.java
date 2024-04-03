@@ -7,6 +7,7 @@ import org.example.getusermatches.repository.UserMatchRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
@@ -56,20 +57,21 @@ public class SaveMatchService {
                 if (key.get() >= 100_000_000) {
                     key.set(0);
                 }
-                url += API_KEY.get(curKey);
-                ResponseEntity<MatchInfo> response = restTemplate.getForEntity(url, MatchInfo.class);
+                ResponseEntity<MatchInfo> response = restTemplate.getForEntity(url + API_KEY.get(curKey), MatchInfo.class);
                 MatchInfo matchInfo = response.getBody();
-                if (matchInfo != null && matchInfo.getInfo().getQueueId() == 420) {
+                if (matchInfo != null && matchInfo.getInfo().getGameDuration() >= 900) {
                     matchInfo.setMatchId(matchId);
                     matchInfo.setTier(tier);
                     matchInfo.setRank(rank);
-                    userMatchRepository.upsertMatchInfo(matchInfo);
-//                    log.info("경기 저장 완료 curKey:{} | matchId:{}", curKey, matchId);
+                    userMatchRepository.save(matchInfo);
+                } else {
+                    log.info("이상한 경기 처리 ! curKey:{} | matchId:{}", curKey, matchId);
                 }
                 return;
-            } catch (Exception e) {
+            } catch (HttpClientErrorException e) {
                 curKey = key.getAndIncrement() % API_KEY_SIZE;
-                log.error("다음 키로 넘어감 nextKey:{}", curKey);
+            } catch (Exception e) {
+                log.error(e.getMessage());
             }
         }
     }

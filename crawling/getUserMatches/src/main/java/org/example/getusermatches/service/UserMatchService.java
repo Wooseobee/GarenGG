@@ -22,9 +22,9 @@ public class UserMatchService {
 
     private List<String> API_KEY;
 
-    public void saveUserMatch(String startTime, String endTime) throws InterruptedException {
+    public void saveUserMatch(int index, String startTime, String endTime) throws InterruptedException {
         API_KEY = apiKeyService.getApiKeys();
-        int idx = 0;
+        int idx = index;
         Pageable pageable = PageRequest.of(idx, 205);
         Page<PlayerInfo> find = userRepository.findAll(pageable);
         while (!find.isEmpty()) {
@@ -46,7 +46,7 @@ public class UserMatchService {
 
             pageable = PageRequest.of(++idx, 205);
             find = userRepository.findAll(pageable);
-            log.info("{}명 완료", idx * 205);
+            log.info("{}명 완료 | idx : {}", idx * 205, idx);
         }
 
     }

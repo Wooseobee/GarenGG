@@ -18,7 +18,6 @@ public class CustomMatchInfoRepositoryImpl implements CustomMatchInfoRepository 
         Query query = new Query(Criteria.where("matchId").is(matchInfo.getMatchId()));
         Update update = new Update();
 
-        update.set("metadata", matchInfo.getMetadata());
         update.set("info", matchInfo.getInfo());
         update.set("tier", matchInfo.getTier());
         update.set("rank", matchInfo.getRank());

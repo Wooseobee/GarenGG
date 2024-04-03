@@ -28,6 +28,7 @@ public class GetMatchService {
     private final DuoRecordMatchRepository duoRecordMatchRepository;
     private final DuoRecordRepository duoRecordRepository;
     private final UserMatchRepository userMatchRepository;
+    private final CombinationService combinationService;
 
     private static class Choice {
         String championName;
@@ -41,7 +42,6 @@ public class GetMatchService {
         }
     }
 
-    @Transactional
     public int saveMatchData(Pageable pageable) {
         Page<MatchInfo> matchList = userMatchRepository.findAll(pageable);
         List<MatchInfo> content = matchList.getContent();
@@ -82,7 +82,7 @@ public class GetMatchService {
             for (int j = i + 1; j < champions.size(); j++) {
                 DuoRecord duoRecord = createCombination(champions.get(i), champions.get(j));
                 if (isValidCombination(duoRecord)) {
-                    saveCombination(duoRecord, matchId, isVictory);
+                    combinationService.saveCombination(duoRecord, matchId, isVictory);
                 }
             }
         }
