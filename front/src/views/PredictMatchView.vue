@@ -327,7 +327,7 @@ const selectTeam = async (team) => {
   correctAnswer.value = team[0].win; // 승리 팀을 선택했는지 여부
   const useHintThisRound = currentHints.value;
   showAnswerFeedback.value = true; // 정답 피드백을 보여주기
-  currentHints.value = 4;
+  currentHints.value = 5;
 
   //정답처리결과에따른 소리출력
   if (correctAnswer.value) {
