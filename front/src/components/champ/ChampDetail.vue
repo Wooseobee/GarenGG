@@ -5,7 +5,7 @@
         <div class="champion-portrait">
           <!-- 초상화 -->
           <img
-            :src="`https://ddragon.leagueoflegends.com/cdn/14.6.1/img/champion/${champname}.png`"
+            :src="`https://ddragon.leagueoflegends.com/cdn/14.7.1/img/champion/${champname}.png`"
             alt=""
           />
         </div>
@@ -22,7 +22,7 @@
             <div class="skill">
               <img
                 v-if="champData.passive && champData.passive.image"
-                :src="`https://ddragon.leagueoflegends.com/cdn/14.6.1/img/passive/${champData.passive.image.full}`"
+                :src="`https://ddragon.leagueoflegends.com/cdn/14.7.1/img/passive/${champData.passive.image.full}`"
                 alt=""
                 @mouseover="showModal('passive')"
                 @mouseleave="closeModal"
@@ -182,7 +182,7 @@ const removeHTMLTags = (str) => {
 };
 
 const getSpellImageURL = (spellId) => {
-  return `https://ddragon.leagueoflegends.com/cdn/14.6.1/img/spell/${spellId}.png`;
+  return `https://ddragon.leagueoflegends.com/cdn/14.7.1/img/spell/${spellId}.png`;
 };
 const modalVisible = ref(false);
 const activeSpell = ref(null);
@@ -208,7 +208,7 @@ const getChampData = async (champname) => {
   try {
     const res = await axios({
       method: "get",
-      url: `https://ddragon.leagueoflegends.com/cdn/14.6.1/data/ko_KR/champion/${champname}.json`,
+      url: `https://ddragon.leagueoflegends.com/cdn/14.7.1/data/ko_KR/champion/${champname}.json`,
     });
     console.log(res);
     champData.value = res.data.data[champname];
