@@ -1,8 +1,6 @@
 package org.example.apikeycrawling.component;
 
-import com.google.common.collect.Lists;
 import lombok.*;
-import org.example.apikeycrawling.dto.MatchDto;
 import org.example.apikeycrawling.entity.mongo.PlayerMatch;
 import org.example.apikeycrawling.entity.mongo.PlayerMost;
 import org.example.apikeycrawling.entity.mysql.PlayerInfoTest;
@@ -12,13 +10,9 @@ import org.example.apikeycrawling.repository.PlayerInfoTestRepository;
 
 import org.example.apikeycrawling.repository.PlayerMatchRepository;
 import org.example.apikeycrawling.repository.PlayerMostRepository;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.HttpClientErrorException;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -56,13 +50,13 @@ public class PlayerMostCrawlingComponent {
             CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
             playerMostRepository.saveAll(playerMosts);
 
-            pageNumber++; // 다음 페이지로
-
             sb = new StringBuilder();
             sb.append("현재 시간: ").append(GlobalConstants.formatter.format(new Date()))
                     .append(" page.getTotalPages() = " + page.getTotalPages())
                     .append(" 중 pageNumber = ").append(pageNumber).append(" 완료");
             System.out.println(sb);
+
+            pageNumber++; // 다음 페이지로
         } while (pageNumber < page.getTotalPages()); // 전체 페이지 수에 도달할 때까지 반복
 
     }
@@ -112,7 +106,7 @@ public class PlayerMostCrawlingComponent {
         for (String curName : oldPlayers.keySet()) {
             if (!hashMapNamePlayerInfoTest.containsKey(curName))
                 continue;
-            if(!visited.get(curName))
+            if (!visited.containsKey(curName))
                 continue;
             calculate(oldPlayers.get(curName), newPlayerMosts, hashMapNamePlayerInfoTest, curName);
         }
@@ -122,27 +116,23 @@ public class PlayerMostCrawlingComponent {
         System.out.println(sb);
 
         ////////////////////////////// saveAll ////////////////////////////////
-        List<PlayerMost> temp = new ArrayList<>();
-
-        int batchSize = 10000;
         int totalSize = newPlayerMosts.size();
-        for (int i = 0; i < totalSize; i++) {
-            temp.add(newPlayerMosts.get(i));
+        int batchSize = totalSize / 100; // 스레드 수를 기반으로 배치 크기 결정
 
-            if ((i + 1) % batchSize == 0 || i == totalSize - 1) {
-                playerMostRepository.saveAll(temp);
-                temp.clear();
-
-                // 처리된 데이터의 비율(퍼센트) 계산
-                double percentCompleted = ((double) (i + 1) / totalSize) * 100;
-
-                // 현재 시간과 처리된 데이터의 비율(퍼센트)를 출력
-                String progressMessage = String.format("현재 시간: %s, 완료: %.2f%%",
-                        GlobalConstants.formatter.format(new Date()), percentCompleted);
-
-                System.out.println(progressMessage);
-            }
+        int threadNumber = 1;
+        List<CompletableFuture<Void>> futures = new ArrayList<>();
+        for (int start = 0; start < totalSize; start += batchSize) {
+            int end = Math.min(start + batchSize, totalSize);
+            List<PlayerMost> batchList = newPlayerMosts.subList(start, end);
+            CompletableFuture<Void> future = playerMostCrawlingAsyncService.save(batchList, threadNumber);
+            futures.add(future);
+            threadNumber++;
         }
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+        sb = new StringBuilder();
+        sb.append("현재 시간: ").append(GlobalConstants.formatter.format(new Date()))
+                .append(" 종료");
+        System.out.println(sb);
     }
 
     public void readPlayerMost(HashMap<String, HashMap<String, WinLose>> oldPlayers,
@@ -190,60 +180,27 @@ public class PlayerMostCrawlingComponent {
                     .append(" page.getTotalPages() = " + page.getTotalPages())
                     .append(" 중 pageNumber = ").append(pageNumber).append(" 완료");
             System.out.println(sb);
-
         } while (pageNumber < page.getTotalPages());
     }
 
-    public void readPlayerMatch(HashMap<String, HashMap<String, WinLose>> oldPlayers, HashMap<String, Boolean> visited, int startPageNumber, int endPageNumber) {
+    public void readPlayerMatch(HashMap<String, HashMap<String, WinLose>> oldPlayers
+            , HashMap<String, Boolean> visited, int startPageNumber, int endPageNumber) {
 
-        StringBuilder sb;
         int pageNumber = startPageNumber;
         int pageSize = 10000;
-        Page<PlayerMatch> page;
 
+        List<CompletableFuture<Void>> futures = new ArrayList<>();
+        ArrayList<HashMap<String, HashMap<String, WinLose>>> newPlayersList = new ArrayList<>();
         do {
-            page = playerMatchRepository.findAll(PageRequest.of(pageNumber, pageSize));
-            List<PlayerMatch> curPlayerMatchs = page.getContent();
-
-            // 한 경기 씩
-            for (PlayerMatch curPlayerMatch : curPlayerMatchs) {
-
-                // 한명씩
-                for (PlayerMatch.ParticipantDto participant : curPlayerMatch.getInfo().getParticipants()) {
-
-                    String curName = participant.getRiotIdGameName() + "-" + participant.getRiotIdTagline();
-
-                    visited.put(curName,true);
-
-                    if (!oldPlayers.containsKey(curName))
-                        oldPlayers.put(curName, new HashMap<>());
-
-                    if (!oldPlayers.get(curName).containsKey(participant.getChampionName()))
-                        oldPlayers.get(curName).put(participant.getChampionName(), new WinLose());
-
-                    if (participant.getWin()) {
-                        oldPlayers.get(curName).get(participant.getChampionName()).setWin(
-                                oldPlayers.get(curName).get(participant.getChampionName()).getWin() + 1
-                        );
-                    } else {
-                        oldPlayers.get(curName).get(participant.getChampionName()).setLose(
-                                oldPlayers.get(curName).get(participant.getChampionName()).getLose() + 1
-                        );
-                    }
-                }
-            }
-
+            CompletableFuture<Void> future = playerMostCrawlingAsyncService.findSave(newPlayersList, visited, pageNumber, pageSize, startPageNumber, endPageNumber);
+            futures.add(future);
             pageNumber++;
-
-            sb = new StringBuilder();
-            sb.append("현재 시간: ").append(GlobalConstants.formatter.format(new Date()))
-                    .append(" startPageNumber = ").append(startPageNumber)
-                    .append(" endPageNumber = ").append(endPageNumber)
-                    .append(" 중 pageNumber = ").append(pageNumber).append(" 완료");
-            System.out.println(sb);
 
         } while (pageNumber < endPageNumber);
 
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+
+        // newPlayersList와 oldPlayers 합치기
 
     }
 

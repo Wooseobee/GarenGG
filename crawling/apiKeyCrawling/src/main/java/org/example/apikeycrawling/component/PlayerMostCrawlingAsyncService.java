@@ -2,10 +2,15 @@ package org.example.apikeycrawling.component;
 
 import lombok.*;
 import org.example.apikeycrawling.dto.MatchDto;
+import org.example.apikeycrawling.entity.mongo.PlayerMatch;
 import org.example.apikeycrawling.entity.mongo.PlayerMost;
 import org.example.apikeycrawling.entity.mysql.PlayerInfoTest;
 import org.example.apikeycrawling.global.GlobalConstants;
+import org.example.apikeycrawling.repository.PlayerMatchRepository;
+import org.example.apikeycrawling.repository.PlayerMostRepository;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
@@ -21,6 +26,8 @@ import java.util.regex.Pattern;
 @RequiredArgsConstructor
 public class PlayerMostCrawlingAsyncService {
 
+    private final PlayerMostRepository playerMostRepository;
+    private final PlayerMatchRepository playerMatchRepository;
 
     @Async("threadPoolTaskExecutor")
     public CompletableFuture<Void> crawlingPlayerInfoTestOnePerson(ArrayList<PlayerMost> playerMosts, PlayerInfoTest foundPagePlayerInfoTest) throws InterruptedException {
@@ -205,6 +212,78 @@ public class PlayerMostCrawlingAsyncService {
 
         return CompletableFuture.completedFuture(null);
     }
+
+    @Async("threadPoolTaskExecutor")
+    public CompletableFuture<Void> findSave(ArrayList<HashMap<String, HashMap<String, PlayerMostCrawlingComponent.WinLose>>> newPlayersList
+            , HashMap<String, Boolean> visited, int pageNumber, int pageSize, int startPageNumber, int endPageNumber
+    ) {
+
+        Page<PlayerMatch> page = playerMatchRepository.findAll(PageRequest.of(pageNumber, pageSize));
+        List<PlayerMatch> curPlayerMatchs = page.getContent();
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("현재 시간: ").append(GlobalConstants.formatter.format(new Date()))
+                .append(" startPageNumber = ").append(startPageNumber)
+                .append(" endPageNumber = ").append(endPageNumber)
+                .append(" 중 pageNumber = ").append(pageNumber).append(" curPlayerMatchs 찾음");
+        System.out.println(sb);
+
+        HashMap<String, HashMap<String, PlayerMostCrawlingComponent.WinLose>> newPlayers = new HashMap<>();
+
+        // 한 경기 씩
+        for (PlayerMatch curPlayerMatch : curPlayerMatchs) {
+
+            // 한명씩
+            for (PlayerMatch.ParticipantDto participant : curPlayerMatch.getInfo().getParticipants()) {
+
+                String curName = participant.getRiotIdGameName() + "-" + participant.getRiotIdTagline();
+
+                visited.put(curName, true);
+
+                if (!newPlayers.containsKey(curName))
+                    newPlayers.put(curName, new HashMap<>());
+
+                if (!newPlayers.get(curName).containsKey(participant.getChampionName()))
+                    newPlayers.get(curName).put(participant.getChampionName(), new PlayerMostCrawlingComponent.WinLose());
+
+                if (participant.getWin()) {
+                    newPlayers.get(curName).get(participant.getChampionName()).setWin(
+                            newPlayers.get(curName).get(participant.getChampionName()).getWin() + 1
+                    );
+                } else {
+                    newPlayers.get(curName).get(participant.getChampionName()).setLose(
+                            newPlayers.get(curName).get(participant.getChampionName()).getLose() + 1
+                    );
+                }
+            }
+        }
+
+        sb = new StringBuilder();
+        sb.append("현재 시간: ").append(GlobalConstants.formatter.format(new Date()))
+                .append(" startPageNumber = ").append(startPageNumber)
+                .append(" endPageNumber = ").append(endPageNumber)
+                .append(" 중 pageNumber = ").append(pageNumber).append(" 완료");
+        System.out.println(sb);
+
+        newPlayersList.add(newPlayers);
+
+        return CompletableFuture.completedFuture(null);
+    }
+
+    @Async("threadPoolTaskExecutor")
+    public CompletableFuture<Void> save(List<PlayerMost> batchList, int threadNumber) {
+        StringBuilder sb;
+
+        playerMostRepository.saveAll(batchList);
+
+        sb = new StringBuilder();
+        sb.append("현재 시간: ").append(GlobalConstants.formatter.format(new Date()))
+                .append(" threadNumber = ").append(threadNumber).append(" 종료");
+        System.out.println(sb);
+
+        return CompletableFuture.completedFuture(null);
+    }
+
 
     @Builder
     @Setter
