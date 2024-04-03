@@ -132,6 +132,7 @@ const match = ref();
 const decoder = new TextDecoder();
 const tier = ref("");
 const finishRound = ref(false);
+const positionOrder = ["TOP", "JUNGLE", "MIDDLE", "BOTTOM", "UTILITY"];
 
 //소리관련
 const correctAudioPlayer = ref(null);
@@ -142,6 +143,15 @@ const correctSrc = ref(
 const wrongSrc = ref(
   new URL("/src/assets/sounds/wrong.mp3", import.meta.url).href
 );
+
+function sortByPosition(participants) {
+  return participants.sort((a, b) => {
+    return (
+      positionOrder.indexOf(a.individualPosition) -
+      positionOrder.indexOf(b.individualPosition)
+    );
+  });
+}
 
 const getRankImage = () => {
   const tierImg =
@@ -226,8 +236,8 @@ const fetchMatchData = async () => {
     tier.value = response.data.tier;
     matchTime.value = calculateGameTime(time);
     // 승리 팀과 패배 팀을 분류하기 위한 임시 배열
-    const winTeam = [];
-    const loseTeam = [];
+    let winTeam = [];
+    let loseTeam = [];
     const participantsArray = await decryptData(
       response.data.participants,
       key2.value
@@ -292,6 +302,9 @@ const fetchMatchData = async () => {
         loseTeam.push(participantData);
       }
     }
+
+    winTeam = sortByPosition(winTeam);
+    loseTeam = sortByPosition(loseTeam);
 
     if (Math.random() < 0.5) {
       teamOnePlayers.value = winTeam; // 승리 팀을 teamOnePlayers에 할당
