@@ -1,5 +1,6 @@
 package org.example.apikeycrawling.entity.mongo;
 
+import jakarta.persistence.Id;
 import lombok.*;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -10,9 +11,10 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@Document(collection = "player_match")
+@Document(collection = "player_match_v1")
 public class PlayerMatch {
 
+    @Id
     private String matchId;
     private InfoDto info;
     private String rank;

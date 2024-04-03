@@ -21,7 +21,18 @@ public class MyStartupTask implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) throws InterruptedException {
 
-        playerMostCrawlingComponent.crawlingVersion2(1, 40);
+        // 10000개 씩이다
+        // 0 page 1 ~ 1만
+        // 1 page 1만 ~ 2만
+        // 9 page 9만 ~ 10만
+        // 10 page 10만 ~ 11만
+        // 40 page 40만 ~ 41만
+
+        // 0 ~ 40 1 ~ 40만
+        // 130 ~ 150 : 130만~ 150만
+
+        // 150 ~ 170
+        playerMostCrawlingComponent.crawlingVersion2(170, 270);
 
     }
 }
