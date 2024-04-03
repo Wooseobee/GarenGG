@@ -80,11 +80,12 @@ const playSound = (sound) => {
 // 카드 뒤집기
 const isFlipped = ref(false);
 const toggleCard = () => {
-  if (props.cardType != null) {
-    backGroundStore.updateBackgroundImage(props.champname);
-  } else {
-    console.log("cardTypenotnull : ", props.cardType);
-  }
+  //번잡해서 기능 제거
+  // if (props.cardType != null) {
+  //   backGroundStore.updateBackgroundImage(props.champname);
+  // } else {
+  //   console.log("cardTypenotnull : ", props.cardType);
+  // }
 
   isEffect.value = false;
   if (!isFlipped.value) {
