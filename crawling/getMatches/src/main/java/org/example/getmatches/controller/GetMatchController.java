@@ -23,11 +23,12 @@ public class GetMatchController {
     @GetMapping("/duoRecord/{offset}")
     public String setMatch(@PathVariable("offset") int offset) {
         int page = offset;
-        Pageable pageable = PageRequest.of(page, 5);
+        Pageable pageable = PageRequest.of(page, 100);
         int successData;
         do {
             successData = getMatchService.saveMatchData(pageable);
-            pageable = PageRequest.of(++page, 5);
+            pageable = PageRequest.of(++page, 100);
+            log.info("조합 저장 완료 - page:{}", page);
         } while (successData > 0);
         return "ok";
     }
