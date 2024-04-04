@@ -13,7 +13,7 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addMapping("/**")
                 .allowedOrigins(
                         "https://j10a605.p.ssafy.io",
-                        "http://localhost:5173",
+//                        "http://localhost:5173",
                         "https://garengg.shop",
                         "https://www.garengg.shop"
                 )
