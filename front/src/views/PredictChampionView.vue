@@ -2,33 +2,12 @@
   <div class="app-container">
     <Header />
 
-    <!-- 노란색 네모에 해당하는 버튼 -->z
-    <div class="game-container">
-      <!-- champion-prediction 내부 -->
-      <div class="champion-prediction">
-        <audio ref="audioPlayer" :src="audioSrc"></audio>
-        <button @click="playSound">Play Sound</button>
-      </div>
-
-      {{ championStore.championNames[0] }}
-
-      <div class="champion-options">
-        <button
-          v-for="(option, index) in answerOptions"
-          :key="index"
-          @click="userAnswer = option"
-          class="option-button"
-        >
-          {{ championStore.championNames[option] }}
-        </button>
-      </div>
-    </div>
     <!-- 모달 창 구현 -->
     <div v-if="showRankModal" class="rank-modal">
       <div class="rank-modal-content">
         <span class="close" @click="closeModal">&times;</span>
         <RankView
-          :score="score"
+          :score="currentRound"
           :nickname="nickname"
           :rank="rank"
           :uuid="uuid"
@@ -50,8 +29,47 @@
         />
         <button @click="submitNickname">Submit</button>
         <button @click="goBack">return</button>
+        <div class="description">
+          <h3>*게임 설명*</h3>
+          <div>1. 대사를 듣고 챔피언을 맞추는 게임입니다.</div>
+          <div>2. 최대 167경기가 준비되어 있습니다.</div>
+          <div>3. 틀리는 즉시 게임은 종료됩니다.</div>
+          <div>4. 대사는 1초만 한번 들을 수 있습니다.</div>
+          <div>5. PlaySound 버튼을 누르고 3초 이내에 골라주세요.</div>
+        </div>
       </div>
     </div>
+
+    <div v-else class="game-container">
+      <div class="game-description">
+        <p>대사를 듣고 챔피언을 골라보세요!</p>
+      </div>
+      <audio ref="audioPlayer" :src="audioSrc"></audio>
+      <button class="play-sound-btn" @click="playSound" :disabled="soundPlayed">
+        Play Sound
+      </button>
+
+      <div class="champion-prediction">
+        <div class="champions-container">
+          <button
+            class="champion-button"
+            v-for="candidate in rounds[currentRound].candidateChampions"
+            :key="candidate.championKey"
+            @click="checkAnswer(candidate.championKey)"
+          >
+            <img
+              class="champion-image"
+              :src="`https://ddragon.leagueoflegends.com/cdn/14.6.1/img/champion/${candidate.id}.png`"
+              alt=""
+            />
+          </button>
+        </div>
+      </div>
+
+      <h2>Time left: {{ timeLeft }} seconds</h2>
+      <!-- 기존 게임 컨테이너 내용 -->
+    </div>
+
     <div
       v-if="showAnswerFeedback"
       class="answer-feedback"
@@ -63,83 +81,58 @@
 </template>
 
 <script setup>
-import RankView from "@/components/common/RankView.vue";
-import { v4 as uuidv4 } from "uuid";
-
 //////////////////////////////////////////////////////////////////
 
-import { onMounted, ref, computed } from "vue";
+import { onMounted, ref, computed, onUnmounted, watch } from "vue";
 import { useRouter } from "vue-router";
 import Header from "@/components/common/Header.vue";
-import { useChampionStore } from "@/stores/championStore";
-
-const showRankModal = ref(false);
-const rank = ref([]);
-const uuid = ref("");
-const correctAnswer = ref(false); // 정답 여부
-const showAnswerFeedback = ref(false); // 정답 피드백 표시 여부
-const userAnswer = ref("");
+import { localAxios } from "../utils/http-commons";
+import { v4 as uuidv4 } from "uuid";
+import RankView from "@/components/common/RankView.vue";
+import CryptoJS from "crypto-js"; // 암호화/복호화를 위한 crypto-js 라이브러리
 
 /////////////////////////////////////////////////////////
 
-const nicknameInput = ref(null);
-const shuffledIndexes = ref([]);
-const currentRound = ref(0);
-const championStore = useChampionStore();
-const nickname = ref("");
 const showNicknameModal = ref(true);
+const nicknameInput = ref(null);
+const nickname = ref("");
 const router = useRouter();
+const currentRound = ref(0);
 const audioPlayer = ref(null);
-const answerOptions = ref([]);
+const correctAudioPlayer = ref(null);
+const wrongAudioPlayer = ref(null);
+const rounds = ref([]);
+const timerId = ref(null);
 
+const showAnswerFeedback = ref(false);
+const correctAnswer = ref(false);
+const showRankModal = ref(false);
+const timeLeft = ref(3); // 타이머 남은 시간
+
+const uuid = ref("");
+const rank = ref([]);
+const soundPlayed = ref(false);
+
+const correctSrc = ref(
+  new URL("/src/assets/sounds/correct.mp3", import.meta.url).href
+);
+const wrongSrc = ref(
+  new URL("/src/assets/sounds/wrong.mp3", import.meta.url).href
+);
 /////////////////////////////////////////////////////////
 
-onMounted(() => {
+onMounted(async function () {
+  //정답여부 음성 출력
+  correctAudioPlayer.value = new Audio(correctSrc.value);
+  wrongAudioPlayer.value = new Audio(wrongSrc.value);
+
   nicknameInput.value.focus();
 
-  console.log(championStore.championKeys);
-
-  // 인덱스 배열을 생성합니다. 예: [0, 1, 2, ..., length-1]
-  const indexes = Array.from(
-    { length: championStore.championKeys.length },
-    (_, i) => i
-  );
-  // Fisher-Yates 셔플 알고리즘을 이용해 배열을 섞습니다.
-  shuffledIndexes.value = shuffleArray(indexes);
-
-  console.log(shuffledIndexes.value);
-
-  // 정답 옵션을 설정합니다.
-  setAnswerOptions();
+  await getRounds();
 });
 
-function setAnswerOptions() {
-  const correctKey =
-    championStore.championKeys[shuffledIndexes.value[currentRound.value]];
-  const otherKeys = championStore.championKeys.filter((k) => k !== correctKey);
-
-  // Fisher-Yates 셔플 알고리즘을 다시 사용하여 다른 키를 섞습니다.
-  const shuffledOtherKeys = shuffleArray(otherKeys).slice(0, 4);
-
-  // 정답과 무작위로 선택된 다른 옵션을 결합합니다.
-  answerOptions.value = shuffleArray([correctKey, ...shuffledOtherKeys]);
-  console.log(answerOptions.value);
-}
-
-// Fisher-Yates 셔플 알고리즘을 이용한 배열 섞기
-function shuffleArray(array) {
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]]; // 배열 요소 교환
-  }
-  return array;
-}
-
-const audioSrc = computed(() => {
-  const key =
-    championStore.championKeys[shuffledIndexes.value[currentRound.value]];
-  console.log("key = " + key);
-  return `src/assets/pick-voice/${key}.ogg`;
+onUnmounted(() => {
+  if (timerId.value) clearTimeout(timerId.value);
 });
 
 const submitNickname = () => {
@@ -150,6 +143,48 @@ const submitNickname = () => {
   }
 };
 
+const getRounds = async function () {
+  try {
+    const response = await localAxios.get(`/championPrediction/start`);
+    // 서버로부터 받은 암호화된 데이터와 비밀키를 사용하여 데이터를 복호화합니다.
+    const decryptedData = decryptData(
+      response.data.encryptedData,
+      response.data.secretKey
+    );
+
+    // 복호화된 데이터를 rounds에 저장합니다.
+    rounds.value = decryptedData;
+  } catch (error) {
+    console.error("API 호출 중 오류 발생:", error);
+    alert(error.response.data.errorMessage);
+    router.push({ name: "championPrediction" });
+  }
+};
+
+const decryptData = (encryptedData, secretKey) => {
+  // Base64로 인코딩된 비밀키를 바이트 배열로 디코딩합니다.
+  const key = CryptoJS.enc.Base64.parse(secretKey);
+
+  // Base64로 인코딩된 암호화된 데이터를 디코딩합니다.
+  const base64DecryptedData = CryptoJS.enc.Base64.parse(encryptedData);
+
+  // 디코딩된 암호화된 데이터를 복호화합니다.
+  const decryptedData = CryptoJS.AES.decrypt(
+    { ciphertext: base64DecryptedData },
+    key,
+    {
+      mode: CryptoJS.mode.ECB,
+      padding: CryptoJS.pad.Pkcs7,
+    }
+  );
+
+  // 복호화된 데이터를 UTF8 포맷의 문자열로 변환합니다.
+  const decryptedText = decryptedData.toString(CryptoJS.enc.Utf8);
+
+  // JSON으로 파싱하여 반환합니다.
+  return JSON.parse(decryptedText);
+};
+
 const goBack = () => {
   router.push("/playground");
 };
@@ -158,22 +193,138 @@ const closeModal = () => {
   window.location.reload();
 };
 
-const playSound = () => {
-  audioPlayer.value.play();
-};
+// const audioSrc = computed(() => {
+//   if (rounds.value.length > 0 && rounds.value[currentRound.value]) {
+//     const key = rounds.value[currentRound.value].answerChampion.championKey;
+//     return `/src/assets/pick-voice/${key}.ogg`;
+//   }
+//   return "";
+// });
 
-////////////////////////////////////////////////////////////
-
-const checkAnswer = () => {
-  if (userAnswer.value === "아리") {
-    alert("정답입니다!");
-    correctAnswer.value = true; // 정답 여부 업데이트
-  } else {
-    alert("틀렸습니다.");
-    correctAnswer.value = false; // 정답 여부 업데이트
+const audioSrc = computed(() => {
+  if (rounds.value.length > 0 && rounds.value[currentRound.value]) {
+    const key = rounds.value[currentRound.value].answerChampion.championKey;
+    // Webpack 환경에서 require 사용
+    // return require(`/src/assets/pick-voice/${key}.ogg`);
+    // Vite 환경에서 import.meta.url 사용
+    return new URL(`/src/assets/pick-voice/${key}.ogg`, import.meta.url).href;
   }
-  showAnswerFeedback.value = true; // 정답 피드백 보여주기
+  return "";
+});
+
+const checkAnswer = async (championKey) => {
+  if (showAnswerFeedback.value || timerId.value === null) return;
+
+  // 타이머 정지
+  clearInterval(timerId.value);
+  timerId.value = null; // 타이머 ID 초기화
+
+  const isCorrect =
+    championKey === rounds.value[currentRound.value].answerChampion.championKey;
+  correctAnswer.value = isCorrect;
+  showAnswerFeedback.value = true;
+
+  //정답결과에따른 소리출력
+  if (isCorrect) {
+    correctAudioPlayer.value.play();
+  } else {
+    wrongAudioPlayer.value.play();
+  }
+  // 정답 확인 후 처리
+  await new Promise((resolve) => setTimeout(resolve, 2000));
+  showAnswerFeedback.value = false;
+
+  // 정답 처리
+  if (isCorrect) {
+    proceedToNextRound();
+  } else {
+    endGame();
+  }
 };
+
+const proceedToNextRound = () => {
+  if (currentRound.value < rounds.value.length - 1) {
+    currentRound.value++;
+    // 다음 라운드를 위한 상태 초기화
+    correctAnswer.value = false;
+    soundPlayed.value = false;
+    timeLeft.value = 3; // 타이머 재설정
+  } else {
+    alert("Congratulations! You've completed the game!");
+    endGame();
+  }
+};
+
+const playGame = async function (body) {
+  try {
+    const response = await localAxios.post(`/playGame`, body);
+    return response;
+  } catch (error) {
+    console.error("API 호출 중 오류 발생:", error);
+    alert(error.response.data.errorMessage);
+    router.push({ name: "championPrediction" });
+  }
+};
+
+onUnmounted(() => {
+  if (timerId.value) clearTimeout(timerId.value);
+});
+
+const startTimer = () => {
+  if (timerId.value) clearTimeout(timerId.value); // 이전 타이머가 있으면 초기화
+
+  timerId.value = setInterval(() => {
+    if (timeLeft.value > 0) {
+      timeLeft.value -= 1;
+    } else {
+      clearInterval(timerId.value);
+      autoFail();
+    }
+  }, 1000);
+};
+
+const autoFail = async () => {
+  showAnswerFeedback.value = true;
+  correctAnswer.value = false; // 자동으로 틀린 것으로 처리
+  await new Promise((resolve) => setTimeout(resolve, 2000));
+  showAnswerFeedback.value = false;
+  endGame();
+};
+
+const playSound = () => {
+  if (showAnswerFeedback.value || timeLeft.value <= 0 || soundPlayed.value)
+    return;
+
+  audioPlayer.value.play(); // 오디오 재생 시작
+  startTimer(); // 타이머 시작 (이 부분은 기존 로직을 유지)
+  soundPlayed.value = true; // 소리 재생 상태를 true로 설정
+
+  setTimeout(() => {
+    audioPlayer.value.pause(); // 1초 후 오디오 재생을 멈춤
+    audioPlayer.value.currentTime = 0; // 오디오 재생 위치를 시작 지점으로 리셋
+  }, 500); // 1000밀리초(1초) 후 실행될 코드
+};
+
+// 기존 checkAnswer 함수에서 endGame 로직 분리
+const endGame = async () => {
+  uuid.value = uuidv4();
+  const response = await playGame({
+    gameId: 2,
+    nickname: nickname.value,
+    score: currentRound.value,
+    uuid: uuid.value,
+  });
+  showRankModal.value = true;
+  rank.value = response.data;
+};
+
+// currentRound가 변경될 때 실행될 로직
+watch(currentRound, () => {
+  // 새 라운드가 시작될 때 필요한 상태를 초기화
+  correctAnswer.value = false; // 정답 상태 초기화
+  soundPlayed.value = false; // 소리 재생 상태 초기화
+  // 필요하다면 타이머 관련 로직도 여기에 추가할 수 있습니다.
+});
 </script>
 
 <style scoped>
@@ -326,7 +477,267 @@ const checkAnswer = () => {
   left: 50%;
   transform: translate(-50%, -50%);
   font-size: 20rem;
-  animation: fadeInOut 5s ease-in-out;
+  animation: fadeInOut 0s ease-in-out;
+}
+
+.correct {
+  color: green;
+}
+
+.wrong {
+  color: #d00;
+}
+
+@keyframes fadeInOut {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+.play-sound-btn {
+  font-size: 1.5rem; /* 버튼 내 텍스트 크기 증가 */
+  padding: 10px 20px; /* 버튼 패딩 증가 */
+  margin-bottom: 20px; /* 버튼과 챔피언 이미지들 사이의 간격 조정 */
+  cursor: pointer;
+  background-color: #4caf50; /* 버튼 배경색 */
+  color: white; /* 버튼 텍스트 색상 */
+  border: none; /* 테두리 제거 */
+  border-radius: 5px; /* 버튼 둥근 모서리 */
+}
+
+.champions-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center; /* 이미지들을 중앙 정렬 */
+  gap: 20px; /* 이미지들 사이의 간격 */
+}
+
+.champion-button {
+  border: none; /* 버튼 테두리 제거 */
+  background: none; /* 버튼 배경색 제거 */
+  cursor: pointer;
+}
+
+.champion-image {
+  width: 100px; /* 챔피언 이미지 크기 조정 */
+  height: 100px; /* 챔피언 이미지 크기 조정 */
+  object-fit: cover; /* 이미지 비율 유지 */
+}
+
+.game-container h2 {
+  margin: 20px 0;
+  color: #ffdd57; /* 금색으로 표시 */
+  font-size: 2rem; /* 폰트 크기를 크게 */
+  font-weight: bold;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* 텍스트에 그림자 추가 */
+}
+
+.play-sound-btn {
+  font-size: 1.5rem; /* 버튼 내 텍스트 크기 증가 */
+  padding: 10px 20px; /* 버튼 패딩 증가 */
+  margin-bottom: 20px; /* 버튼과 챔피언 이미지들 사이의 간격 조정 */
+  cursor: pointer;
+  background-color: #4caf50; /* 버튼 배경색 */
+  color: white; /* 버튼 텍스트 색상 */
+  border: none; /* 테두리 제거 */
+  border-radius: 5px; /* 버튼 둥근 모서리 */
+}
+
+.champions-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center; /* 이미지들을 중앙 정렬 */
+  gap: 20px; /* 이미지들 사이의 간격 */
+}
+
+.champion-button {
+  border: none; /* 버튼 테두리 제거 */
+  background: none; /* 버튼 배경색 제거 */
+  cursor: pointer;
+}
+
+.champion-image {
+  width: 100px; /* 챔피언 이미지 크기 조정 */
+  height: 100px; /* 챔피언 이미지 크기 조정 */
+  object-fit: cover; /* 이미지 비율 유지 */
+}
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh; /* 전체 화면 높이 */
+}
+
+.round {
+  text-align: center;
+  font-size: 1.5rem;
+  color: #ffffff;
+  /* padding-top을 제거하고 flex layout에 맡김 */
+}
+
+.game-container {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: white; /* 텍스트 색상 */
+  /* 게임 화면의 추가적인 스타일링이 여기에 들어감 */
+}
+
+.match-prediction {
+  width: 100%; /* 전체 너비를 사용 */
+  max-width: 1200px; /* 최대 너비 설정 */
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  /* 이곳에 더 많은 스타일을 추가할 수 있음 */
+  align-items: center;
+  background: radial-gradient(
+    circle,
+    rgba(0, 0, 0, 1) 0%,
+    rgba(0, 0, 0, 1) 100%
+  );
+  background-size: cover;
+  box-shadow: 0 0 10px 10px #005a82; /* 네온 효과 */
+  border: 1px solid #005a82; /* 네온 테두리 */
+  border-radius: 15px; /* 둥근 모서리 */
+}
+
+.vs {
+  font-size: 3rem; /* 크기 증가 */
+  color: #d00;
+  text-shadow: 0 0 10px #d00; /* 텍스트 네온 효과 */
+  font-family: "Press Start 2P", cursive; /* 레트로 폰트 */
+}
+
+.matchTime {
+  padding: 10px;
+  background-color: #005a82; /* 노란색 배경 */
+  color: white; /* 텍스트 색상 */
+  cursor: pointer; /* 클릭 가능한 요소로 표시 */
+}
+
+.match-info {
+  display: flex; /* Flexbox 레이아웃 사용 */
+  align-items: center; /* 모든 아이템을 세로 축에서 가운데 정렬 */
+  justify-content: space-around; /* 아이템들 사이에 공간을 균등하게 배분 */
+  padding: 10px; /* 내부 여백 추가 */
+  border-radius: 5px; /* 경계선 둥글게 처리 */
+  flex-direction: column;
+}
+
+.hint {
+  padding: 10px 20px;
+  background-color: #005a82; /* 파란색 배경 */
+  color: #fff; /* 텍스트 색상 */
+  border-radius: 5px; /* 약간 둥근 모서리 */
+  cursor: pointer; /* 클릭 가능한 요소로 표시 */
+}
+
+.usedHints {
+  margin-top: 150px;
+}
+.team-selection {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px; /* 상단 여백 추가 */
+}
+
+.team-button {
+  cursor: pointer; /* 클릭 가능한 요소로 표시 */
+  transition: border 0.3s;
+}
+.team-button:hover {
+  border: 2px solid #00ffea; /* 네온 테두리 색상, 적절한 색상으로 조정 가능 */
+}
+
+.rank-modal {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.rank-modal-content {
+  width: 80%; /* 모달의 너비를 화면의 80%로 설정 */
+  max-width: 640px; /* 최대 너비를 640px로 제한 */
+  height: auto; /* 모달의 높이를 내용에 따라 자동으로 조정 */
+  max-height: 90%; /* 화면의 90%를 넘지 않는 높이로 제한 */
+  padding: 40px; /* 내부 여백을 40px로 설정 */
+  background: white;
+  border-radius: 10px; /* 모달의 모서리를 둥글게 */
+  position: relative;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 모달에 그림자 효과 추가 */
+  overflow-y: auto; /* 필요한 경우 내부 스크롤바 활성화 */
+}
+
+.close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 25px;
+  cursor: pointer;
+  color: black;
+}
+
+.nickname-modal {
+  /* 모달 위치 및 스타일링 설정 */
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000; /* z-index를 높여 다른 요소들 위에 오도록 설정 */
+}
+
+.nickname-modal-content {
+  background: #32281e;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  color: black;
+}
+
+.nickname-modal-content h3 {
+  color: #f0e6d2;
+}
+
+.nickname-modal-content input {
+  background-color: #f0e6d2;
+}
+
+.nickname-modal-content button {
+  background-color: #f0e6d2;
+  margin-left: 10px;
+  margin-bottom: 10px;
+}
+
+.description {
+  color: #c8aa6e;
+}
+
+.answer-feedback {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 20rem;
+  /* animation: fadeInOut 5s ease-in-out; */
 }
 
 .correct {

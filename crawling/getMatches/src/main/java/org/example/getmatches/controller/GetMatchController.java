@@ -8,25 +8,27 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/api")
 @Slf4j
 public class GetMatchController {
 
     private final GetMatchService getMatchService;
     private final RenewChampionService renewChampionService;
 
-    @GetMapping("/combination/{offset}")
+    @GetMapping("/duoRecord/{offset}")
     public String setMatch(@PathVariable("offset") int offset) {
         int page = offset;
-        Pageable pageable = PageRequest.of(page, 10);
+        Pageable pageable = PageRequest.of(page, 100);
         int successData;
         do {
             successData = getMatchService.saveMatchData(pageable);
-            pageable = PageRequest.of(++page, 10);
-            log.info("조합 저장 완료 - page:{} & successData:{}", page, successData);
+            pageable = PageRequest.of(++page, 100);
+            log.info("조합 저장 완료 - page:{}", page);
         } while (successData > 0);
         return "ok";
     }

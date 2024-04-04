@@ -3,11 +3,12 @@ import motor.motor_asyncio
 import logging
 import re
 import csv
+import time
 
 logging.basicConfig(level=logging.INFO)
 
 # MongoDB 연결 정보 설정
-MONGODB_URL = "mongodb://root:ssafy605@15.164.142.18:27017"
+MONGODB_URL = "mongodb://root:ssafy605@j10a605.p.ssafy.io:27017"
 
 # MongoDB 클라이언트 초기화 (비동기)
 async_client = motor.motor_asyncio.AsyncIOMotorClient(MONGODB_URL)
@@ -17,11 +18,12 @@ db = async_client["a605"]
 
 # MongoDB에서 데이터 가져오는 함수 (비동기)!
 async def get_player_prev_solo_rank():
-    collection = db["player_cur_solo_rank"]
+
+    collection = db["player_most"]
     
     # here
     # _id가 50 이하인 플레이어 데이터만 조회 {"_id": {"$lte": 10000}}
-    players = collection.find()
+    players = collection.find({})
     result = []  # 최종 결과를 저장할 빈 리스트
 
     async for player in players:
@@ -37,15 +39,39 @@ async def get_player_prev_solo_rank():
             # 게임 데이터에서 총 게임 수와 승리율 추출
             game_data = champion_data["game"]
             total_games, win_rate = process_game_data(game_data)
-            if total_games <= 10:
+            if total_games <= 5:
                 continue
             
+            if total_games >= 1000:
+                multiplier = 2.0
+            elif total_games >= 500:
+                multiplier = 1.8
+            elif total_games >= 200:
+                multiplier = 1.6
+            elif total_games >= 100:
+                multiplier = 1.4
+            elif total_games >= 50:
+                multiplier = 1.0
+            elif total_games >= 30:
+                multiplier = 0.9
+            elif total_games >= 20:
+                multiplier = 0.7
+            elif total_games >= 10:
+                multiplier = 0.5
+            else:
+                multiplier = 0.3
+            
+            score = round(multiplier * win_rate, 2)
+            if score == 0:
+                score = 0.01
+
             # 최종 결과에 추가
             result.append({
                 "id": player["_id"],
                 "champion": champion_data["champion"],
-                "score": total_games * win_rate / 100  # 총 게임 수와 승리율을 배열로 저장
+                "score": score  # 총 게임 수와 승리율을 배열로 저장
             })
+
     return result
 
 def process_game_data(game_data):
@@ -89,7 +115,10 @@ if __name__ == "__main__":
     import asyncio
 
     async def main():
+        start_time = time.time()
         result = await get_player_prev_solo_rank()
-
         await save_result_to_csv(result)
+        end_time = time.time()
+        elapsed_time_minutes = (end_time - start_time) / 60
+        print(f"save data took {elapsed_time_minutes:.2f} minutes")
     asyncio.run(main())

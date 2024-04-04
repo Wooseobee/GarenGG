@@ -7,6 +7,7 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
+@Table(name = "player_info_test")
 public class PlayerInfo {
 
     @Id

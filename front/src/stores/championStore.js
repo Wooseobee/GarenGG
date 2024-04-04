@@ -19,7 +19,7 @@ export const useChampionStore = defineStore("champion", {
           this.championIds = data.map((item) => item.id);
           this.championSquareImgUrls = data.map(
             (item) =>
-              "https://ddragon.leagueoflegends.com/cdn/14.4.1/img/champion/" +
+              "https://ddragon.leagueoflegends.com/cdn/14.7.1/img/champion/" +
               item.id +
               ".png"
           );

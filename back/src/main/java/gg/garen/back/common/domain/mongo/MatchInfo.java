@@ -1,18 +1,19 @@
 package gg.garen.back.common.domain.mongo;
 
-import gg.garen.back.common.audit.Auditable;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-@Document(collection = "match")
+@Document(collection = "player_match_v1")
 @Getter
 @Setter
-public class MatchInfo extends Auditable {
+public class MatchInfo {
 
     @Id
     private String matchId;
     private Metadata metadata;
     private Info info;
+    private String tier;
+    private String rank;
 }

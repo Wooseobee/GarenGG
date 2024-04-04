@@ -3,8 +3,6 @@ package org.example.getmatches.domain.mysql;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-
-import jakarta.persistence.Entity;
 import org.example.getmatches.audit.Auditable;
 
 @Entity

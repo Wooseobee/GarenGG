@@ -4,14 +4,14 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.List;
-
 @Getter
 @Setter
 @Builder
 public class RandomMatchResponseDto {
-    private String matchId;
-    List<ParticipantDto> participants;
-    private Long gameDuration;
-    private String gameVersion;
+    private byte[] matchId;
+    private byte[] participants;
+    private byte[] gameDuration;
+    private byte[] matchInfo;
+    private byte[] match;
+    private String tier;
 }

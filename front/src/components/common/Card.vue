@@ -8,6 +8,9 @@
       class="face face-front"
       @mouseenter="startEffect"
       @mouseleave="stopEffect"
+      :class="{
+        cardHover: isEffect === true,
+      }"
     >
       <!-- card content -->
       <!-- <audio hidden="true" ref="audio">
@@ -20,15 +23,22 @@
     <div class="face face-back">
       <div class="image-container">
         <img :src="champImageUrl" alt="champ" />
+        <!-- <div class="cardInfo">
+          <p>{{ champKoreanName }}</p>
+          <div></div>
+          <p>#{{ rank }}</p>
+        </div> -->
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useChampionStore } from "@/stores/championStore.js";
+import { useBackGroundStore } from "@/stores/backGroundStore";
+const backGroundStore = useBackGroundStore();
 const championStore = useChampionStore();
 const router = useRouter();
 const props = defineProps({
@@ -36,41 +46,47 @@ const props = defineProps({
     type: String,
     required: true,
   },
+  champKoreanName: {
+    type: String,
+    required: false,
+  },
+  rank: Number, // 순위 prop 추가,
+  cardType: {
+    type: String,
+    required: false,
+  },
 });
 const { championKeys, championIds } = championStore;
 
 // champinfo 객체 생성
-const champinfo = {};
-
-for (let i = 0; i < championKeys.length; i++) {
-  champinfo[championIds[i]] = championKeys[i];
-}
-const champkey = champinfo[props.champname];
+const champinfo = ref({});
 // 소리
-const audiolink = ref(
-  `https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/ko_kr/v1/champion-choose-vo/${champkey}.ogg`
-);
+const audiolink = computed(() => {
+  // const champinfo = {};
+  // for (let i = 0; i < championKeys.length; i++) {
+  //   champinfo.value[championIds[i]] = championKeys[i];
+  // }
+  // console.log("Champinfo 잘 저장되나?", champinfo.value);
+  const champkey = champinfo.value[props.champname];
+  return `https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/ko_kr/v1/champion-choose-vo/${champkey}.ogg`;
+});
 const playSound = (sound) => {
   if (sound) {
     const audio = new Audio(sound);
     audio.play();
   }
 };
-// 쓰레기 코드
-// const audio = ref(null);
-// const playFlipSound = async () => {
-//   try {
-//     console.log(champkey);
-//     console.log(audio.value);
-//     audio.value?.play();
-//   } catch (error) {
-//     console.error('에러 발생:', error);
-//   }
-// };
-//
+
 // 카드 뒤집기
 const isFlipped = ref(false);
 const toggleCard = () => {
+  //번잡해서 기능 제거
+  // if (props.cardType != null) {
+  //   backGroundStore.updateBackgroundImage(props.champname);
+  // } else {
+  //   console.log("cardTypenotnull : ", props.cardType);
+  // }
+
   isEffect.value = false;
   if (!isFlipped.value) {
     setTimeout(() => {
@@ -94,7 +110,15 @@ const startEffect = () => {
 const stopEffect = () => {
   isEffect.value = false;
 };
-const champImageUrl = `https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${props.champname}_0.jpg`;
+const champImageUrl = computed(() => {
+  return `https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${props.champname}_0.jpg`;
+});
+
+onMounted(() => {
+  for (let i = 0; i < championKeys.length; i++) {
+    champinfo.value[championIds[i]] = championKeys[i];
+  }
+});
 </script>
 
 <style scoped>
@@ -102,8 +126,8 @@ const champImageUrl = `https://ddragon.leagueoflegends.com/cdn/img/champion/load
   padding: 20px;
 }
 .card {
-  width: 308px;
-  height: 560px;
+  width: 277.2px; /* 308px의 90% */
+  height: 504px; /* 560px의 90% */
   margin-left: 15px;
   margin-right: 15px;
   position: relative;
@@ -195,10 +219,26 @@ const champImageUrl = `https://ddragon.leagueoflegends.com/cdn/img/champion/load
 }
 .card .face-back img,
 .card .face-front img {
-  width: 308px;
-  height: 560px;
+  width: 277.2px; /* 변경된 카드의 너비에 맞춤 */
+  height: 504px; /* 변경된 카드의 높이에 맞춤 */
   object-fit: cover;
   /* filter: grayscale(); */
   /* opacity: 0.7; */
+}
+
+.cardInfo h1,
+.cardInfo p {
+  color: #ffffff;
+  text-align: center;
+  position: relative;
+  bottom: 10px; /* 아래에서부터 10px의 여백 */
+  left: 50%;
+  transform: translateX(-50%); /* 중앙 정렬 */
+  z-index: 10; /* 다른 요소들 위에 오도록 z-index 설정 */
+  padding: 5px; /* 패딩 추가 */
+  border-radius: 5px; /* 모서리 둥글게 */
+}
+.cardHover {
+  cursor: pointer;
 }
 </style>

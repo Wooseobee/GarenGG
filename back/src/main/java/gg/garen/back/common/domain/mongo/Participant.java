@@ -6,6 +6,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class Participant {
+    private int assists;
     private int assistMePings;
     private int championId;
     private String championName;
@@ -17,6 +18,7 @@ public class Participant {
     private String lane;
     private int participantId;
     private String puuid;
+    private String riotIdGameName;
     private String riotIdTagline;
     private String role;
     private String summonerId;

@@ -14,17 +14,19 @@
     />
     <div class="player-info">
       <h5>{{ player.championName }}</h5>
-      <p>{{ player.nickName }} #{{ player.riotIdTagline }}</p>
+      <p v-if="finishRound">
+        {{ player.nickName }} #{{ player.riotIdTagline }}
+      </p>
     </div>
     <div class="player-stats">
       <div v-if="currentHint >= 2 && player.firstBloodKill" class="firstBlood">
-        !FirstBlood!
+        !첫 킬 달성!
       </div>
       <div v-if="currentHint >= 1" class="enemyMissingPings">
         미아핑 : {{ player.enemyMissingPings }}
       </div>
       <div v-if="currentHint >= 4" class="kd">
-        K/D : {{ player.kills }} / {{ player.deaths }}
+        K/D/A : {{ player.kills }} / {{ player.deaths }} / {{ player.assists }}
       </div>
     </div>
   </div>
@@ -37,6 +39,8 @@ const props = defineProps({
   player: Object,
   isRightTeam: Boolean, // 오른쪽 팀 여부를 결정하는 새로운 prop
   currentHint: Number,
+  tier: String,
+  finishRound: Boolean,
 });
 
 // 이미지 경로를 처리하는 메서드
@@ -60,7 +64,10 @@ const getPositionImage = (path) => {
     default:
       break;
   }
-  return new URL(`../assets/Position_Diamond-${path}.png`, import.meta.url)
+  const tier =
+    props.tier.charAt(0).toUpperCase() + props.tier.slice(1).toLowerCase();
+
+  return new URL(`../assets/Position_${tier}-${path}.png`, import.meta.url)
     .href;
 };
 </script>

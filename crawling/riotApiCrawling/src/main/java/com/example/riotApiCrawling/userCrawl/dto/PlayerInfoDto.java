@@ -17,6 +17,38 @@ public class PlayerInfoDto {
     boolean freshBlood;
     boolean hotStreak;
 
+    Long apiKeyId;
+
+    @Override
+    public String toString() {
+        return "PlayerInfoDto{" +
+                "puuid='" + puuid + '\'' +
+                ", tagLine='" + tagLine + '\'' +
+                ", leagueId='" + leagueId + '\'' +
+                ", queueType='" + queueType + '\'' +
+                ", tier='" + tier + '\'' +
+                ", rank='" + rank + '\'' +
+                ", summonerId='" + summonerId + '\'' +
+                ", summonerName='" + summonerName + '\'' +
+                ", leaguePoints=" + leaguePoints +
+                ", wins=" + wins +
+                ", losses=" + losses +
+                ", veteran=" + veteran +
+                ", inactive=" + inactive +
+                ", freshBlood=" + freshBlood +
+                ", hotStreak=" + hotStreak +
+                ", apiKeyId=" + apiKeyId +
+                '}';
+    }
+
+    public Long getApiKeyId() {
+        return apiKeyId;
+    }
+
+    public void setApiKeyId(Long apiKeyId) {
+        this.apiKeyId = apiKeyId;
+    }
+
     public String getPuuid() {
         return puuid;
     }
@@ -137,25 +169,5 @@ public class PlayerInfoDto {
         this.hotStreak = hotStreak;
     }
 
-    @Override
-    public String toString() {
-        return "PlayerInfoDto{" +
-                "puuid='" + puuid + '\'' +
-                ", tagLine='" + tagLine + '\'' +
-                ", leagueId='" + leagueId + '\'' +
-                ", queueType='" + queueType + '\'' +
-                ", tier='" + tier + '\'' +
-                ", rank='" + rank + '\'' +
-                ", summonerId='" + summonerId + '\'' +
-                ", summonerName='" + summonerName + '\'' +
-                ", leaguePoints=" + leaguePoints +
-                ", wins=" + wins +
-                ", losses=" + losses +
-                ", veteran=" + veteran +
-                ", inactive=" + inactive +
-                ", freshBlood=" + freshBlood +
-                ", hotStreak=" + hotStreak +
-                '}';
-    }
 }
 
