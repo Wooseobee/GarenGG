@@ -12,7 +12,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
-@CrossOrigin("*")
+@CrossOrigin(origins = {"https://garengg.shop", "https://j10a605.p.ssafy.io/"})
 public class GameController {
 
     private final GameService gameService;
