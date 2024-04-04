@@ -368,7 +368,7 @@ const selectTeam = async (team) => {
       rank.value = response.data;
     }
   } else {
-    uuid.value = uuidv4();
+    uuid.value = "&" + uuidv4();
     const response = await playGame({
       gameId: 1,
       nickname: nickname.value,
