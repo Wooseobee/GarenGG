@@ -20,7 +20,7 @@
 
 ## :walking: 프로젝트 소개
 
-- GarenGG는 서비스입니다.
+- GarenGG는 Leagueoflegend 데이터를 가공해 챔피언을 추천해주고, 데이터 기반의 게임을 제공하는 서비스입니다.
 
 ## :construction_worker: 팀원 구성
 
