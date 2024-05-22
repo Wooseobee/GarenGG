@@ -110,27 +110,27 @@
 
 <details>
 <summary>챔피언 추천</summary>
-<img src="images/champion_recommend.gif" width="1024" height="1024">
+<img src="images/champion_recommend.gif" width="711" height="400">
 </details>
 
 <details>
 <summary>듀오 챔피언 추천</summary>
-<img src="images/duo_champion_recommend.gif" width="1024" height="1024">
+<img src="images/duo_champion_recommend.gif" width="711" height="400">
 </details>
 
 <details>
 <summary>승리팀 맞추기</summary>
-<img src="images/game1.gif" width="1024" height="1024">
+<img src="images/game1.gif" width="711" height="400">
 </details>
 
 <details>
 <summary>소리 듣고 챔피언 맞추기</summary>
-<img src="images/game2.gif" width="1024" height="1024">
+<img src="images/game2.gif" width="711" height="400">
 </details>
 
 <details>
 <summary>채팅</summary>
-<img src="images/chatting.gif" width="1024" height="1024">
+<img src="images/chatting.gif" width="711" height="400">
 </details>
 
 ## :computer: 구동 방법
