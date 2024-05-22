@@ -109,15 +109,29 @@
 ## :movie_camera: 기능 시연
 
 <details>
+<summary>챔피언 추천</summary>
+<img src="images/champion_recommend.gif">
+</details>
+
+<details>
+<summary>듀오 챔피언 추천</summary>
+<img src="images/duo_champion_recommend.gif">
+</details>
+
+<details>
+<summary>승리팀 맞추기</summary>
+<img src="images/game1.gif">
+</details>
+
+<details>
+<summary>소리 듣고 챔피언 맞추기</summary>
+<img src="images/game2.gif">
+</details>
+
+<details>
 <summary>채팅</summary>
-
-- 소모임 가입, 탈퇴시 채팅방 알림 구현
-- 소모임원들만 채팅방에 접근할 수 있게 제한
-- 가입 이전의 내용은 확인 불가
-
-[//]: # '  <img src="images/소모임/chatting.gif">'
-
-  </details>
+<img src="images/chatting.gif">
+</details>
 
 ## :computer: 구동 방법
 
